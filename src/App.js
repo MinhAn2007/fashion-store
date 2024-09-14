@@ -22,7 +22,7 @@ import Under10 from './components/Under10';
 import ForHer from './components/ForHer';
 import ForHim from './components/ForHim';
 import MobileNav from './components/MobileNav';
-
+import Chatbot from './components/ChatBot';
 function App() {
 
   return (
@@ -39,11 +39,9 @@ function App() {
           <Route path='/forher' element={<> <NavBar />  <ForHer /> </>} />
           <Route path='/forhim' element={<> <NavBar />  <ForHim /> </>} />
         </Routes>
-
+    
       </BrowserRouter>
-
-
-
+      <Chatbot />
 
     </div>
   );
