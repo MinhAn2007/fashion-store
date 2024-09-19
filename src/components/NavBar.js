@@ -85,7 +85,7 @@ const NavBar = () => {
 
 
                         <li class="dropdown nav-link nav-link-fade-up" onMouseOver={showHandler2} >
-                            GIFT SETS
+                            Sản Phẩm
                             {show2 && <ul class="dropdown-nav dropdown-nav2" onMouseLeave={dontShowHandler}>
                                 <GiftSets />
                             </ul>}
