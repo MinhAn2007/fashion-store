@@ -8,11 +8,9 @@
     flex-wrap: wrap;
     flex-direction: row;
     gap: 85px;
-    position: relative;
     width: 104vw;
     margin-top: 3rem;
-    right: -6.5rem;
-
+    margin-left: 3.5rem;
 }
 
 :root{
