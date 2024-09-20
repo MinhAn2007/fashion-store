@@ -46,7 +46,7 @@ const Products = () => {
   }
 
   return (
-    <div className='ourBestSellersMainParent'>
+    <div className='ourBestSellersMainParent mx-auto'>
       {products.map((item) => (
         <OurBestSellers
           key={item.id}
