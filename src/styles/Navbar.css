@@ -6,6 +6,11 @@
   height: 8rem;
 }
 
+.logo-img {
+  width: 10rem;
+  height: 12rem;
+  object-fit: contain;
+}
 .logo {
   display: inline-block;
   padding: 0.5rem;

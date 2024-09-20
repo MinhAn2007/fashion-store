@@ -1,6 +1,6 @@
 import React from 'react'
 import "../styles/Navbar.css";
-import logo from "../assets/cara.png";
+import logo from "../assets/al.png";
 import { useState } from 'react';
 import BestSellers from './BestSellers';
 import GiftSets from './GiftSets';
@@ -66,7 +66,7 @@ const NavBar = () => {
                 <nav class="navbar" role="navigation" aria-label="menu">
 
                     <Link to="/">
-                        <img src={logo} className=" ml-32" />
+                        <img src={logo} className=" ml-32 logo-img object-contain" alt="Fashion Store Logo" />
                     </Link>
 
                     <ul class="menuNav">

@@ -1,6 +1,6 @@
 import React from 'react'
 import { FaShoppingBag } from "react-icons/fa";
-import logo from "../assets/cara.png";
+import logo from "../assets/al.png";
 import "../styles/Navbar.css";
 import { Link } from 'react-router-dom';
 import { useState } from 'react';
@@ -14,7 +14,7 @@ const MobileNav = () => {
                 <div className='flex gap-40'>
 
                     <Link to="/">
-                        <img src={logo} className="w-32" />
+                        <img src={logo} className="w-32 "  alt="Fashion Store Logo" />
                     </Link>
 
                     <Link to={"/cart"}>
