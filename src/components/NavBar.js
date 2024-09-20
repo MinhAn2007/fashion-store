@@ -73,7 +73,7 @@ const NavBar = () => {
                         <li class="dropdown nav-link nav-link-fade-up transition-all duration-700" onMouseOver={showHandler} >
                             BEST SELLERS
                             {show && <div>
-                                <ul class="dropdown-nav" onMouseLeave={dontShowHandler} >
+                                <ul class="dropdown-nav z-[999]" onMouseLeave={dontShowHandler} >
 
                                     <BestSellers > </BestSellers>
 

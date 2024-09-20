@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import OurBestSellers from './OurBestSellers';
-
+import { formatPrice } from '../utils/utils.js'; // Import formatPrice from utils
 const Products = () => {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -28,6 +28,15 @@ const Products = () => {
     fetchProducts();
   }, [API]);
 
+  // Randomize image from cover array
+  const getRandomImage = (cover) => {
+    if (Array.isArray(cover) && cover.length > 0) {
+      const randomIndex = Math.floor(Math.random() * cover.length);
+      return cover[randomIndex];
+    }
+    return ''; // Return a default image or empty string if no image available
+  };
+
   if (loading) {
     return <p>Loading...</p>;
   }
@@ -43,8 +52,8 @@ const Products = () => {
           key={item.id}
           id={item.id}
           title={item.name}
-          price={item.price}
-          image={item.cover} // Ensure this matches the field in your API
+          price={formatPrice(item.price)}
+          image={getRandomImage(item.cover)} // Randomize the image from cover array
         />
       ))}
     </div>

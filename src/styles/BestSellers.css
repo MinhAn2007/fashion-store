@@ -2,7 +2,7 @@
     display: flex !important;
     flex-direction: row !important;
     position: absolute;
-    top: 4.5rem;
+    top: 2.5rem;
     gap: 2rem !important;
     left: 4rem;
 }
@@ -12,10 +12,9 @@
 }
 
 .bestSellerImage {
-
+    height: 20rem;
     width: 17rem;
-    object-fit: cover;
-
+    object-fit: contain;
 }
 
 ::-webkit-scrollbar{

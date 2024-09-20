@@ -45,7 +45,7 @@ const OurBestSellers = (props) => {
                     </Link>
                     <div className="card-body items-center text-center">
                         <h2 className="card-title mb-1 font-bold text-xl">{title}</h2>
-                        <h2 className=" text-xl mb-2 fof">${price}</h2>
+                        <h2 className=" text-xl mb-2 fof">{price}</h2>
 
 
                         <div className="card-actions" onClick={() =>

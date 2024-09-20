@@ -4,6 +4,7 @@ import 'react-loading-skeleton/dist/skeleton.css'; // Import Skeleton styles
 import HoverImage from 'react-hover-image/build';
 import { Link } from 'react-router-dom';
 import "../styles/BestSellers.css";
+import { formatPrice } from '../utils/utils.js'; // Import formatPrice from utils
 
 const BestSellers = () => {
   const [products, setProducts] = useState([]);
@@ -39,14 +40,6 @@ const BestSellers = () => {
       controller.abort(); // Cleanup function to abort the fetch request
     };
   }, [API]);
-
-  // Function to format price as VND
-  const formatPrice = (price) => {
-    return new Intl.NumberFormat('vi-VN', {
-      style: 'currency',
-      currency: 'VND',
-    }).format(Number(price));
-  };
 
   // Function to get the first image URL from the cover array
   const getFirstImageUrl = (coverArray) => {
