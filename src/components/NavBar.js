@@ -9,6 +9,7 @@ import { FaShoppingBag, FaUser } from "react-icons/fa";
 import { Link } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 
+
 const NavBar = () => {
     const [show, setShow] = useState(false);
     const [show2, setShow2] = useState(false);
