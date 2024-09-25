@@ -5,7 +5,7 @@ import { useState } from 'react';
 import BestSellers from './BestSellers';
 import GiftSets from './GiftSets';
 import Body from './Body';
-import { FaShoppingBag } from "react-icons/fa";
+import { FaShoppingBag, FaUser } from "react-icons/fa";
 import { Link } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 
@@ -103,13 +103,18 @@ const NavBar = () => {
                         </li> */}
 
 
-                        <p className='navLine absolute bg-red-600 w-1 font-extralight h-9 z-50'>  </p>
+                        {/* <p className='navLine absolute bg-red-600 w-1 font-extralight h-9 z-50'>  </p> */}
 
                     </ul>
 
+
                     <Link to="/cart">
-                        <FaShoppingBag className=' text-2xl text-right ml-10 relative left-24' />
+                        <FaShoppingBag className='text-2xl mr-4 ml-20' />
                     </Link>
+                    <Link to="/account">
+                        <FaUser className='text-2xl ml-10' /> {/* Icon tài khoản */}
+                    </Link>
+
                 </nav >
             </header >
 
