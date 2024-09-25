@@ -93,13 +93,14 @@ const NavBar = () => {
                         </li>
 
 
-                        <li class="dropdown nav-link nav-link-fade-up" onMouseOver={showHandler3} >
+                        {/* tạm thời đóng phần shoprange lại */}
+                        {/* <li class="dropdown nav-link nav-link-fade-up" onMouseOver={showHandler3} >
                             SHOP RANGE
                             {show3 && <ul class="dropdown-nav dropdown-nav3" onMouseLeave={dontShowHandler}>
                                 <Body />
                             </ul>}
 
-                        </li>
+                        </li> */}
 
 
                         <p className='navLine absolute bg-red-600 w-1 font-extralight h-9 z-50'>  </p>
@@ -122,29 +123,7 @@ export default NavBar
 
 
 
-
-
-
-
 /*    
-
-
-
-          
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
@@ -180,18 +159,6 @@ export default NavBar
 
             <h3>Dropdown Menu inside a Navigation Bar</h3>
             <p>Hover over the "Dropdown" link to see the dropdown menu.</p>
-
-
-
-
-
-
-
-
-
-
-
-
 
 */
 
