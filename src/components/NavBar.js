@@ -61,7 +61,6 @@ const NavBar = () => {
     return (
         <div>
 
-
             <header class="banner" role="banner">
 
                 <nav class="navbar" role="navigation" aria-label="menu">
@@ -109,19 +108,22 @@ const NavBar = () => {
                     </ul>
 
 
-                    <Link to="/cart">
+                  <div class="ml-auto mr-32">
+                  <Link to="/cart">
                         <FaShoppingBag className='text-2xl mr-4 ml-20' />
                     </Link>
                     <Link to="/account">
                         <FaUser className='text-2xl ml-10' /> {/* Icon tài khoản */}
                     </Link>
 
+                  </div>
                 </nav >
             </header >
 
 
 
         </div >
+
     )
 }
 
