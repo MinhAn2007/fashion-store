@@ -72,7 +72,7 @@ li {
   width: 82rem;
   margin-top: 1rem !important;
   height: 30rem;
-  background-color: white;
+  background-color: #F8F8FF;
   border-radius: 25px;
 }
 
@@ -94,7 +94,7 @@ li {
   left: -20rem;
   width: 68rem;
   height: 28rem;
-  background-color: white;
+  background-color: #F8F8FF;
 }
 
 .dropdown-nav2 li {
@@ -115,7 +115,7 @@ li {
   left: -33rem;
   width: 71rem;
   height: 28rem;
-  background-color: white;
+  background-color: #F8F8FF;
 }
 
 .dropdown-nav3 li {
@@ -136,7 +136,7 @@ li {
   left: -37rem;
   width: 71rem;
   height: 28rem;
-  background-color: white;
+  background-color: #F8F8FF;
 }
 
 .dropdown-nav4 li {
