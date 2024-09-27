@@ -29,6 +29,7 @@
     /*   HOME PAGE  */
     .App {
         max-width: 100% !important;
+        background-color: #F8F8FF;
     }
 
     html {
@@ -381,7 +382,7 @@
     /* HOME PAGE  */
     * {
         box-sizing: border-box;
-
+        background-color: #F8F8FF;
     }
 
 
@@ -638,7 +639,7 @@
 
     .sinLih {
         left: -12rem !important;
-        background-color: #f8f9fc !important;
+        background-color: #F8F8FF !important;
     }
 
     .sideImageHold {

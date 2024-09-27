@@ -3,3 +3,14 @@
     box-sizing: border-box !important;
     height: auto !important;
 }*/
+.App{
+    background-color: #F8F8FF;
+}
+.btn-primary {
+    background-color: black;
+}
+
+.btn:hover, .btn-active {
+    background-color: #e7e3db;
+    color: black;
+}

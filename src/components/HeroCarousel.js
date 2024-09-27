@@ -25,7 +25,7 @@ export default class SimpleSlider extends Component {
       slidesToScroll: 1,
     };
     return (
-      <div className="carousel-contain mt-6">
+      <div className="carousel-contain">
         <Slider {...settings}>
           <div>
             <img src={carousel1} className="car-pic" />

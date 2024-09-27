@@ -35,6 +35,8 @@ const SinglePage = () => {
       try {
         const response = await fetch(`${API}/api/product/${id}`); // Replace with your actual API URL
         const data = await response.json();
+        console.log(data);
+        
         setProduct(data[0]); // Assuming the API returns an array
         if (data.length > 0) {
           setActiveImg(data[0].cover[0]); // Set the default active image

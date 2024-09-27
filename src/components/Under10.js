@@ -170,7 +170,7 @@ const Under10 = () => {
 
                     if (item.type.includes("all")) {
                         return (
-                            <div className='card w-96 bg-base-100 shadow-xl  '>
+                            <div className='card w-96  bg-white-700 shadow-xl  '>
                                 <Link to={`/${item.id}`}>
                                     <figure className="px-10 pt-10">
                                         <HoverImage src={item.primaryImage} hoverSrc={item.hoverImg} className="w-32 u20img" />
@@ -208,7 +208,7 @@ const Under10 = () => {
 
                     if (item.type.includes("all")) {
                         return (
-                            <div className='card w-96 bg-base-100 shadow-xl  '>
+                            <div className='card w-96  bg-white-700 shadow-xl  '>
                                 <Link to={`/${item.id}`}>
                                     <figure className="px-10 pt-10">
                                         <HoverImage src={item.primaryImage} hoverSrc={item.hoverImg} className="w-32 u20img" />
@@ -241,7 +241,7 @@ const Under10 = () => {
 
                     if (item.type.includes("all")) {
                         return (
-                            <div className='card w-96 bg-base-100 shadow-xl  '>
+                            <div className='card w-96  bg-white-700 shadow-xl  '>
                                 <Link to={`/${item.id}`}>
                                     <figure className="px-10 pt-10">
                                         <HoverImage src={item.primaryImage} hoverSrc={item.hoverImg} className="w-32 u20img" />
@@ -276,7 +276,7 @@ const Under10 = () => {
 
                     if (item.type.includes("all")) {
                         return (
-                            <div className='card w-96 bg-base-100 shadow-xl  '>
+                            <div className='card w-96  bg-white-700 shadow-xl  '>
                                 <Link to={`/${item.id}`}>
                                     <figure className="px-10 pt-10">
                                         <HoverImage src={item.primaryImage} hoverSrc={item.hoverImg} className="w-32 u20img" />

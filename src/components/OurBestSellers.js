@@ -35,7 +35,7 @@ const OurBestSellers = (props) => {
         <div>
             <div key={id}>
 
-                <div className="card w-96 bg-base-100 shadow-xl zoom">
+                <div className="card w-96  bg-white-700 shadow-xl zoom">
 
                     <Link to={`/${id}`}>
                         <figure className="px-10 pt-10">

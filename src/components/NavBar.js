@@ -59,7 +59,7 @@ const NavBar = () => {
     }
 
     return (
-            <header className="banner navbar fixed top-0" role="banner">
+            <header className="banner navbar " role="banner">
 
                 <nav className="navbar fixed top-0" role="navigation" aria-label="menu">
 
