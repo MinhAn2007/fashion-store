@@ -1,9 +1,13 @@
 .navbar {
   box-shadow: 0 4px 20px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
-  background: #F8F8FF;
   display: flex;
   align-items: center;
-  height: 8rem;
+  height: 5rem;
+  position: sticky;
+  top: 0;
+  z-index: 1000; /* Đảm bảo navbar nằm trên các phần tử khác */
+  background-color: white; /* Đảm bảo nó không bị trong suốt khi scroll */
+  width: 100%; /* Full width */
 }
 
 .logo-img {

@@ -59,21 +59,19 @@ const NavBar = () => {
     }
 
     return (
-        <div>
+            <header className="banner navbar fixed top-0" role="banner">
 
-            <header class="banner" role="banner">
-
-                <nav class="navbar" role="navigation" aria-label="menu">
+                <nav className="navbar fixed top-0" role="navigation" aria-label="menu">
 
                     <Link to="/">
                         <img src={logo} className=" ml-32 logo-img object-contain" alt="Fashion Store Logo" />
                     </Link>
 
-                    <ul class="menuNav">
-                        <li class="dropdown nav-link nav-link-fade-up transition-all duration-700" onMouseOver={showHandler} >
+                    <ul className="menuNav">
+                        <li className="dropdown nav-link nav-link-fade-up transition-all duration-700" onMouseOver={showHandler} >
                             BEST SELLERS
                             {show && <div>
-                                <ul class="dropdown-nav z-[999]" onMouseLeave={dontShowHandler} >
+                                <ul className="dropdown-nav z-[999]" onMouseLeave={dontShowHandler} >
 
                                     <BestSellers > </BestSellers>
 
@@ -84,9 +82,9 @@ const NavBar = () => {
                         </li >
 
 
-                        <li class="dropdown nav-link nav-link-fade-up" onMouseOver={showHandler2} >
+                        <li className="dropdown nav-link nav-link-fade-up" onMouseOver={showHandler2} >
                             Sản Phẩm
-                            {show2 && <ul class="dropdown-nav dropdown-nav2" onMouseLeave={dontShowHandler}>
+                            {show2 && <ul className="dropdown-nav dropdown-nav2" onMouseLeave={dontShowHandler}>
                                 <GiftSets />
                             </ul>}
 
@@ -108,7 +106,7 @@ const NavBar = () => {
                     </ul>
 
 
-                  <div class="ml-auto mr-32">
+                  <div className="ml-auto mr-32">
                   <Link to="/cart">
                         <FaShoppingBag className='text-2xl mr-4 ml-20' />
                     </Link>
@@ -122,7 +120,6 @@ const NavBar = () => {
 
 
 
-        </div >
 
     )
 }
