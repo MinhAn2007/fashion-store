@@ -3,19 +3,10 @@ import Slider from "react-slick";
 
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
-import car1 from "../assets/car1.png"
-import car2 from "../assets/car2.png"
-import car3 from "../assets/car3.png"
-import carousel1 from "../assets/carousel1.png";
-
-import { FaArrowRight } from "react-icons/fa"
-
-  ;
-
-
+import banner1 from "../assets/banner1.png"
+import banner2 from "../assets/banner2.png"
+import banner3 from "../assets/banner3.png"
 export default class SimpleSlider extends Component {
-
-
 
   render() {
     const settings = {
@@ -27,33 +18,16 @@ export default class SimpleSlider extends Component {
     return (
       <div className="carousel-contain">
         <Slider {...settings}>
+        <div>
+        <img src={banner2} className="car-pic" alt="Banner 1" />
+          </div>
           <div>
-            <img src={carousel1} className="car-pic" />
+            <img src={banner3} className="car-pic" alt="Banner 2" />
           </div>
 
           <div>
-            <img src={carousel1} className="car-pic" />
+            <img src={banner1} className="car-pic" alt="Banner 3" />
           </div>
-
-
-          <div>
-            <img src={carousel1} className="car-pic" />
-          </div>
-
-          <div>
-            <img src={carousel1} className="car-pic" />
-          </div>
-
-          <div>
-            <img src={carousel1} className="car-pic" />
-          </div>
-
-          <div>
-            <img src={carousel1} className="car-pic" />
-          </div>
-
-
-
         </Slider>
       </div>
     );

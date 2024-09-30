@@ -33,13 +33,13 @@ const SinglePage = () => {
   useEffect(() => {
     const fetchProduct = async () => {
       try {
-        const response = await fetch(`${API}/api/product/${id}`); // Replace with your actual API URL
+        const response = await fetch(`${API}/api/product/${id}`);
         const data = await response.json();
         console.log(data);
-        
-        setProduct(data[0]); // Assuming the API returns an array
-        if (data.length > 0) {
-          setActiveImg(data[0].cover[0]); // Set the default active image
+
+        setProduct(data); // Use the product object directly
+        if (data.cover && data.cover.length > 0) {
+          setActiveImg(data.cover[0]); // Set the default active image
         }
       } catch (error) {
         console.error("Error fetching product data:", error);

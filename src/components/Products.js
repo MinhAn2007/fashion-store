@@ -11,7 +11,7 @@ const Products = () => {
     // Fetch data from the API
     const fetchProducts = async () => {
       try {
-        const response = await fetch(`${API}/api/products?limit=10&page=1`); // Adjust limit and page as needed
+        const response = await fetch(`${API}/api/products?limit=8&page=1`); // Adjust limit and page as needed
         if (!response.ok) {
           throw new Error('Network response was not ok');
         }

@@ -272,9 +272,11 @@ code {
 }
 
 .car-pic {
+    margin-top: 20px;
+    height: 40vw; 
     width: 100vw;
     max-width: 100% !important;
-    object-fit: cover;
+    object-fit:contain;
 }
 
 .slick-prev {
