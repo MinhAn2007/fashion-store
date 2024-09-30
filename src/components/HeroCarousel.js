@@ -3,9 +3,9 @@ import Slider from "react-slick";
 
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
-import banner1 from "../assets/banner1.png";
-import banner2 from "../assets/banner2.png";
-import banner3 from "../assets/banner3.png";
+import banner1 from "../assets/banner4.png";
+import banner2 from "../assets/banner4.png";
+import banner3 from "../assets/banner4.png";
 
 export default class SimpleSlider extends Component {
   render() {

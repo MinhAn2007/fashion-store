@@ -15,14 +15,14 @@
 
 .heroHeadingHold {
   position: relative;
-  left: 39rem;
+  left: 19rem;
   gap: 18rem;
   top: -5rem;
 }
 
 .heroDescHold {
   gap: 10.8rem;
-  left: 29rem;
+  left: 18rem;
   top: -4rem;
   font-size: 17px;
   margin-left: 20px;
@@ -41,6 +41,6 @@
 }
 
 *::-webkit-scrollbar-thumb {
-  background-color: #173f35;
+  background-color: black;
   border-radius: 40px;
 }
