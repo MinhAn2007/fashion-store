@@ -6,7 +6,7 @@ import banner3 from "../assets/banner3.png";
 
 const JournalSection = () => {
   return (
-    <div className="bg-gray-50 mt-16 flex flex-col md:flex-row pt-10 shadow-lg rounded-lg p-6"> {/* Added shadow and padding */}
+    <div className="bg-gray-50 mt-16 flex flex-col md:flex-row pt-10 shadow-lg rounded-lg p-12"> {/* Added shadow and padding */}
       <div className="w-full md:w-1/3 mx-auto md:ml-20 lg:ml-64 relative">
         <img
           src="https://cdn.shopify.com/s/files/1/0081/7374/8305/files/Sukin_Journal_Heading_2-01_2500x2500_6e692e60-90cb-4cd0-9006-a6f1d09fe1c4_360x.png?v=1613561992"
