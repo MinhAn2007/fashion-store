@@ -46,17 +46,19 @@ const Products = () => {
   }
 
   return (
-    <div className='ourBestSellersMainParent mx-auto'>
-      {products.map((item) => (
+    <div className='flex flex-wrap gap-20 mt-14 justify-center'>
+    {products.map((item, index) => (
+      <div className='' key={item.id}>
         <OurBestSellers
-          key={item.id}
           id={item.id}
           title={item.name}
           price={formatPrice(item.price)}
           image={getRandomImage(item.cover)} // Randomize the image from cover array
         />
-      ))}
-    </div>
+      </div>
+    ))}
+  </div>
+  
   );
 };
 

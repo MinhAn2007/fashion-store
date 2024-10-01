@@ -24,8 +24,8 @@ const OurBestSellers = (props) => {
 
     return (
         <div>
-            <div key={id} className="transform transition-transform duration-300 hover:scale-105 hover:shadow-lg">
-                <div className="card w-96 bg-white shadow-xl py-10">
+            <div key={id} className="mx-auto transform transition-transform duration-300 hover:scale-105 hover:shadow-lg">
+                <div className="card w-96 bg-white shadow-xl py-10 ">
                     <Link to={`/${id}`}>
                         <figure className="pt-6">
                             <img src={image} alt={title} className="rounded-xl w-2/5 h-auto" />
