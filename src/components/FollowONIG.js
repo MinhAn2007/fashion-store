@@ -27,7 +27,7 @@ const FollowONIG = () => {
   };
 
   return (
-    <div className=' flex flex-col my-28 flex-center'>
+    <div className=' flex flex-col my-24 flex-center'>
       <h1 className='text-center font-bold text-4xl italic'> FOLLOW US ON INSTAGRAM </h1>
 
 
