@@ -130,10 +130,6 @@ const SinglePage = () => {
         <BsCurrencyDollar className='w-16 h-20 sv' />
         <GiCardboardBoxClosed className='w-16 h-20 sv' />
       </div>
-
-      <div className='spfooterHold absolute'>
-        <SPFooter />
-      </div>
     </div>
   );
 };

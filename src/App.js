@@ -31,8 +31,8 @@ function App() {
 
         <Routes >
           <Route path='/' exact element={<>   <NavBar /> <MobileNav />  <SimpleSlider />  <HeroSection />  <BsText />  {<Products />}  {/*<OurBestSellers />*/}  <Ingridients />  <JournalSection /> <FollowONIG /> <SPFooter />  </>} />
-          <Route path='/:id' exact element={<> <NavBar /> <MobileNav />  <SinglePage /> </>} />
-          <Route path='/journal/april' element={<> <NavBar /> <MobileNav />  <JournalPage /> </>} />
+          <Route path='/:id' exact element={<> <NavBar /> <MobileNav />  <SinglePage /> <SPFooter /></>} />
+          <Route path='/journal/april' element={<> <NavBar /> <MobileNav />  <JournalPage /> <SPFooter /></>} />
           <Route path='/cart' exact element={<>  <NavBar /> <CartHold /></>} />
           <Route path='/under20' element={<> <NavBar />  <Under20 /> </>} />
           <Route path='/under40' element={<> <NavBar />  <Under10 /> </>} />
