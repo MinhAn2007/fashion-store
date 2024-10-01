@@ -2,10 +2,13 @@
 module.exports = {
   content: ["./src/**/*.{html,js}"],
   theme: {
-    extend: {},
+    extend: {
+      fontFamily: {
+        futura: ['Futura', 'sans-serif'], // Add Futura font
+      },
+    },
   },
   plugins: [require("daisyui")],
-
   
   daisyui: {
     themes: false,
