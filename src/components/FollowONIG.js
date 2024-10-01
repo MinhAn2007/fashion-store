@@ -28,7 +28,7 @@ const FollowONIG = () => {
 
   return (
     <div className=' flex flex-col my-24 flex-center'>
-      <h1 className='text-center font-bold text-4xl italic'> FOLLOW US ON INSTAGRAM </h1>
+      <h1 className='text-center font-bold text-4xl italic'> THEO DÕI CHÚNG TÔI TRÊN INSTAGRAM </h1>
 
 
         <Marquee pauseOnHover={true} speed={100}  className='mt-24'>
