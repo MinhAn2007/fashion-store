@@ -275,7 +275,6 @@ code {
     height: 30vw; 
     width: 100vw;
     max-width: 100% !important;
-    object-fit:contain;
 }
 
 .slick-prev {

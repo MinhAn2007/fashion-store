@@ -23,6 +23,7 @@ import ForHer from './components/ForHer';
 import ForHim from './components/ForHim';
 import MobileNav from './components/MobileNav';
 import Chatbot from './components/ChatBot';
+import ScrollToTop from './components/ScrollOnTop';
 function App() {
 
   return (
@@ -39,7 +40,7 @@ function App() {
           <Route path='/forher' element={<> <NavBar />  <ForHer /> </>} />
           <Route path='/forhim' element={<> <NavBar />  <ForHim /> </>} />
         </Routes>
-    
+        <ScrollToTop />
       </BrowserRouter>
       <Chatbot />
 

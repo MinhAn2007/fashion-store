@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import fashionImg1 from "../assets/banner1.png";
 import fashionImg3 from "../assets/banner3.png";
 import fashionImg2 from "../assets/banner2.png";
@@ -6,6 +6,11 @@ import { FaShippingFast, FaLock } from "react-icons/fa";
 import { BsCurrencyDollar } from "react-icons/bs";
 
 const FashionBlogPage = () => {
+  // Scroll to the top on page load
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
+
   return (
     <div className="flex flex-col items-center py-8">
       {/* Header */}
@@ -69,8 +74,6 @@ const FashionBlogPage = () => {
             <p className="text-lg font-medium text-gray-700">Điểm Thưởng</p>
           </div>
         </div>
-
-
       </div>
     </div>
   );

@@ -1,19 +1,7 @@
+/* eslint-disable jsx-a11y/alt-text */
 import React from 'react'
-import AliceCarousel from 'react-alice-carousel';
 import "../styles/FollowONIG.css";
-import { store } from '../productsStore/Store';
 import "react-alice-carousel/lib/alice-carousel.css";
-import i1 from "../assets/i1.jpg";
-import i2 from "../assets/i2.jpg";
-import i3 from "../assets/i3.jpg";
-import i4 from "../assets/i4.jpg";
-import i5 from "../assets/i5.jpg";
-import i6 from "../assets/i6.jpg";
-import i7 from "../assets/i7.jpg";
-import i8 from "../assets/i8.jpg";
-import i9 from "../assets/i9.jpg";
-import i10 from "../assets/i10.jpg";
-import i11 from "../assets/i11.jpg";
 import { ExternalLink } from 'react-external-link';
 import Marquee from "react-fast-marquee";
 
@@ -39,63 +27,58 @@ const FollowONIG = () => {
   };
 
   return (
-    <div className=' flex flex-row gap-28  mt-44 flex-wrap mb-36'>
-      <p className='igText '> FOLLOW US ON INSTAGRAM </p>
+    <div className=' flex flex-col my-28 flex-center'>
+      <h1 className='text-center font-bold text-4xl italic'> FOLLOW US ON INSTAGRAM </h1>
 
-      <div className='followOnInstaMarqueeConatiner'>
 
-        <Marquee pauseOnHover={true} speed={100} >
+        <Marquee pauseOnHover={true} speed={100}  className='mt-24'>
 
-          <ExternalLink href='https://www.instagram.com/reel/Ck6akcopA_F/' >
-            <img src={i1} className=' w-60 rounded-2xl   mrMl carouselIMg' />
+          <ExternalLink href='https://thorstore.vn/' >
+            <img src="https://thorstore.vn/upload/hinhthem/fb02c74bb67f4c8bb79c44e632ef6849-26526734_400x530.jpeg" className=' w-60 rounded-2xl   mrMl carouselIMg' />
           </ExternalLink>
 
-          <ExternalLink href='https://www.instagram.com/reel/Ck9DOsWLEdw/'>
-            <img src={i2} className=' w-60 rounded-2xl  mrMl  carouselIMg' />
+          <ExternalLink href='https://thorstore.vn/'>
+            <img src="https://thorstore.vn/upload/hinhthem/80dab4476608439db64db504b18db333-99805030_400x530.jpeg" className=' w-60 rounded-2xl  mrMl  carouselIMg' />
           </ExternalLink>
 
-          <ExternalLink href='https://www.instagram.com/reel/Ck_u9AjOJFh/'>
-            <img src={i3} className=' w-60 rounded-2xl   mrMl carouselIMg' />
+          <ExternalLink href='https://thorstore.vn/'>
+            <img src="https://thorstore.vn/upload/hinhthem/d681e2ef09db49ed9ebb646459ac6ed9-85926019_400x530.jpeg" className=' w-60 rounded-2xl   mrMl carouselIMg' />
           </ExternalLink>
 
-          <ExternalLink href='https://www.instagram.com/reel/CkgnyuWu_u7/'>
-            <img src={i4} className=' w-60 rounded-2xl   mrMl carouselIMg' />
+          <ExternalLink href='https://thorstore.vn/'>
+            <img src="https://thorstore.vn/upload/hinhthem/c182cb2f10d34d34ae09152d631546ce-87043395_400x530.jpeg" className=' w-60 rounded-2xl   mrMl carouselIMg' />
           </ExternalLink>
 
-          <ExternalLink href='https://www.instagram.com/p/CkeOeuMvliW/'>
-            <img src={i5} className=' w-60 rounded-2xl  mrMl  carouselIMg' />
+          <ExternalLink href='https://thorstore.vn/'>
+            <img src="https://thorstore.vn/upload/hinhthem/597220dee9ac464a9dfefadbbeb127ee-95987452_400x530.jpeg" className=' w-60 rounded-2xl  mrMl  carouselIMg' />
           </ExternalLink>
 
-          <ExternalLink href='https://www.instagram.com/reel/CkgnyuWu_u7/'>
-            <img src={i6} className=' w-60 rounded-2xl  mrMl  carouselIMg' />
+          <ExternalLink href='https://thorstore.vn/'>
+            <img src="https://thorstore.vn/upload/hinhthem/e7a2634520a042bdba1cdb0fddd5fbb9-59858297_400x530.jpeg" className=' w-60 rounded-2xl  mrMl  carouselIMg' />
           </ExternalLink>
 
-          <ExternalLink href='https://www.instagram.com/reel/Ckg4wazO9SQ/'>
-            <img src={i7} className=' w-60 rounded-2xl   mrMl carouselIMg' />
+          <ExternalLink href='https://thorstore.vn/'>
+            <img src="https://thorstore.vn/upload/hinhthem/521e10a13467460786859e8a261cca2f-71266275_400x530.jpeg" className=' w-60 rounded-2xl   mrMl carouselIMg' />
           </ExternalLink>
 
-          <ExternalLink href='https://www.instagram.com/reel/CkjTteAMPaZ/'>
-            <img src={i8} className=' w-60 rounded-2xl   mrMl carouselIMg' />
+          <ExternalLink href='https://thorstore.vn/'>
+            <img src="https://thorstore.vn/upload/hinhthem/fc15db2758754b4cb6fd5a478a0a00ed-14947881_400x530.jpeg" className=' w-60 rounded-2xl   mrMl carouselIMg' />
           </ExternalLink>
 
-          <ExternalLink href='https://www.instagram.com/reel/CklzQFcJW9a/'>
-            <img src={i9} className=' w-60 rounded-2xl  mrMl carouselIMg' />
+          <ExternalLink href='https://thorstore.vn/'>
+            <img src="https://thorstore.vn/upload/hinhthem/8d8f552295c3494d91b7a19da37e976c-84309982_400x530.jpeg" className=' w-60 rounded-2xl  mrMl carouselIMg' />
           </ExternalLink>
 
-          <ExternalLink href='https://www.instagram.com/reel/CkwQD6KO1WP/'>
-            <img src={i10} className=' w-60 rounded-2xl  mrMl  carouselIMg' />
+          <ExternalLink href='https://thorstore.vn/'>
+            <img src="https://thorstore.vn/upload/hinhthem/5ee071410a8e4168aa2fcc6e9a0c67ee-14564973_400x530.jpeg" className=' w-60 rounded-2xl  mrMl  carouselIMg' />
           </ExternalLink>
 
-          <ExternalLink href='https://www.instagram.com/reel/Ckg4wazO9SQ/'>
-            <img src={i11} className=' w-60 rounded-2xl  mrMl  carouselIMg' />
+          <ExternalLink href='https://thorstore.vn/'>
+            <img src="https://thorstore.vn/upload/hinhthem/072dd00c1aff4593bf01cd9dcb477b6c-24360794_400x530.jpeg" className=' w-60 rounded-2xl  mrMl  carouselIMg' />
           </ExternalLink>
 
         </Marquee>
       </div>
-
-    </div>
-
-
 
   )
 }
