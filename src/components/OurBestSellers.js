@@ -24,17 +24,16 @@ const OurBestSellers = (props) => {
 
     return (
         <div>
-            <div key={id}>
-                <div className="card w-96 bg-white-700 shadow-xl py-10">
+            <div key={id} className="transform transition-transform duration-300 hover:scale-105 hover:shadow-lg">
+                <div className="card w-96 bg-white shadow-xl py-10">
                     <Link to={`/${id}`}>
-                        <figure className="pt-6"> {/* Reduced padding */}
-                            {/* Adjusted image size to one-third */}
+                        <figure className="pt-6">
                             <img src={image} alt={title} className="rounded-xl w-2/5 h-auto" />
                         </figure>
                     </Link>
-                    <div className="card-body items-center text-center p-2"> {/* Reduced padding */}
+                    <div className="card-body items-center text-center p-2">
                         <h2 className="card-title mb-1 font-bold text-xl">{title}</h2>
-                        <h2 className="text-xl mb-2 fof">{price}</h2>
+                        <h2 className="text-xl mb-2">{price}</h2>
                         <div className="card-actions">
                             <button 
                                 className="btn btn-primary"
