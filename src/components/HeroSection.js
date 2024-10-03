@@ -7,7 +7,7 @@ import three from "../assets/three.png";
 const HeroSection = () => {
   return (
     <div className="heroSecMainParent">
-      <p className="text-4xl text-center welcomeStore mt-6">SỰ LỰA CHỌN HOÀN HẢO.</p>
+      <p className="text-4xl text-center welcomeStore mt-6 font-semibold">SỰ LỰA CHỌN HOÀN HẢO.</p>
       <p className="text-center text-xl my-6">
         {" "}
         Hãy trao niềm tin, chúng tôi sẽ làm cho bạn hài lòng nhất !{" "}
@@ -17,7 +17,7 @@ const HeroSection = () => {
         <div className="flex flex-row items-center mx-4">
           <img src={one} className="w-24 mr-8" alt="Image 1" />
           <div className="flex flex-col">
-            <p className="text-xl font-medium text-gray-700">Bền bỉ theo thời gian</p>
+            <p className="text-xl font-medium text-gray-700 font-semibold">Bền bỉ theo thời gian</p>
             <p className="mb-2 break-words">
               Chất liệu cao cấp đảm bảo độ bền vượt trội, đồng hành cùng bạn trong mọi hoạt động.
             </p>
@@ -27,7 +27,7 @@ const HeroSection = () => {
         <div className="flex flex-row items-center mx-4">
           <img src={two} className="w-24 mr-8" alt="Image 2" />
           <div className="flex flex-col">
-            <p className="text-xl font-medium text-gray-700">
+            <p className="text-xl font-medium text-gray-700 font-semibold">
               Thoải mái vận động.
             </p>
             <p className="mb-2 break-words">
@@ -39,7 +39,7 @@ const HeroSection = () => {
         <div className="flex flex-row items-center mx-4">
           <img src={three} className="w-24 mr-8" alt="Image 3" />
           <div className="flex flex-col">
-            <p className="text-xl font-medium text-gray-700">
+            <p className="text-xl font-medium text-gray-700 font-semibold">
               Mềm mại, nâng niu
             </p>
             <p className="mb-2 break-words">
