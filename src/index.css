@@ -270,8 +270,8 @@ code {
 
 .car-pic {
     height: 30vw; 
-    width: 100vw;
-    max-width: 100% !important;
+    width: 120vw;
+    max-width: 120% !important;
     object-fit:contain;
 }
 
