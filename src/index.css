@@ -1,8 +1,6 @@
 body {
     margin: 0;
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
-        'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
-        sans-serif;
+    font-family: 'Futura', sans-serif;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     background-color: #FFFAFA;
@@ -267,14 +265,13 @@ img {
 }
 
 code {
-    font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
-        monospace;
+    font-family: 'Futura', sans-serif;
 }
 
 .car-pic {
     height: 30vw; 
-    width: 120vw;
-    max-width: 120% !important;
+    width: 100vw;
+    max-width: 100% !important;
     object-fit:contain;
 }
 

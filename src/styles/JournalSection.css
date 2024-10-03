@@ -27,19 +27,9 @@
     color: rgb(255, 255, 255);
 }
 
-.jsImg {
-    position: relative;
-    top: -10rem;
-    left: 40rem;
-    width: 22rem;
-    object-fit: cover;
-}
+
 
 .jsRightText{
     left: 43rem;
     top: -8rem;
-}
-
-.lh6{
-line-height: 6.5rem;
 }

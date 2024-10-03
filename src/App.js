@@ -23,6 +23,7 @@ import ForHer from './components/ForHer';
 import ForHim from './components/ForHim';
 import MobileNav from './components/MobileNav';
 import Chatbot from './components/ChatBot';
+import ScrollToTop from './components/ScrollOnTop';
 function App() {
 
   return (
@@ -31,15 +32,15 @@ function App() {
 
         <Routes >
           <Route path='/' exact element={<>   <NavBar /> <MobileNav />  <SimpleSlider />  <HeroSection />  <BsText />  {<Products />}  {/*<OurBestSellers />*/}  <Ingridients />  <JournalSection /> <FollowONIG /> <SPFooter />  </>} />
-          <Route path='/:id' exact element={<> <NavBar /> <MobileNav />  <SinglePage /> </>} />
-          <Route path='/journal/april' element={<> <NavBar /> <MobileNav />  <JournalPage /> </>} />
+          <Route path='/:id' exact element={<> <NavBar /> <MobileNav />  <SinglePage /> <SPFooter /></>} />
+          <Route path='/journal/april' element={<> <NavBar /> <MobileNav />  <JournalPage /> <SPFooter /></>} />
           <Route path='/cart' exact element={<>  <NavBar /> <CartHold /></>} />
           <Route path='/under20' element={<> <NavBar />  <Under20 /> </>} />
           <Route path='/under40' element={<> <NavBar />  <Under10 /> </>} />
           <Route path='/forher' element={<> <NavBar />  <ForHer /> </>} />
           <Route path='/forhim' element={<> <NavBar />  <ForHim /> </>} />
         </Routes>
-    
+        <ScrollToTop />
       </BrowserRouter>
       <Chatbot />
 

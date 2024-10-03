@@ -7,21 +7,19 @@ import three from "../assets/three.png";
 const HeroSection = () => {
   return (
     <div className="heroSecMainParent">
-      <p className="text-4xl text-center welcomeStore mt-6">HEY! FIND YOUR STYLE.</p>
+      <p className="text-4xl text-center welcomeStore mt-6">SỰ LỰA CHỌN HOÀN HẢO.</p>
       <p className="text-center text-xl my-6">
         {" "}
-        If you don't conform to the way others dress, you don't have to conform
-        to their way of thinking.{" "}
+        Hãy trao niềm tin, chúng tôi sẽ làm cho bạn hài lòng nhất !{" "}
       </p>
 
       <div className="flex flex-row items-center mt-10 mx-64 text-algin">
         <div className="flex flex-row items-center mx-4">
           <img src={one} className="w-24 mr-8" alt="Image 1" />
           <div className="flex flex-col">
-            <p className="text-xl font-medium text-gray-700">Made to Last</p>
+            <p className="text-xl font-medium text-gray-700">Bền bỉ theo thời gian</p>
             <p className="mb-2 break-words">
-              Our shirts are crafted from soft, breathable fabrics for ultimate
-              comfort and a tailored fit.
+              Chất liệu cao cấp đảm bảo độ bền vượt trội, đồng hành cùng bạn trong mọi hoạt động.
             </p>
           </div>
         </div>
@@ -30,11 +28,10 @@ const HeroSection = () => {
           <img src={two} className="w-24 mr-8" alt="Image 2" />
           <div className="flex flex-col">
             <p className="text-xl font-medium text-gray-700">
-              Crafted for Comfort
+              Thoải mái, tự tin vận động.
             </p>
             <p className="mb-2 break-words">
-              Made from gentle, skin-friendly materials, they offer a luxurious
-              feel against your skin.
+              Co giãn 4 chiều mang lại cảm giác thoải mái mỗi khi bạn vận động
             </p>
           </div>
         </div>
@@ -43,11 +40,10 @@ const HeroSection = () => {
           <img src={three} className="w-24 mr-8" alt="Image 3" />
           <div className="flex flex-col">
             <p className="text-xl font-medium text-gray-700">
-              Soft on Your Skin
+              Mềm mại, nâng niu
             </p>
             <p className="mb-2 break-words">
-              Our jeans feature durable fabrics and meticulous stitching,
-              ensuring long-lasting wear.
+              Chất liệu mềm mại, êm ái, mang đến cảm giác dễ chịu cho làn da của bạn
             </p>
           </div>
         </div>
