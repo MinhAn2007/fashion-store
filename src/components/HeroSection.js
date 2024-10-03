@@ -28,10 +28,10 @@ const HeroSection = () => {
           <img src={two} className="w-24 mr-8" alt="Image 2" />
           <div className="flex flex-col">
             <p className="text-xl font-medium text-gray-700">
-              Thoải mái, tự tin vận động.
+              Thoải mái vận động.
             </p>
             <p className="mb-2 break-words">
-              Co giãn 4 chiều mang lại cảm giác thoải mái mỗi khi bạn vận động
+              Co giãn 4 chiều mang lại cảm giác thoải mái mỗi khi bạn vận động.
             </p>
           </div>
         </div>
@@ -43,7 +43,7 @@ const HeroSection = () => {
               Mềm mại, nâng niu
             </p>
             <p className="mb-2 break-words">
-              Chất liệu mềm mại, êm ái, mang đến cảm giác dễ chịu cho làn da của bạn
+              Chất liệu mềm mại, êm ái, mang đến cảm giác dễ chịu cho làn da của bạn.
             </p>
           </div>
         </div>
