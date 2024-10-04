@@ -1,132 +1,169 @@
-import React from 'react'
+import React from "react";
 import "../styles/Navbar.css";
 import logo from "../assets/al.png";
-import { useState } from 'react';
-import BestSellers from './BestSellers';
-import GiftSets from './GiftSets';
-import Body from './Body';
+import { useState } from "react";
+import BestSellers from "./BestSellers";
+import GiftSets from "./GiftSets";
+import Body from "./Body";
 import { FaShoppingBag, FaUser } from "react-icons/fa";
-import { Link } from 'react-router-dom';
-import { useSelector } from 'react-redux';
-
+import { Link } from "react-router-dom";
+import { useSelector } from "react-redux";
 
 const NavBar = () => {
-    const [show, setShow] = useState(false);
-    const [show2, setShow2] = useState(false);
-    const [show3, setShow3] = useState(false);
-    const [show4, setShow4] = useState(false);
+  const [show, setShow] = useState(false);
+  const [show2, setShow2] = useState(false);
+  const [show3, setShow3] = useState(false);
+  const [show4, setShow4] = useState(false);
 
+  const showHandler = () => {
+    setShow(true);
+    setShow2(false);
+    setShow3(false);
+    setShow4(false);
+  };
 
-    const showHandler = () => {
-        setShow(true)
-        setShow2(false)
-        setShow3(false)
-        setShow4(false)
+  const showHandler2 = () => {
+    setShow2(true);
+    setShow(false);
+    setShow3(false);
+    setShow4(false);
+  };
 
-    }
+  const showHandler3 = () => {
+    setShow3(true);
+    setShow(false);
+    setShow2(false);
+    setShow4(false);
+  };
 
-    const showHandler2 = () => {
-        setShow2(true)
-        setShow(false)
-        setShow3(false)
-        setShow4(false)
+  const showHandler4 = () => {
+    setShow4(true);
+    setShow(false);
+    setShow2(false);
+    setShow3(false);
+  };
 
-    }
+  const dontShowHandler = () => {
+    setShow(false);
+    setShow2(false);
+    setShow3(false);
+    setShow4(false);
+  };
 
-    const showHandler3 = () => {
-        setShow3(true)
-        setShow(false)
-        setShow2(false)
-        setShow4(false)
-    }
+  return (
+    <header className="banner navbar " role="banner">
+      <nav className="navbar fixed top-0" role="navigation" aria-label="menu">
+        <Link to="/">
+          <img
+            src={logo}
+            className=" ml-32 logo-img object-contain"
+            alt="Fashion Store Logo"
+          />
+        </Link>
 
-    const showHandler4 = () => {
-        setShow4(true)
-        setShow(false)
-        setShow2(false)
-        setShow3(false)
+        <ul className="menuNav">
+          <li
+            className="dropdown nav-link nav-link-fade-up transition-all duration-700"
+            onMouseOver={showHandler}
+          >
+            Nổi bật
+            {show && (
+              <div>
+                <ul
+                  className="dropdown-nav z-[999]"
+                  onMouseLeave={dontShowHandler}
+                >
+                  <BestSellers> </BestSellers>
+                </ul>
+              </div>
+            )}
+          </li>
+          <li
+            className="dropdown nav-link nav-link-fade-up"
+            onMouseOver={showHandler2}
+          >
+            SẢN PHẨM
+            {show2 && (
+              <ul
+                className="dropdown-nav dropdown-nav2"
+                onMouseLeave={dontShowHandler}
+              >
+                <GiftSets />
+              </ul>
+            )}
+          </li>
+          <li
+            className="dropdown nav-link nav-link-fade-up"
+            onMouseOver={showHandler2}
+          >
+            Áo
+            {show2 && (
+              <ul
+                className="dropdown-nav dropdown-nav2"
+                onMouseLeave={dontShowHandler}
+              >
+                <GiftSets />
+              </ul>
+            )}
+          </li>{" "}
+          <li
+            className="dropdown nav-link nav-link-fade-up"
+            onMouseOver={showHandler2}
+          >
+            Quần
+            {show2 && (
+              <ul
+                className="dropdown-nav dropdown-nav2"
+                onMouseLeave={dontShowHandler}
+              >
+                <GiftSets />
+              </ul>
+            )}
+          </li>{" "}
+          <li
+            className="dropdown nav-link nav-link-fade-up"
+            onMouseOver={showHandler2}
+          >
+            Phụ kiện
+            {show2 && (
+              <ul
+                className="dropdown-nav dropdown-nav2"
+                onMouseLeave={dontShowHandler}
+              >
+                <GiftSets />
+              </ul>
+            )}
+          </li>
+          <li
+            className="dropdown nav-link nav-link-fade-up"
+            onMouseOver={showHandler2}
+          >
+            Giày dép
+            {show2 && (
+              <ul
+                className="dropdown-nav dropdown-nav2"
+                onMouseLeave={dontShowHandler}
+              >
+                <GiftSets />
+              </ul>
+            )}
+          </li>
+        </ul>
 
-    }
+        <div className="ml-auto mr-32">
+          <Link to="/cart">
+            <FaShoppingBag className="text-2xl mr-4 ml-20" />
+          </Link>
+          <Link to="/account">
+            <FaUser className="text-2xl ml-10" /> {/* Icon tài khoản */}
+          </Link>
+        </div>
+      </nav>
+    </header>
+  );
+};
 
-
-    const dontShowHandler = () => {
-        setShow(false)
-        setShow2(false)
-        setShow3(false)
-        setShow4(false)
-
-
-    }
-
-    return (
-            <header className="banner navbar " role="banner">
-
-                <nav className="navbar fixed top-0" role="navigation" aria-label="menu">
-
-                    <Link to="/">
-                        <img src={logo} className=" ml-32 logo-img object-contain" alt="Fashion Store Logo" />
-                    </Link>
-
-                    <ul className="menuNav">
-                        <li className="dropdown nav-link nav-link-fade-up transition-all duration-700" onMouseOver={showHandler} >
-                        SẢN PHẨM BÁN CHẠY
-                        {show && <div>
-                                <ul className="dropdown-nav z-[999]" onMouseLeave={dontShowHandler} >
-
-                                    <BestSellers > </BestSellers>
-
-                                </ul>
-
-                            </div>}
-
-                        </li >
-
-
-                        <li className="dropdown nav-link nav-link-fade-up" onMouseOver={showHandler2} >
-                            Sản Phẩm
-                            {show2 && <ul className="dropdown-nav dropdown-nav2" onMouseLeave={dontShowHandler}>
-                                <GiftSets />
-                            </ul>}
-
-                        </li>
-
-
-                        {/* tạm thời đóng phần shoprange lại */}
-                        {/* <li class="dropdown nav-link nav-link-fade-up" onMouseOver={showHandler3} >
-                            SHOP RANGE
-                            {show3 && <ul class="dropdown-nav dropdown-nav3" onMouseLeave={dontShowHandler}>
-                                <Body />
-                            </ul>}
-
-                        </li> */}
-
-
-                        {/* <p className='navLine absolute bg-red-600 w-1 font-extralight h-9 z-50'>  </p> */}
-
-                    </ul>
-
-
-                  <div className="ml-auto mr-32">
-                  <Link to="/cart">
-                        <FaShoppingBag className='text-2xl mr-4 ml-20' />
-                    </Link>
-                    <Link to="/account">
-                        <FaUser className='text-2xl ml-10' /> {/* Icon tài khoản */}
-                    </Link>
-
-                  </div>
-                </nav >
-            </header >
-
-
-
-
-    )
-}
-
-export default NavBar
-
-
+export default NavBar;
 
 /*    
 
@@ -166,4 +203,3 @@ export default NavBar
             <p>Hover over the "Dropdown" link to see the dropdown menu.</p>
 
 */
-
