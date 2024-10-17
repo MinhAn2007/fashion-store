@@ -1,205 +1,134 @@
 import React from "react";
-import "../styles/Navbar.css";
 import logo from "../assets/al.png";
-import { useState } from "react";
-import BestSellers from "./BestSellers";
-import GiftSets from "./GiftSets";
-import Body from "./Body";
-import { FaShoppingBag, FaUser } from "react-icons/fa";
 import { Link } from "react-router-dom";
-import { useSelector } from "react-redux";
+import {
+  FaShoppingBag,
+  FaUser,
+  FaChevronDown,
+  FaChevronRight,
+  FaSearch,
+} from "react-icons/fa";
 
 const NavBar = () => {
-  const [show, setShow] = useState(false);
-  const [show2, setShow2] = useState(false);
-  const [show3, setShow3] = useState(false);
-  const [show4, setShow4] = useState(false);
-
-  const showHandler = () => {
-    setShow(true);
-    setShow2(false);
-    setShow3(false);
-    setShow4(false);
-  };
-
-  const showHandler2 = () => {
-    setShow2(true);
-    setShow(false);
-    setShow3(false);
-    setShow4(false);
-  };
-
-  const showHandler3 = () => {
-    setShow3(true);
-    setShow(false);
-    setShow2(false);
-    setShow4(false);
-  };
-
-  const showHandler4 = () => {
-    setShow4(true);
-    setShow(false);
-    setShow2(false);
-    setShow3(false);
-  };
-
-  const dontShowHandler = () => {
-    setShow(false);
-    setShow2(false);
-    setShow3(false);
-    setShow4(false);
-  };
-
   return (
-    <header className="banner navbar " role="banner">
-      <nav className="navbar fixed top-0" role="navigation" aria-label="menu">
-        <Link to="/">
-          <img
-            src={logo}
-            className=" ml-32 logo-img object-contain"
-            alt="Fashion Store Logo"
-          />
-        </Link>
+    <div className=" banner navbar mr-auto w-full flex items-center justify-between gap-x-40 h-20 bg-[#F8F8FF] shadow-md fixed top-0 z-50">
+      <Link to="/" className="flex-shrink-0">
+        <img
+          src={logo}
+          className="ml-20 object-contain w-40 h-40"
+          alt="Fashion Store Logo"
+        />
+      </Link>
 
-        <ul className="menuNav">
-          <li
-            className="dropdown nav-link nav-link-fade-up transition-all duration-700"
-            onMouseOver={showHandler}
-          >
-            Nổi bật
-            {show && (
-              <div>
-                <ul
-                  className="dropdown-nav z-[999]"
-                  onMouseLeave={dontShowHandler}
-                >
-                  <BestSellers> </BestSellers>
-                </ul>
-              </div>
-            )}
-          </li>
-          <li
-            className="dropdown nav-link nav-link-fade-up"
-            onMouseOver={showHandler2}
-          >
+      <ul className="flex font-bold gap-x-24 ml-16">
+        <li className="group relative">
+          <span className="cursor-pointer py-2 hover:text-gray-600 flex items-center">
             SẢN PHẨM
-            {show2 && (
-              <ul
-                className="dropdown-nav dropdown-nav2"
-                onMouseLeave={dontShowHandler}
-              >
-                <GiftSets />
+            <FaChevronDown className="ml-1 text-xs" />
+          </span>
+          <ul className="absolute left-0 hidden group-hover:block bg-[#F8F8FF] shadow-lg w-48 transition-all ease-in-out opacity-0 group-hover:opacity-100">
+            <li className="group/nested relative p-4 hover:bg-gray-100">
+              <span className="font-bold cursor-pointer flex items-center justify-between">
+                Áo
+                <FaChevronRight className="ml-1 text-xs" />
+              </span>
+              <ul className="absolute left-full top-0 hidden group-hover/nested:block  bg-[#F8F8FF] shadow-lg w-48   transition-all duration-10000 ease-in-out opacity-0 group-hover/nested:opacity-100">
+                <li className="p-4 hover:bg-gray-100">
+                  <p className="font-bold">Áo khoác</p>
+                </li>
+                <li className="p-4 hover:bg-gray-100">
+                  <p className="font-bold">Áo thun</p>
+                </li>{" "}
+                <li className="p-4 hover:bg-gray-100">
+                  <p className="font-bold">Áo Sơ mi</p>
+                </li>{" "}
+                <li className="p-4 hover:bg-gray-100">
+                  <p className="font-bold">Polo</p>
+                </li>
               </ul>
-            )}
-          </li>
-          <li
-            className="dropdown nav-link nav-link-fade-up"
-            onMouseOver={showHandler2}
-          >
-            Áo
-            {show2 && (
-              <ul
-                className="dropdown-nav dropdown-nav2"
-                onMouseLeave={dontShowHandler}
-              >
-                <GiftSets />
+            </li>
+            <li className="group/nested relative p-4 hover:bg-gray-100">
+              <span className="font-bold cursor-pointer flex items-center justify-between">
+                Quần
+                <FaChevronRight className="ml-1 text-xs" />
+              </span>
+              <ul className="absolute left-full top-0 hidden group-hover/nested:block  bg-[#F8F8FF] shadow-lg w-48   transition-all duration-10000 ease-in-out opacity-0 group-hover/nested:opacity-100">
+                <li className="p-4 hover:bg-gray-100">
+                  <p className="font-bold">Quần vải</p>
+                </li>
+                <li className="p-4 hover:bg-gray-100">
+                  <p className="font-bold">Quần Tây</p>
+                </li>{" "}
+                <li className="p-4 hover:bg-gray-100">
+                  <p className="font-bold">Quần Jean</p>
+                </li>{" "}
+                <li className="p-4 hover:bg-gray-100">
+                  <p className="font-bold">Chân Váy</p>
+                </li>
               </ul>
-            )}
-          </li>{" "}
-          <li
-            className="dropdown nav-link nav-link-fade-up"
-            onMouseOver={showHandler2}
-          >
-            Quần
-            {show2 && (
-              <ul
-                className="dropdown-nav dropdown-nav2"
-                onMouseLeave={dontShowHandler}
-              >
-                <GiftSets />
-              </ul>
-            )}
-          </li>{" "}
-          <li
-            className="dropdown nav-link nav-link-fade-up"
-            onMouseOver={showHandler2}
-          >
-            Phụ kiện
-            {show2 && (
-              <ul
-                className="dropdown-nav dropdown-nav2"
-                onMouseLeave={dontShowHandler}
-              >
-                <GiftSets />
-              </ul>
-            )}
-          </li>
-          <li
-            className="dropdown nav-link nav-link-fade-up"
-            onMouseOver={showHandler2}
-          >
-            Giày dép
-            {show2 && (
-              <ul
-                className="dropdown-nav dropdown-nav2"
-                onMouseLeave={dontShowHandler}
-              >
-                <GiftSets />
-              </ul>
-            )}
-          </li>
-        </ul>
+            </li>
+            <li className="p-4 hover:bg-gray-100">
+              <span>Phụ Kiện</span>
+            </li>
+            <li className="p-4 hover:bg-gray-100">
+              <span>Giày Dép</span>
+            </li>
+          </ul>
+        </li>
 
-        <div className="ml-auto mr-32">
-          <Link to="/cart">
-            <FaShoppingBag className="text-2xl mr-4 ml-20" />
-          </Link>
-          <Link to="/account">
-            <FaUser className="text-2xl ml-10" /> {/* Icon tài khoản */}
-          </Link>
+        <li className="group relative">
+          <span className="cursor-pointer py-2 hover:text-gray-600 flex items-center">
+            SẢN PHẨM SALE
+            <FaChevronDown className="ml-1 text-xs" />
+          </span>
+          <ul className="absolute left-0 hidden group-hover:block bg-[#F8F8FF] shadow-lg w-48 transition-all ease-in-out opacity-0 group-hover:opacity-100">
+            <li className="p-4 hover:bg-gray-100">
+              <span>Đồng giá 199k</span>
+            </li>{" "}
+            <li className="p-4 hover:bg-gray-100">
+              <span>Giảm sốc đến 50%</span>
+            </li>
+          </ul>
+        </li>
+        <li className="group relative">
+          <span className="cursor-pointer py-2 hover:text-gray-600 flex items-center">
+            SẢN PHẨM MỚI
+          </span>
+        </li>
+        <li className="group relative">
+          <span className="cursor-pointer py-2 hover:text-gray-600 flex items-center">
+            BỘ SƯU TẬP
+            <FaChevronDown className="ml-1 text-xs" />
+          </span>
+          <ul className="absolute left-0 hidden group-hover:block bg-[#F8F8FF] shadow-lg w-48 transition-all ease-in-out opacity-0 group-hover:opacity-100">
+            <li className="p-4 hover:bg-gray-100">
+              <span className="font-bold">Accessories Silver</span>
+            </li>
+            <li className="p-4 hover:bg-gray-100">
+              <span className="font-bold">Minimalism</span>
+            </li>
+          </ul>
+        </li>
+      </ul>
+
+      <div className="flex items-center space-x-6 mr-20">
+        <div className="relative">
+          <input
+            type="text"
+            placeholder="Tìm kiếm..."
+            className="border border-gray-300 rounded-full py-1 pl-10 pr-4 focus:outline-none"
+          />
+          <FaSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
         </div>
-      </nav>
-    </header>
+        <Link to="/cart" className="hover:text-gray-600">
+          <FaShoppingBag className="text-2xl" />
+        </Link>
+        <Link to="/account" className="hover:text-gray-600">
+          <FaUser className="text-2xl" />
+        </Link>
+      </div>
+    </div>
   );
 };
 
 export default NavBar;
-
-/*    
-
-
-
-
-             <div class="container">
-                <div class="dropdown" onMouseOver={showHandler}>
-                    <button class="dropbtn">Dropdown</button>
-                    <div class="dropdown-content" onMouseLeave={dontShowHandler}>
-                     {show && <BestSellers /> }
-                    </div>
-                </div>
-
-                <div class="dropdown" onMouseOver={showHandler2}>
-                    <button class="dropbtn">Dropdown</button>
-                    <div class="dropdown-content" onMouseLeave={dontShowHandler}>
-                    {show2 && <GiftSets /> }
-                    </div>
-                </div>
-
-
-                <div class="dropdown">
-                    <button class="dropbtn">Dropdown</button>
-                    <div class="dropdown-content">
-                        Link 1
-                        Link 2
-                        Link 3
-                    </div>
-                </div>
-
-
-                <a href="#news">Link</a>
-            </div>
-
-            <h3>Dropdown Menu inside a Navigation Bar</h3>
-            <p>Hover over the "Dropdown" link to see the dropdown menu.</p>
-
-*/
