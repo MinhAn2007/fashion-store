@@ -22,10 +22,13 @@ const NavBar = () => {
 
       <ul className="flex font-bold gap-x-24 ml-16">
         <li className="group relative">
-          <span className="cursor-pointer py-2 hover:text-gray-600 flex items-center">
+          <Link
+            to="/products"
+            className="cursor-pointer py-2 hover:text-gray-600 flex items-center"
+          >
             SẢN PHẨM
             <FaChevronDown className="ml-1 text-xs" />
-          </span>
+          </Link>
           <ul className="absolute left-0 hidden group-hover:block bg-[#F8F8FF] shadow-lg w-48 transition-all ease-in-out opacity-0 group-hover:opacity-100">
             <li className="group/nested relative p-4 hover:bg-gray-100">
               <span className="font-bold cursor-pointer flex items-center justify-between">

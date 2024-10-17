@@ -20,7 +20,7 @@ import SPFooter from "./components/SPFooter";
 import Under20 from "./components/Under20";
 import Under10 from "./components/Under10";
 import ForHer from "./components/ForHer";
-import ForHim from "./components/ForHim";
+import ProductFeed from "./components/ListProducts";
 import MobileNav from "./components/MobileNav";
 import Chatbot from "./components/ChatBot";
 import ScrollToTop from "./components/ScrollOnTop";
@@ -99,11 +99,11 @@ function App() {
             }
           />
           <Route
-            path="/forhim"
+            path="/products"
             element={
               <>
                 {" "}
-                <ForHim />{" "}
+                <ProductFeed /> <SPFooter />
               </>
             }
           />
