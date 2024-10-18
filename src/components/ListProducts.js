@@ -97,13 +97,10 @@ export default function ShopPage() {
     let filteredProducts = allProducts;
 
     // Lọc theo giá
-    console.log("selectedFilters.price", selectedFilters.price);
-
     if (selectedFilters.price.length > 0) {
       filteredProducts = filteredProducts.filter((product) => {
         return selectedFilters.price.some((filter) => {
           const price = parseInt(product.skus[0].price); // Lấy giá từ SKU đầu tiên
-          console.log("price", price);
 
           if (filter === "Dưới 100.000đ") return price < 100000;
           if (filter === "100.000đ - 200.000đ")
@@ -184,7 +181,6 @@ export default function ShopPage() {
     });
   };
 
-  console.log("currentProducts", currentProducts);
 
   return (
     <div className="container mx-auto py-8 flex">

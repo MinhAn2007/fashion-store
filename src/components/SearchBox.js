@@ -59,7 +59,6 @@ const SearchBox = () => {
 
 
   const executeOnClick = (isExpanded) => {
-    console.log(isExpanded);
   }
 
 
