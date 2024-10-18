@@ -8,34 +8,38 @@ const Products = () => {
   const API = process.env.REACT_APP_API_ENDPOINT;
 
   useEffect(() => {
-    // Fetch data from the API
+    const controller = new AbortController();
+
     const fetchProducts = async () => {
       try {
-        const response = await fetch(`${API}/api/products?limit=8&page=1`); // Adjust limit and page as needed
+        const response = await fetch(`${API}/api/bestseller`, {
+          signal: controller.signal
+        });
         if (!response.ok) {
           throw new Error('Network response was not ok');
         }
         const data = await response.json();
-        // Access the products array from the API response
-        setProducts(data.products || []); // Ensure data.products exists and is an array
+        console.log(data);
+        
+        setProducts(data.products || []);
+        console.log(products[0].skus[0].image);
+        
       } catch (error) {
-        setError(error.message);
+        if (error.name !== 'AbortError') {
+          setError(error.message);
+        }
+        
       } finally {
         setLoading(false);
       }
     };
 
     fetchProducts();
-  }, [API]);
 
-  // Randomize image from cover array
-  const getRandomImage = (cover) => {
-    if (Array.isArray(cover) && cover.length > 0) {
-      const randomIndex = Math.floor(Math.random() * cover.length);
-      return cover[randomIndex];
-    }
-    return ''; // Return a default image or empty string if no image available
-  };
+    return () => {
+      controller.abort();
+    };
+  }, [API]);
 
   if (loading) {
     return <p>Loading...</p>;
@@ -52,8 +56,8 @@ const Products = () => {
         <OurBestSellers
           id={item.id}
           title={item.name}
-          price={formatPrice(item.price)}
-          image={getRandomImage(item.cover)} // Randomize the image from cover array
+          price={formatPrice(item.skus[0].price)} // Format the price using formatPrice
+          image={item.skus[0].image} // Randomize the image from cover array
         />
       </div>
     ))}

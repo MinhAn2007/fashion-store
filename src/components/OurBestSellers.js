@@ -28,7 +28,7 @@ const OurBestSellers = (props) => {
                 <div className="card w-96 bg-gray-50 shadow-xl py-10 ">
                     <Link to={`/${id}`}>
                         <figure className="pt-6">
-                            <img src={image} alt={title} className="rounded-xl w-2/5 h-auto" />
+                            <img src={image} alt={title} className="rounded-xl w-3/5 h-auto" />
                         </figure>
                     </Link>
                     <div className="card-body items-center text-center p-2">
