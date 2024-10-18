@@ -16,44 +16,47 @@ const categories = [
 const filters = [
   {
     name: "Giá",
+    value: "price",
     options: ["Dưới 100.000đ", "100.000đ - 200.000đ", "Trên 200.000đ"],
-    type: "checkbox", // Chuyển từ radio sang checkbox
+    type: "checkbox",
   },
   {
     name: "Màu sắc",
+    value: "color",
     options: ["Đỏ", "Vàng", "Xanh", "Đen", "Trắng"],
     type: "checkbox",
   },
   {
     name: "Kích cỡ",
+    value: "size",
     options: ["S", "M", "L", "XL"],
     type: "checkbox",
   },
   {
     name: "Đánh giá",
+    value: "rating",
     options: ["1 sao", "2 sao", "3 sao", "4 sao", "5 sao"],
     type: "checkbox",
   },
   {
     name: "Danh mục",
-    options: ["Áo", "Quần", "Phụ Kiện", "Giày"],
+    value: "category",
+    options: ["Áo", "Quần", "Phụ kiện", "Giày"],
     type: "checkbox",
   },
 ];
 
 export default function ShopPage() {
-  const [selectedCategory, setSelectedCategory] = useState(categories[0]);
   const [selectedFilters, setSelectedFilters] = useState({
     price: [],
     color: [],
     size: [],
-    brand: [],
+    category: [],
     rating: [],
-    status: [],
   });
   const [currentPage, setCurrentPage] = useState(1);
   const productsPerPage = 12;
-  const [products, setProducts] = useState([]);
+  const [allProducts, setAllProducts] = useState([]);
   const [sortedProducts, setSortedProducts] = useState([]);
   const API = process.env.REACT_APP_API_ENDPOINT;
 
@@ -62,7 +65,8 @@ export default function ShopPage() {
       try {
         const response = await fetch(`${API}/api/products`);
         const data = await response.json();
-        setProducts(data.products || []);
+        setAllProducts(data.products || []);
+        setSortedProducts(data.products || []);
       } catch (error) {
         console.error("Error fetching products:", error);
       }
@@ -72,8 +76,8 @@ export default function ShopPage() {
   }, [API]);
 
   useEffect(() => {
-    setSortedProducts(products);
-  }, [products]);
+    filterProducts();
+  }, [selectedFilters]);
 
   const indexOfLastProduct = currentPage * productsPerPage;
   const indexOfFirstProduct = indexOfLastProduct - productsPerPage;
@@ -89,29 +93,117 @@ export default function ShopPage() {
   };
 
   const sortProducts = (order) => {
-    const sorted = [...products].sort((a, b) => {
-      const priceA = parseInt(a.skus[0].price); // Xử lý giá để so sánh
+    const sorted = [...sortedProducts].sort((a, b) => {
+      const priceA = parseInt(a.skus[0].price);
       const priceB = parseInt(b.skus[0].price);
       return order === "asc" ? priceA - priceB : priceB - priceA;
     });
     setSortedProducts(sorted);
   };
 
+  const filterProducts = () => {
+    let filteredProducts = allProducts;
+
+    // Lọc theo giá
+    console.log("selectedFilters.price", selectedFilters.price);
+
+    if (selectedFilters.price.length > 0) {
+      filteredProducts = filteredProducts.filter((product) => {
+        return selectedFilters.price.some((filter) => {
+          const price = parseInt(product.skus[0].price); // Lấy giá từ SKU đầu tiên
+          console.log("price", price);
+
+          if (filter === "Dưới 100.000đ") return price < 100000;
+          if (filter === "100.000đ - 200.000đ")
+            return price >= 100000 && price <= 200000;
+          if (filter === "Trên 200.000đ") return price > 200000;
+          return false;
+        });
+      });
+    }
+
+    // Lọc theo màu sắc
+    if (selectedFilters.color.length > 0) {
+      filteredProducts = filteredProducts.filter(
+        (product) =>
+          product.skus.some((sku) => selectedFilters.color.includes(sku.color)) // Kiểm tra tất cả SKU
+      );
+    }
+
+    // Lọc theo kích cỡ
+    if (selectedFilters.size.length > 0) {
+      filteredProducts = filteredProducts.filter(
+        (product) =>
+          product.skus.some((sku) => selectedFilters.size.includes(sku.size)) // Kiểm tra tất cả SKU
+      );
+    }
+
+    // Lọc theo đánh giá
+    if (selectedFilters.rating.length > 0) {
+      filteredProducts = filteredProducts.filter((product) => {
+        return selectedFilters.rating.some((filter) => {
+          const rating = parseFloat(product.rating); // Lấy đánh giá từ sản phẩm
+          if (filter.includes("1 sao")) return rating >= 1 && rating < 2;
+          if (filter.includes("2 sao")) return rating >= 2 && rating < 3;
+          if (filter.includes("3 sao")) return rating >= 3 && rating < 4;
+          if (filter.includes("4 sao")) return rating >= 4 && rating < 5;
+          if (filter.includes("5 sao")) return rating >= 5;
+          return false;
+        });
+      });
+    }
+
+    // Lọc theo danh mục (nếu có)
+    if (selectedFilters.category.length > 0) {
+      filteredProducts = filteredProducts.filter(
+        (product) =>
+          selectedFilters.category.includes(product.category_name) ||
+          selectedFilters.category.includes(product.parent_category_name)
+      );
+    }
+
+    // Cập nhật danh sách sản phẩm đã lọc và chỉ giữ lại SKU đầu tiên
+    const filteredProductsWithFirstSKU = filteredProducts.map((product) => ({
+      ...product,
+      skus: [product.skus[0]], // Giữ lại chỉ SKU đầu tiên
+    }));
+
+    setSortedProducts(filteredProductsWithFirstSKU);
+    setCurrentPage(1);
+  };
+
   const handleFilterChange = (filterName, value, checked) => {
     setSelectedFilters((prev) => {
-      // Nếu thuộc tính chưa tồn tại, khởi tạo nó là một mảng rỗng
       const currentFilter = prev[filterName] || [];
       const updatedOptions = checked
-        ? [...currentFilter, value] // Thêm giá trị vào mảng nếu đã chọn
-        : currentFilter.filter((option) => option !== value); // Xóa giá trị khỏi mảng nếu không chọn
+        ? [...currentFilter, value]
+        : currentFilter.filter((option) => option !== value);
       return { ...prev, [filterName]: updatedOptions };
     });
   };
 
+  const clearFilters = () => {
+    setSelectedFilters({
+      price: [],
+      color: [],
+      size: [],
+      category: [],
+      rating: [],
+    });
+  };
+
+  console.log("currentProducts", currentProducts);
+
   return (
     <div className="container mx-auto py-8 flex">
       <div className="w-2/12 pr-4">
-        <h2 className="text-lg font-semibold mb-5 mt-[6px]">Bộ lọc</h2>
+        <h2 className="text-lg font-semibold mb-7 mt-[6px]">Bộ lọc</h2>
+        <button
+          onClick={clearFilters}
+          className="bg-black w-44 mb-5 text-white h-10 border border-transparent transition-all duration-400 ease hover:bg-white hover:text-black hover:border-black"
+        >
+          Xóa Bộ Lọc
+        </button>
         <div className="flex flex-col space-y-4">
           {filters.map((filter) => (
             <div key={filter.name} className="mb-4">
@@ -120,10 +212,14 @@ export default function ShopPage() {
                 <label key={option} className="flex items-center">
                   <input
                     type="checkbox"
-                    checked={selectedFilters[filter.name.toLowerCase()]?.includes(option)}
+                    checked={selectedFilters[filter.value]?.includes(option)}
                     value={option}
                     onChange={(e) =>
-                      handleFilterChange(filter.name.toLowerCase(), option, e.target.checked)
+                      handleFilterChange(
+                        filter.value,
+                        option,
+                        e.target.checked
+                      )
                     }
                     className="mr-2"
                   />
