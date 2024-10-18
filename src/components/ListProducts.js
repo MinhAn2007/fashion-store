@@ -3,15 +3,7 @@
 import React, { useState, useEffect } from "react";
 import BreadCrumb from "./BreadCrumb";
 import "../styles/SinglePage.css";
-
-const categories = [
-  "Tất cả sản phẩm",
-  "Sản phẩm mới",
-  "Khuyến mãi",
-  "Bán chạy",
-  "Đồ ăn nhanh",
-  "Thức uống",
-];
+import { Link } from "react-router-dom";
 
 const filters = [
   {
@@ -200,7 +192,7 @@ export default function ShopPage() {
         <h2 className="text-lg font-semibold mb-7 mt-[6px]">Bộ lọc</h2>
         <button
           onClick={clearFilters}
-          className="bg-black w-44 mb-5 text-white h-10 border border-transparent transition-all duration-400 ease hover:bg-white hover:text-black hover:border-black"
+          className="bg-gray-300 rounded-3xl w-44 mb-5 text-black h-10 border border-transparent transition-all duration-400 ease hover:bg-white hover:text-black hover:border-black"
         >
           Xóa Bộ Lọc
         </button>
@@ -215,11 +207,7 @@ export default function ShopPage() {
                     checked={selectedFilters[filter.value]?.includes(option)}
                     value={option}
                     onChange={(e) =>
-                      handleFilterChange(
-                        filter.value,
-                        option,
-                        e.target.checked
-                      )
+                      handleFilterChange(filter.value, option, e.target.checked)
                     }
                     className="mr-2"
                   />
@@ -256,11 +244,8 @@ export default function ShopPage() {
                   className="w-96 h-96 object-cover transition-opacity duration-300 group-hover:opacity-50"
                 />
                 <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-black bg-opacity-60">
-                  <button
-                    className="bg-transparent w-52 text-white h-10 border border-transparent transition-all duration-400 ease"
-                    onClick={() => alert("Đang phát triển")}
-                  >
-                    Xem chi tiết
+                  <button className="bg-transparent w-52 text-white h-10 border border-transparent transition-all duration-400 ease">
+                    <Link to={`/${product.id}`}>Xem chi tiết</Link>
                   </button>
                 </div>
               </div>
