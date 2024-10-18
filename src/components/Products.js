@@ -21,9 +21,7 @@ const Products = () => {
         const data = await response.json();
         console.log(data);
         
-        setProducts(data.products || []);
-        console.log(products[0].skus[0].image);
-        
+        setProducts(data.products || []);        
       } catch (error) {
         if (error.name !== 'AbortError') {
           setError(error.message);
