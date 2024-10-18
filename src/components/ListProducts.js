@@ -30,18 +30,13 @@ const filters = [
     type: "checkbox",
   },
   {
-    name: "Thương hiệu",
-    options: ["Brand A", "Brand B", "Brand C"],
-    type: "checkbox",
-  },
-  {
     name: "Đánh giá",
     options: ["1 sao", "2 sao", "3 sao", "4 sao", "5 sao"],
     type: "checkbox",
   },
   {
-    name: "Tình trạng sản phẩm",
-    options: ["Mới", "Cũ", "Thời trang"],
+    name: "Danh mục",
+    options: ["Áo", "Quần", "Phụ Kiện", "Giày"],
     type: "checkbox",
   },
 ];
