@@ -11,16 +11,16 @@ import {
 
 const NavBar = () => {
   return (
-    <div className=" banner navbar mr-auto w-full flex items-center justify-between gap-x-40 h-20 bg-[#F8F8FF] shadow-md fixed top-0 z-50">
+    <div className=" banner navbar mr-auto w-full flex items-center justify-between gap-x-16 h-20 bg-[#F8F8FF] shadow-md fixed top-0 z-50">
       <Link to="/" className="flex-shrink-0">
         <img
           src={logo}
-          className="ml-20 object-contain w-40 h-40"
+          className="ml-36 object-contain w-40 h-40"
           alt="Fashion Store Logo"
         />
       </Link>
 
-      <ul className="flex font-bold gap-x-24 ml-16">
+      <ul className="flex font-bold gap-x-24 -ml-40">
         <li className="group relative">
           <Link
             to="/products"
@@ -51,7 +51,7 @@ const NavBar = () => {
               </ul>
             </li>
             <li className="group/nested relative p-4 hover:bg-gray-100">
-              <span className="font-bold cursor-pointer flex items-center justify-between">
+              <span className="font-bold cursor-pointer flex items-center justify-between ">
                 Quần
                 <FaChevronRight className="ml-1 text-xs" />
               </span>
@@ -114,12 +114,12 @@ const NavBar = () => {
         </li>
       </ul>
 
-      <div className="flex items-center space-x-6 mr-20">
-        <div className="relative">
+      <div className="flex items-center space-x-6 mr-36">
+        <div className="relative w-3/5">
           <input
             type="text"
             placeholder="Tìm kiếm..."
-            className="border border-gray-300 rounded-full py-1 pl-10 pr-4 focus:outline-none"
+            className="border border-gray-300 rounded-full py-1 pl-10 pr-4 focus:outline-none w-full" // Thay w-3/5 thành w-full
           />
           <FaSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
         </div>
