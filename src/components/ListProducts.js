@@ -40,8 +40,17 @@ const filters = [
     type: "checkbox",
   },
 ];
-
-export default function ShopPage() {
+const mapProductType = (id) => {
+  const productTypes = {
+    1: "Áo",
+    2: "Quần",
+    3: "Phụ kiện",
+    4: "Giày dép",
+  };
+  return productTypes[id] || "Tất cả sản phẩm";
+};
+let nameBreadCrumb = "Tất cả sản phẩm";
+export default function ShopPage(props) {
   const [selectedFilters, setSelectedFilters] = useState({
     price: [],
     color: [],
@@ -56,11 +65,17 @@ export default function ShopPage() {
   const API = process.env.REACT_APP_API_ENDPOINT;
   const dispatch = useDispatch();
   const toast = useToast();
-
   useEffect(() => {
     const fetchProducts = async () => {
       try {
-        const response = await fetch(`${API}/api/products`);
+        let response;
+        if (props.id) {
+          response = await fetch(`${API}/api/category/${props.id}`);
+          nameBreadCrumb = mapProductType(props.id);
+        } else {
+          response = await fetch(`${API}/api/products`);
+        }
+
         const data = await response.json();
         setAllProducts(data.products || []);
         setSortedProducts(data.products || []);
@@ -70,7 +85,7 @@ export default function ShopPage() {
     };
 
     fetchProducts();
-  }, [API]);
+  }, [API, props.id]);
 
   useEffect(() => {
     filterProducts();
@@ -206,7 +221,6 @@ export default function ShopPage() {
       });
     }
   };
-  
 
   return (
     <div className="container mx-auto py-8 flex">
@@ -219,31 +233,41 @@ export default function ShopPage() {
           Xóa Bộ Lọc
         </button>
         <div className="flex flex-col space-y-4">
-          {filters.map((filter) => (
-            <div key={filter.name} className="mb-4">
-              <h3 className="font-semibold">{filter.name}:</h3>
-              {filter.options.map((option) => (
-                <label key={option} className="flex items-center">
-                  <input
-                    type="checkbox"
-                    checked={selectedFilters[filter.value]?.includes(option)}
-                    value={option}
-                    onChange={(e) =>
-                      handleFilterChange(filter.value, option, e.target.checked)
-                    }
-                    className="mr-2"
-                  />
-                  {option}
-                </label>
-              ))}
-            </div>
-          ))}
+          {filters.map((filter) => {
+            if (filter.value === "category" && props.id) {
+              return null;
+            }
+
+            return (
+              <div key={filter.name} className="mb-4">
+                <h3 className="font-semibold">{filter.name}:</h3>
+                {filter.options.map((option) => (
+                  <label key={option} className="flex items-center">
+                    <input
+                      type="checkbox"
+                      checked={selectedFilters[filter.value]?.includes(option)}
+                      value={option}
+                      onChange={(e) =>
+                        handleFilterChange(
+                          filter.value,
+                          option,
+                          e.target.checked
+                        )
+                      }
+                      className="mr-2"
+                    />
+                    {option}
+                  </label>
+                ))}
+              </div>
+            );
+          })}
         </div>
       </div>
 
       <div className="flex-grow">
         <div className="mb-6 flex justify-between items-center">
-          <BreadCrumb name="Tất cả sản phẩm" />
+          <BreadCrumb name={nameBreadCrumb} />
           <select
             onChange={(e) => sortProducts(e.target.value)}
             className="border rounded p-2"
@@ -276,7 +300,10 @@ export default function ShopPage() {
                 <p className="text-gray-600 mt-1 mb-2">
                   {product.skus[0].price}
                 </p>
-                <button onClick={() => addItemToCartHandler(product)} className="bg-black w-52 text-white h-10 border border-transparent transition-all duration-400 ease hover:bg-white hover:text-black hover:border-black">
+                <button
+                  onClick={() => addItemToCartHandler(product)}
+                  className="bg-black w-52 text-white h-10 border border-transparent transition-all duration-400 ease hover:bg-white hover:text-black hover:border-black"
+                >
                   Thêm vào giỏ
                 </button>
               </div>

@@ -107,6 +107,42 @@ function App() {
               </>
             }
           />
+          <Route
+            path="/ao"
+            element={
+              <>
+                {" "}
+                <ProductFeed id={1} /> <SPFooter />
+              </>
+            }
+          />{" "}
+          <Route
+            path="/quan"
+            element={
+              <>
+                {" "}
+                <ProductFeed id={2} /> <SPFooter />
+              </>
+            }
+          />
+          <Route
+            path="/phukien"
+            element={
+              <>
+                {" "}
+                <ProductFeed id={3} /> <SPFooter />
+              </>
+            }
+          />
+          <Route
+            path="/giay"
+            element={
+              <>
+                {" "}
+                <ProductFeed id={4} /> <SPFooter />
+              </>
+            }
+          />
         </Routes>
         <ScrollToTop />
       </BrowserRouter>
