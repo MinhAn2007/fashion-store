@@ -340,7 +340,7 @@ const SinglePage = () => {
 
       {/* Overlay để hiển thị hình ảnh hoặc video */}
       {isOverlayOpen && (
-        <div className="fixed inset-0 bg-black bg-opacity-70 flex justify-center items-center z-[9999]">
+        <div className="fixed inset-0 bg-black bg-opacity-70 flex justify-center items-center z-[99999]">
           {selectedMedia.endsWith('.mp4') ? ( // Kiểm tra định dạng media
             <video src={selectedMedia} className="max-w-full max-h-full" controls autoPlay />
           ) : (

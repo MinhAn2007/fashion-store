@@ -4,6 +4,9 @@ import React, { useState, useEffect } from "react";
 import BreadCrumb from "./BreadCrumb";
 import "../styles/SinglePage.css";
 import { Link } from "react-router-dom";
+import { useDispatch } from "react-redux";
+import { cartActions } from "../redux-state/CartState";
+import { useToast } from "@chakra-ui/react";
 
 const filters = [
   {
@@ -51,6 +54,8 @@ export default function ShopPage() {
   const [allProducts, setAllProducts] = useState([]);
   const [sortedProducts, setSortedProducts] = useState([]);
   const API = process.env.REACT_APP_API_ENDPOINT;
+  const dispatch = useDispatch();
+  const toast = useToast();
 
   useEffect(() => {
     const fetchProducts = async () => {
@@ -181,6 +186,27 @@ export default function ShopPage() {
     });
   };
 
+  const addItemToCartHandler = (product) => {
+    if (product.skus.length > 0) {
+      const selectedVariant = product.skus[0]; // Hoặc logic để chọn SKU phù hợp
+      dispatch(
+        cartActions.addItemToCart({
+          id: product.id,
+          price: selectedVariant.price,
+          title: product.name,
+          image: selectedVariant.image, // Hoặc activeImg nếu bạn đang sử dụng state này
+        })
+      );
+      toast({
+        title: "Thành công",
+        description: "Sản phẩm đã được thêm vào giỏ hàng",
+        status: "success",
+        duration: 1500,
+        isClosable: true,
+      });
+    }
+  };
+  
 
   return (
     <div className="container mx-auto py-8 flex">
@@ -250,7 +276,7 @@ export default function ShopPage() {
                 <p className="text-gray-600 mt-1 mb-2">
                   {product.skus[0].price}
                 </p>
-                <button className="bg-black w-52 text-white h-10 border border-transparent transition-all duration-400 ease hover:bg-white hover:text-black hover:border-black">
+                <button onClick={() => addItemToCartHandler(product)} className="bg-black w-52 text-white h-10 border border-transparent transition-all duration-400 ease hover:bg-white hover:text-black hover:border-black">
                   Thêm vào giỏ
                 </button>
               </div>

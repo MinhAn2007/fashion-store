@@ -12,7 +12,6 @@ import { Route, Routes } from "react-router-dom";
 import { BrowserRouter } from "react-router-dom";
 import SinglePage from "./components/SinglePage";
 import JournalPage from "./components/JournalPage";
-import Cart from "./components/Cart";
 import FollowONIG from "./components/FollowONIG";
 import Products from "./components/Products";
 import CartHold from "./components/CartHold";
@@ -68,6 +67,7 @@ function App() {
               <>
                 {" "}
                 <CartHold />
+                <SPFooter />
               </>
             }
           />
