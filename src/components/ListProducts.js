@@ -74,6 +74,8 @@ export default function ShopPage(props) {
           nameBreadCrumb = mapProductType(props.id);
         } else {
           response = await fetch(`${API}/api/products`);
+          nameBreadCrumb = 'Tất cả sản phẩm';
+
         }
 
         const data = await response.json();

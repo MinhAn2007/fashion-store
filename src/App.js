@@ -23,31 +23,40 @@ import ProductFeed from "./components/ListProducts";
 import MobileNav from "./components/MobileNav";
 import Chatbot from "./components/ChatBot";
 import ScrollToTop from "./components/ScrollOnTop";
+import Login from "./components/Login";
+import SignUp from "./components/SignUp";
+
 function App() {
   return (
     <div className="App">
       <BrowserRouter>
-        <NavBar />
         <Routes>
+          <Route path="/login" element={<Login />} />
+          <Route path="/signup" element={<SignUp />} />
+
           <Route
             path="/"
-            exact
             element={
               <>
-                {" "}
-                <SimpleSlider /> <HeroSection /> <BsText /> {<Products />}{" "}
-                {/*<OurBestSellers />*/} <Ingridients /> <JournalSection />{" "}
-                <FollowONIG /> <SPFooter />{" "}
+                <NavBar />
+                <SimpleSlider />
+                <HeroSection />
+                <BsText />
+                <Products />
+                <Ingridients />
+                <JournalSection />
+                <FollowONIG />
+                <SPFooter />
               </>
             }
           />
           <Route
             path="/:id"
-            exact
             element={
               <>
-                {" "}
-                <SinglePage /> <SPFooter />
+                <NavBar />
+                <SinglePage />
+                <SPFooter />
               </>
             }
           />
@@ -55,46 +64,19 @@ function App() {
             path="/journal/april"
             element={
               <>
-                {" "}
-                <JournalPage /> <SPFooter />
-              </>
-            }
-          />
-          <Route
-            path="/cart"
-            exact
-            element={
-              <>
-                {" "}
-                <CartHold />
+                <NavBar />
+                <JournalPage />
                 <SPFooter />
               </>
             }
           />
           <Route
-            path="/under20"
+            path="/cart"
             element={
               <>
-                {" "}
-                <Under20 />{" "}
-              </>
-            }
-          />
-          <Route
-            path="/under40"
-            element={
-              <>
-                {" "}
-                <Under10 />{" "}
-              </>
-            }
-          />
-          <Route
-            path="/forher"
-            element={
-              <>
-                {" "}
-                <ForHer />{" "}
+                <NavBar />
+                <CartHold />
+                <SPFooter />
               </>
             }
           />
@@ -102,8 +84,9 @@ function App() {
             path="/products"
             element={
               <>
-                {" "}
-                <ProductFeed /> <SPFooter />
+                <NavBar />
+                <ProductFeed />
+                <SPFooter />
               </>
             }
           />
@@ -111,17 +94,19 @@ function App() {
             path="/ao"
             element={
               <>
-                {" "}
-                <ProductFeed id={1} /> <SPFooter />
+                <NavBar />
+                <ProductFeed id={1} />
+                <SPFooter />
               </>
             }
-          />{" "}
+          />
           <Route
             path="/quan"
             element={
               <>
-                {" "}
-                <ProductFeed id={2} /> <SPFooter />
+                <NavBar />
+                <ProductFeed id={2} />
+                <SPFooter />
               </>
             }
           />
@@ -129,8 +114,9 @@ function App() {
             path="/phukien"
             element={
               <>
-                {" "}
-                <ProductFeed id={3} /> <SPFooter />
+                <NavBar />
+                <ProductFeed id={3} />
+                <SPFooter />
               </>
             }
           />
@@ -138,8 +124,9 @@ function App() {
             path="/giay"
             element={
               <>
-                {" "}
-                <ProductFeed id={4} /> <SPFooter />
+                <NavBar />
+                <ProductFeed id={4} />
+                <SPFooter />
               </>
             }
           />

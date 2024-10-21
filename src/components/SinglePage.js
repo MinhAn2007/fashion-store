@@ -1,12 +1,12 @@
 import React, { useEffect, useState } from "react";
 import { AiFillStar } from "react-icons/ai";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate, useLocation } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import { cartActions } from "../redux-state/CartState";
 import { useToast } from "@chakra-ui/react";
 import BreadCrumb from "./BreadCrumb";
 import Modal from "react-modal";
-// Tạo ánh xạ giữa tên màu và mã màu
+import { useAuth } from "../hooks/useAuth";
 const colorMap = {
   Đỏ: "#FF0000",
   Xanh: "#0000FF",
@@ -20,7 +20,8 @@ const SinglePage = () => {
   const { id } = useParams();
   const dispatch = useDispatch();
   const toast = useToast();
-
+  const navigate = useNavigate();
+  const location = useLocation();
   const [product, setProduct] = useState(null);
   const [activeImg, setActiveImg] = useState("");
   const [selectedVariant, setSelectedVariant] = useState(null);
@@ -28,15 +29,15 @@ const SinglePage = () => {
   const [selectedColor, setSelectedColor] = useState(null);
   const API = process.env.REACT_APP_API_ENDPOINT;
   const [isOverlayOpen, setIsOverlayOpen] = useState(false);
-  const [selectedMedia, setSelectedMedia] = useState('');
-
+  const [selectedMedia, setSelectedMedia] = useState("");
+  const { isAuthenticated } = useAuth();
   const openOverlay = (media) => {
     setSelectedMedia(media);
     setIsOverlayOpen(true);
   };
 
   const closeOverlay = () => {
-    setSelectedMedia('');
+    setSelectedMedia("");
     setIsOverlayOpen(false);
   };
 
@@ -61,6 +62,10 @@ const SinglePage = () => {
   }, [id]);
 
   const addItemToCartHandler = () => {
+    if (!isAuthenticated) {
+      navigate("/login", { state: { from: location } });
+      return;
+    }
     if (selectedVariant) {
       dispatch(
         cartActions.addItemToCart({
@@ -296,62 +301,78 @@ const SinglePage = () => {
         </div>
       </div>
       <div className="p-4 mx-96">
-      <h2 className="text-lg font-bold mb-4">Đánh giá của khách hàng:</h2>
-      {product.reviews.length > 0 ? (
-        product.reviews.map((review, index) => (
-          <div key={index} className="border p-4 rounded mb-4">
-            <p className="font-semibold">{review.title}</p>
-            <div className="flex items-center">
-              {Array.from({ length: review.rating }, (_, idx) => (
-                <AiFillStar key={idx} className="text-yellow-500" />
-              ))}
-            </div>
-            <p>{review.content}</p>
-            <div className="flex mt-2">
-              {/* Hiển thị hình ảnh */}
-              {review.images && review.images.length > 0 && review.images.map((image, imgIndex) => (
-                <img
-                  key={imgIndex}
-                  src={image}
-                  alt={`Review image ${imgIndex + 1}`}
-                  className="w-16 h-16 object-cover mr-2 cursor-pointer transition-transform transform hover:scale-105"
-                  onClick={() => openOverlay(image)} // Mở overlay cho hình ảnh
-                />
-              ))}
+        <h2 className="text-lg font-bold mb-4">Đánh giá của khách hàng:</h2>
+        {product.reviews.length > 0 ? (
+          product.reviews.map((review, index) => (
+            <div key={index} className="border p-4 rounded mb-4">
+              <p className="font-semibold">{review.title}</p>
+              <div className="flex items-center">
+                {Array.from({ length: review.rating }, (_, idx) => (
+                  <AiFillStar key={idx} className="text-yellow-500" />
+                ))}
+              </div>
+              <p>{review.content}</p>
+              <div className="flex mt-2">
+                {/* Hiển thị hình ảnh */}
+                {review.images &&
+                  review.images.length > 0 &&
+                  review.images.map((image, imgIndex) => (
+                    <img
+                      key={imgIndex}
+                      src={image}
+                      alt={`Review image ${imgIndex + 1}`}
+                      className="w-16 h-16 object-cover mr-2 cursor-pointer transition-transform transform hover:scale-105"
+                      onClick={() => openOverlay(image)} // Mở overlay cho hình ảnh
+                    />
+                  ))}
 
-              {/* Hiển thị video dưới dạng hình ảnh */}
-              {review.video && review.video.length > 0 && review.video.map((videoUrl, vidIndex) => (
-                <img
-                  key={vidIndex}
-                  src="https://img.icons8.com/ios-filled/50/000000/video.png" // Hình ảnh biểu tượng video
-                  alt={`Review video ${vidIndex + 1}`}
-                  className="w-16 h-16 object-cover mr-2 cursor-pointer transition-transform transform hover:scale-105"
-                  onClick={() => openOverlay(videoUrl)} // Mở overlay cho video
-                />
-              ))}
+                {/* Hiển thị video dưới dạng hình ảnh */}
+                {review.video &&
+                  review.video.length > 0 &&
+                  review.video.map((videoUrl, vidIndex) => (
+                    <img
+                      key={vidIndex}
+                      src="https://img.icons8.com/ios-filled/50/000000/video.png" // Hình ảnh biểu tượng video
+                      alt={`Review video ${vidIndex + 1}`}
+                      className="w-16 h-16 object-cover mr-2 cursor-pointer transition-transform transform hover:scale-105"
+                      onClick={() => openOverlay(videoUrl)} // Mở overlay cho video
+                    />
+                  ))}
+              </div>
             </div>
+          ))
+        ) : (
+          <p className="text-gray-500">
+            Hiện tại chưa có đánh giá cho sản phẩm.
+          </p>
+        )}
+
+        {/* Overlay để hiển thị hình ảnh hoặc video */}
+        {isOverlayOpen && (
+          <div className="fixed inset-0 bg-black bg-opacity-70 flex justify-center items-center z-[99999]">
+            {selectedMedia.endsWith(".mp4") ? ( // Kiểm tra định dạng media
+              <video
+                src={selectedMedia}
+                className="max-w-full max-h-full"
+                controls
+                autoPlay
+              />
+            ) : (
+              <img
+                src={selectedMedia}
+                alt="Selected review"
+                className="max-w-full max-h-full"
+              />
+            )}
+            <button
+              onClick={closeOverlay}
+              className="absolute top-4 right-4 text-white text-lg"
+            >
+              Đóng
+            </button>
           </div>
-        ))
-      ) : (
-        <p className="text-gray-500">
-          Hiện tại chưa có đánh giá cho sản phẩm.
-        </p>
-      )}
-
-      {/* Overlay để hiển thị hình ảnh hoặc video */}
-      {isOverlayOpen && (
-        <div className="fixed inset-0 bg-black bg-opacity-70 flex justify-center items-center z-[99999]">
-          {selectedMedia.endsWith('.mp4') ? ( // Kiểm tra định dạng media
-            <video src={selectedMedia} className="max-w-full max-h-full" controls autoPlay />
-          ) : (
-            <img src={selectedMedia} alt="Selected review" className="max-w-full max-h-full" />
-          )}
-          <button onClick={closeOverlay} className="absolute top-4 right-4 text-white text-lg">
-            Đóng
-          </button>
-        </div>
-      )}
-    </div>
+        )}
+      </div>
     </>
   );
 };
