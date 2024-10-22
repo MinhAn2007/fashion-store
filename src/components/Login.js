@@ -2,15 +2,18 @@ import React, { useState } from "react";
 import { useNavigate, useLocation, Link } from "react-router-dom";
 
 const Login = () => {
-  const [email, setemail] = useState("");
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [errorMessage, setErrorMessage] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [successMessage, setSuccessMessage] = useState(null);
   const navigate = useNavigate();
   const location = useLocation();
   const API = process.env.REACT_APP_API_ENDPOINT;
 
   const handleLogin = async (e) => {
-    e.preventDefault(); 
+    e.preventDefault();
+    setLoading(true); // Start loading
 
     try {
       const response = await fetch(`${API}/api/login`, {
@@ -25,26 +28,31 @@ const Login = () => {
       });
 
       if (!response.ok) {
-        throw new Error("Login failed");
+        // Try to get the error message from the response
+        const errorData = await response.json();
+        throw new Error(errorData.message || "Login failed");
       }
 
       const data = await response.json();
-
       const token = data.token;
+      const totalCartQuantity = data.totalCartQuantity; // Assuming your API returns this
+
       localStorage.setItem("token", token);
+      localStorage.setItem("cartQuantity", totalCartQuantity); // Save cart quantity
+
+      setSuccessMessage("Đăng nhập thành công!"); // Set success message
 
       const from = location.state?.from?.pathname || "/";
-      navigate(from, { replace: true });
+      setTimeout(() => {
+        navigate(from, { replace: true });
+      }, 1500); // Redirect after 1.5 seconds
     } catch (error) {
       console.error("Authentication failed:", error);
-
-      // Clear token on failure
       localStorage.removeItem("token");
-
-      // Display error message if present in the error response
-      setErrorMessage(
-        error.message || "Authentication failed. Please try again."
-      );
+      setErrorMessage(error.message || "Authentication failed. Please try again.");
+      setSuccessMessage(null); // Clear success message on error
+    } finally {
+      setLoading(false); // Stop loading
     }
   };
 
@@ -56,6 +64,9 @@ const Login = () => {
             Đăng nhập vào tài khoản của bạn tiếp tục
           </h2>
         </div>
+        {successMessage && (
+          <div className="text-green-600 text-center mb-4">{successMessage}</div>
+        )}
         {errorMessage && (
           <div className="text-red-600 text-center mb-4">{errorMessage}</div>
         )}
@@ -64,7 +75,7 @@ const Login = () => {
           <div className="rounded-md shadow-sm -space-y-px">
             <div>
               <label htmlFor="email" className="sr-only">
-                Tên đăng nhập
+                Email
               </label>
               <input
                 id="email"
@@ -72,9 +83,9 @@ const Login = () => {
                 type="text"
                 required
                 className="appearance-none rounded-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-t-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm"
-                placeholder="Tên đăng nhập"
+                placeholder="Email"
                 value={email}
-                onChange={(e) => setemail(e.target.value)}
+                onChange={(e) => setEmail(e.target.value)}
               />
             </div>
             <div>
@@ -116,6 +127,28 @@ const Login = () => {
           </p>
         </div>
       </div>
+
+      {/* Loading Modal */}
+      {loading && (
+        <div className="fixed inset-0 flex items-center justify-center bg-gray-500 bg-opacity-75 z-50">
+          <div className="bg-white rounded-lg p-6 text-center shadow-lg">
+            <div className="flex justify-center mb-4">
+              <svg
+                className="animate-spin h-8 w-8 text-indigo-600"
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+              >
+                <circle className="opacity-25" cx="12" cy="12" r="10" />
+                <path className="opacity-75" d="M4 12h16M12 4v16" />
+              </svg>
+            </div>
+            <p className="text-gray-700">Đang đăng nhập, vui lòng chờ...</p>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
