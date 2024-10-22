@@ -8,7 +8,7 @@ export const useAuth = () => {
     // This is a placeholder. Replace with your actual authentication logic
     const checkAuth = async () => {
       // Example: check if there's a token in localStorage
-      const token = localStorage.getItem('authToken');
+      const token = localStorage.getItem('token');
       setIsAuthenticated(!!token);
     };
 
