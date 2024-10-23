@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate, useLocation, Link } from "react-router-dom";
 
 const Login = () => {
@@ -10,7 +10,12 @@ const Login = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const API = process.env.REACT_APP_API_ENDPOINT;
-
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    if (token) {
+      navigate("/", { replace: true }); // Redirect to home if logged in
+    }
+  }, [navigate]);
   const handleLogin = async (e) => {
     e.preventDefault();
     setLoading(true); // Start loading
@@ -28,15 +33,14 @@ const Login = () => {
       });
 
       if (!response.ok) {
-        // Try to get the error message from the response
         const errorData = await response.json();
         throw new Error(errorData.message || "Login failed");
       }
 
       const data = await response.json();
       const token = data.token;
-      const totalCartQuantity = data.totalCartQuantity; // Assuming your API returns this
-
+      const totalCartQuantity = data.user.totalCartQuantity; // Assuming your API returns this
+      
       localStorage.setItem("token", token);
       localStorage.setItem("cartQuantity", totalCartQuantity); // Save cart quantity
 
@@ -49,7 +53,9 @@ const Login = () => {
     } catch (error) {
       console.error("Authentication failed:", error);
       localStorage.removeItem("token");
-      setErrorMessage(error.message || "Authentication failed. Please try again.");
+      setErrorMessage(
+        error.message || "Authentication failed. Please try again."
+      );
       setSuccessMessage(null); // Clear success message on error
     } finally {
       setLoading(false); // Stop loading
@@ -65,7 +71,9 @@ const Login = () => {
           </h2>
         </div>
         {successMessage && (
-          <div className="text-green-600 text-center mb-4">{successMessage}</div>
+          <div className="text-green-600 text-center mb-4">
+            {successMessage}
+          </div>
         )}
         {errorMessage && (
           <div className="text-red-600 text-center mb-4">{errorMessage}</div>

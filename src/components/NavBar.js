@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import logo from "../assets/al.png";
 import { Link } from "react-router-dom";
 import {
@@ -16,6 +16,7 @@ const NavBar = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [logoutMessage, setLogoutMessage] = useState("");
   const navigate = useNavigate();
+  const [cartQuantity, setCartQuantity] = useState(0);
 
   const handleLogout = () => {
     setIsLoading(true);
@@ -23,13 +24,18 @@ const NavBar = () => {
       localStorage.clear();
       setIsLoading(false);
       setLogoutMessage("Đăng xuất thành công!");
-      setTimeout(() => {
-        setLogoutMessage("");
-        navigate("/");
-      }, 2000); // Redirect after success message
+      setLogoutMessage("");
+      navigate("/");
+      window.location.reload();
     }, 2000); // Simulate loading time
   };
 
+  useEffect(() => {
+    const quantity = localStorage.getItem("cartQuantity");
+    console.log(quantity);
+    
+    setCartQuantity(quantity ? parseInt(quantity) : 0);
+  }, []);
   return (
     <>
       {isLoading && (
@@ -160,8 +166,13 @@ const NavBar = () => {
             />
             <FaSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
           </div>
-          <Link to="/cart" className="hover:text-gray-600">
+          <Link to="/cart" className="relative hover:text-gray-600">
             <FaShoppingBag className="text-2xl" />
+            {cartQuantity > 0 && (
+              <span className="absolute -top-2 -right-1 bg-red-500 text-white rounded-full text-xs w-4 h-4 flex items-center justify-center">
+                {cartQuantity}
+              </span>
+            )}
           </Link>
 
           <div className="relative group">
@@ -170,12 +181,20 @@ const NavBar = () => {
             </Link>
             <div className="absolute left-0 hidden group-hover:block bg-white shadow-lg rounded-lg">
               {isAuthenticated ? (
-                <button
-                  onClick={handleLogout}
-                  className="block w-32 text-left px-4 py-2 text-gray-800 hover:bg-gray-100"
-                >
-                  Đăng Xuất
-                </button>
+                <>
+                  <Link
+                    to="/account"
+                    className="block w-44 text-left  px-4 py-2 text-gray-800 hover:bg-gray-100"
+                  >
+                    Thông tin tài khoản
+                  </Link>
+                  <button
+                    onClick={handleLogout}
+                    className="block w-44 text-left px-4 py-2 text-gray-800 hover:bg-gray-100"
+                  >
+                    Đăng Xuất
+                  </button>
+                </>
               ) : (
                 <>
                   <Link

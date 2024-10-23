@@ -18,6 +18,7 @@ import Chatbot from "./components/ChatBot";
 import ScrollToTop from "./components/ScrollOnTop";
 import Login from "./components/Login";
 import SignUp from "./components/SignUp";
+import Profile from "./components/Profile";
 
 function App() {
   return (
@@ -69,6 +70,16 @@ function App() {
               <>
                 <NavBar />
                 <CartHold />
+                <SPFooter />
+              </>
+            }
+          />
+                    <Route
+            path="/account"
+            element={
+              <>
+                <NavBar />
+                <Profile />
                 <SPFooter />
               </>
             }
