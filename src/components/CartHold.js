@@ -44,23 +44,43 @@ const CartHold = () => {
     fetchCartItems();
   }, []);
 
-  const handleRemoveItemFromCart = (id) => {
-    dispatch(cartActions.removeItemFromCart(id));
-    setCartItems(cartItems.filter((item) => item.productId !== id)); // Cập nhật trạng thái giỏ hàng
-    calculateTotalPrice(cartItems.filter((item) => item.productId !== id));
+  const handleQuantityUpdate = async (productId, action) => {
+    try {
+      const response = await fetch(`${API}/api/cart/update-quantity`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('token')}` // Nếu bạn dùng token
+        },
+        body: JSON.stringify({
+          productId,
+          action
+        })
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Error updating cart');
+      }
+
+      const data = await response.json();
+      setCartItems(data.cartItems);
+      calculateTotalPrice(data.cartItems);
+    } catch (error) {
+      console.error('Error updating quantity:', error);
+      // Thêm xử lý lỗi UI ở đây (ví dụ: hiển thị thông báo)
+    }
+  };
+
+  // Cập nhật các handlers
+  const handleRemoveItemFromCart = (productId) => {
+    handleQuantityUpdate(productId, 'decrease');
   };
 
   const handleAddItemToCart = (item) => {
-    dispatch(cartActions.addItemToCart(item));
-    setCartItems(
-      cartItems.map((cartItem) =>
-        cartItem.productId === item.productId
-          ? { ...cartItem, quantity: cartItem.quantity + 1 }
-          : cartItem
-      )
-    );
-    calculateTotalPrice(cartItems);
+    handleQuantityUpdate(item.productId, 'increase');
   };
+
 
   const handlePayment = (method) => {
     alert(`Thanh toán bằng: ${method}`);
