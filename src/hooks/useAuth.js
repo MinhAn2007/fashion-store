@@ -1,19 +1,30 @@
-import { useState, useEffect } from 'react';
+import { useEffect, useState } from "react";
+import {jwtDecode} from "jwt-decode";
 
 export const useAuth = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [userData, setUserData] = useState(null);
 
   useEffect(() => {
-    // Check if the user is authenticated
-    // This is a placeholder. Replace with your actual authentication logic
     const checkAuth = async () => {
-      // Example: check if there's a token in localStorage
-      const token = localStorage.getItem('token');
-      setIsAuthenticated(!!token);
+      const token = localStorage.getItem("token");
+      if (token) {
+        setIsAuthenticated(true);
+        // Giải mã token
+        try {
+          const decoded = jwtDecode(token);
+          setUserData(decoded); // Lưu dữ liệu từ token
+        } catch (error) {
+          console.error("Error decoding token:", error);
+          setIsAuthenticated(false);
+        }
+      } else {
+        setIsAuthenticated(false);
+      }
     };
 
     checkAuth();
   }, []);
 
-  return { isAuthenticated };
+  return { isAuthenticated, userData };
 };

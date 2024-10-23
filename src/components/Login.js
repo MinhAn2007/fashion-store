@@ -40,7 +40,9 @@ const Login = () => {
       const data = await response.json();
       const token = data.token;
       const totalCartQuantity = data.user.totalCartQuantity; // Assuming your API returns this
+      const userId = data.user.userId;
       
+      localStorage.setItem("userId", userId);
       localStorage.setItem("token", token);
       localStorage.setItem("cartQuantity", totalCartQuantity); // Save cart quantity
 
