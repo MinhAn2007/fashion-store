@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate, useLocation,Link } from 'react-router-dom';
+import { IoMdArrowBack } from 'react-icons/io';
 
 const Register = () => {
   const [formValues, setFormValues] = useState({
@@ -77,9 +78,9 @@ const Register = () => {
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-4xl w-full bg-white p-8 rounded-lg shadow-xl">
-      <Link to="/" className=" text-black hover:text-black">
-          Quay về trang chủ
-        </Link>
+      <Link to="/" className=" text-black flex">
+        <IoMdArrowBack className="my-auto mr-2"/> Quay về trang chủ
+      </Link>
         <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">Tạo tài khoản mới</h2>
 
         {loading ? (

@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate, useLocation, Link } from "react-router-dom";
+import { IoMdArrowBack } from "react-icons/io";
 
 const Login = () => {
   const [email, setEmail] = useState("");
@@ -41,7 +42,7 @@ const Login = () => {
       const token = data.token;
       const totalCartQuantity = data.user.totalCartQuantity; // Assuming your API returns this
       const userId = data.user.userId;
-      
+
       localStorage.setItem("userId", userId);
       localStorage.setItem("token", token);
       localStorage.setItem("cartQuantity", totalCartQuantity); // Save cart quantity
@@ -68,6 +69,9 @@ const Login = () => {
     <div className="min-h-screen flex items-center justify-center bg-[#F8F8FF] py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-md w-full space-y-8 bg-white p-8 rounded-lg shadow-xl">
         <div>
+          <Link to="/" className=" text-black flex">
+            <IoMdArrowBack className="my-auto mr-2" /> Quay về trang chủ
+          </Link>
           <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
             Đăng nhập vào tài khoản của bạn tiếp tục
           </h2>
