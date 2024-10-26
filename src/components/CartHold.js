@@ -85,7 +85,6 @@ const CartHold = () => {
       const data = await response.json();
       setCartItems(data.cartItems);
       calculateTotalPrice(data.cartItems);
-      updateCartQuantity(data.totalQuantity);
       console.log("cartItems", data.totalQuantity);
     } catch (error) {
       console.error("Error updating quantity:", error);
@@ -127,6 +126,8 @@ const CartHold = () => {
         ? { ...cartItem, quantity: newQuantity }
         : cartItem
     );
+    updateCartQuantity(newQuantity);
+
     setCartItems(updatedItems);
     calculateTotalPrice(updatedItems);
 
