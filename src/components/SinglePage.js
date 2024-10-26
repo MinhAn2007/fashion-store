@@ -77,7 +77,7 @@ const SinglePage = () => {
           Authorization: `Bearer ${localStorage.getItem("token")}`,
         },
         body: JSON.stringify({
-          productId: id,
+          productId: product.id,
           userId: userId,
           quantity: 1,
         }),
@@ -115,36 +115,29 @@ const SinglePage = () => {
     }
   };
 
-  const updateCartQuantity = (quantity) => {
-    localStorage.setItem("cartQuantity", quantity);
-    // Dispatch custom event
-    window.dispatchEvent(
-      new CustomEvent("cartQuantityUpdated", { detail: quantity })
-    );
-  };
+
   const handleSizeChange = (size) => {
     setSelectedSize(size);
-
-    // Lọc các biến thể có size đã chọn
+  
     const availableVariants = product.skus.filter((v) => v.size === size);
-
-    // Kiểm tra xem màu hiện tại có trong các biến thể không
+  
     const currentColorAvailable = availableVariants.some(
       (v) => v.color === selectedColor
     );
-
+  
     if (!currentColorAvailable && availableVariants.length > 0) {
-      // Chọn màu đầu tiên có sẵn nếu màu hiện tại không có
       setSelectedColor(availableVariants[0].color);
       setSelectedVariant(availableVariants[0]);
+      setProduct({ ...product, id: availableVariants[0].id }); // Cập nhật ID sản phẩm
     } else {
       const variant = availableVariants.find((v) => v.color === selectedColor);
       if (variant) {
         setSelectedVariant(variant);
+        setProduct({ ...product, id: variant.id }); // Cập nhật ID sản phẩm
       }
     }
   };
-
+  
   const handleColorChange = (color) => {
     const variant = product.skus.find(
       (v) => v.color === color && v.size === selectedSize
@@ -152,6 +145,7 @@ const SinglePage = () => {
     if (variant) {
       setSelectedColor(color);
       setSelectedVariant(variant);
+      setProduct({ ...product, id: variant.id }); // Cập nhật ID sản phẩm
     }
   };
 

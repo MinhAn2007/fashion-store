@@ -228,7 +228,12 @@ const CartHold = () => {
                     alt={item.sku}
                     className="w-32 h-32 object-cover rounded-lg"
                   />
-                  <p className="font-semibold text-lg">{item.productName}</p>
+                  <div>
+                    <p className="font-semibold text-lg">{item.productName}</p>
+                    <p className="text-sm text-gray-500">
+                      Màu sắc: {item.color} | Kích thước: {item.size}
+                    </p>
+                  </div>
                   <p className="text-lg">
                     {item.skuPrice.toLocaleString("vi-VN", {
                       style: "currency",
