@@ -9,12 +9,14 @@ import {
   AlertDialogHeader,
   AlertDialogBody,
   AlertDialogFooter,
-  Button,
+  Checkbox,
 } from "@chakra-ui/react";
 import EmptyCart from "./EmptyCart";
 import MobileNav from "./MobileNav";
 import BreadCrumb from "./BreadCrumb";
 import { useAuthWithCheck } from "../hooks/useAuth";
+import { Button } from "rizzui";
+import { Link } from "react-router-dom";
 
 const CartHold = () => {
   const [cartItems, setCartItems] = useState([]);
@@ -35,8 +37,13 @@ const CartHold = () => {
       checkApiResponse(response);
       if (!response.ok) throw new Error("Network response was not ok");
       const data = await response.json();
-      setCartItems(data.cartItems);
-      calculateTotalPrice(data.cartItems);
+      const cartItemsWithChecked = data.cartItems.map((item) => ({
+        ...item,
+        checked: true,
+      }));
+      setCartItems(cartItemsWithChecked);
+      calculateTotalPrice(cartItemsWithChecked);
+      updateCartQuantity(data.totalQuantity);
     } catch (error) {
       console.error("Error fetching cart items:", error);
       toast({
@@ -52,10 +59,9 @@ const CartHold = () => {
   };
 
   const calculateTotalPrice = (items) => {
-    const total = items.reduce(
-      (sum, item) => sum + item.quantity * item.skuPrice,
-      0
-    );
+    const total = items
+      .filter((item) => item.checked)
+      .reduce((sum, item) => sum + item.quantity * item.skuPrice, 0);
     setTotalPrice(total);
   };
 
@@ -83,9 +89,14 @@ const CartHold = () => {
 
       if (!response.ok) throw new Error("Error updating quantity");
       const data = await response.json();
-      setCartItems(data.cartItems);
-      calculateTotalPrice(data.cartItems);
-      console.log("cartItems", data.totalQuantity);
+      const updatedItems = data.cartItems.map((item) => ({
+        ...item,
+        checked:
+          cartItems.find((cartItem) => cartItem.id === item.id)
+            ?.checked ?? true,
+      }));
+      setCartItems(updatedItems);
+      calculateTotalPrice(updatedItems);
     } catch (error) {
       console.error("Error updating quantity:", error);
       toast({
@@ -118,11 +129,11 @@ const CartHold = () => {
 
     setPreviousQuantity((prev) => ({
       ...prev,
-      [item.productId]: item.quantity,
+      [item.id]: item.quantity,
     }));
 
     const updatedItems = cartItems.map((cartItem) =>
-      cartItem.productId === item.productId
+      cartItem.id === item.id
         ? { ...cartItem, quantity: newQuantity }
         : cartItem
     );
@@ -136,10 +147,18 @@ const CartHold = () => {
     }
 
     const id = setTimeout(() => {
-      handleQuantityUpdate(item.productId, newQuantity);
+      handleQuantityUpdate(item.id, newQuantity);
     }, 3000);
 
     setTimeoutId(id);
+  };
+
+  const handleToggleSelectItem = (id) => {
+    const updatedItems = cartItems.map((item) =>
+      item.id === id ? { ...item, checked: !item.checked } : item
+    );
+    setCartItems(updatedItems);
+    calculateTotalPrice(updatedItems);
   };
 
   const handleRemoveItem = async () => {
@@ -152,15 +171,18 @@ const CartHold = () => {
           "Content-Type": "application/json",
           Authorization: `Bearer ${localStorage.getItem("token")}`,
         },
-        body: JSON.stringify({ productId: selectedItem.productId, userId }),
+        body: JSON.stringify({ productId: selectedItem.id, userId }),
       });
 
       if (!response.ok) throw new Error("Error removing item");
       const data = await response.json();
-      setCartItems(data.updatedCartItems.cartItems);
-      calculateTotalPrice(data.updatedCartItems.cartItems);
+      const updatedItems = data.updatedCartItems.cartItems.map((item) => ({
+        ...item,
+        checked: true,
+      }));
+      setCartItems(updatedItems);
+      calculateTotalPrice(updatedItems);
       updateCartQuantity(data.updatedCartItems.totalQuantity);
-      console.log("cartItems", localStorage.getItem("cartQuantity"));
 
       toast({
         title: "Thành công",
@@ -170,8 +192,6 @@ const CartHold = () => {
         isClosable: true,
       });
     } catch (error) {
-      console.log(error);
-
       console.error("Error removing item:", error);
       toast({
         title: "Lỗi",
@@ -212,22 +232,24 @@ const CartHold = () => {
               <p className="text-xl font-semibold mb-6">
                 Có {cartItems.length} sản phẩm đang đợi được mua
               </p>
-              <div className="grid grid-cols-5 font-semibold text-lg mb-4 pb-2">
-                <p>Ảnh</p>
-                <p>Sản phẩm</p>
-                <p>Giá</p>
-                <p>Số lượng</p>
-              </div>
+
               {cartItems.map((item) => (
                 <div
-                  key={item.productId}
-                  className="grid grid-cols-5 items-center border-gray-300 pb-6"
+                  key={item.id}
+                  className="grid grid-cols-[0.5fr_1fr_2fr_1fr_1fr_1fr] items-center border-b border-gray-300 pb-6 mb-4" // Adds border bottom
                 >
-                  <img
-                    src={item.productImage}
-                    alt={item.sku}
-                    className="w-32 h-32 object-cover rounded-lg"
+                  <Checkbox
+                    isChecked={item.checked}
+                    onChange={() => handleToggleSelectItem(item.id)}
+                    colorScheme="blackAlpha"
                   />
+                  <Link to={`/${item.productId}`} key={item.id}>
+                    <img
+                      src={item.productImage}
+                      alt={item.sku}
+                      className="w-32 h-32 object-cover rounded-lg"
+                    />
+                  </Link>
                   <div>
                     <p className="font-semibold text-lg">{item.productName}</p>
                     <p className="text-sm text-gray-500">
@@ -240,7 +262,7 @@ const CartHold = () => {
                       currency: "VND",
                     })}
                   </p>
-                  <div className="flex">
+                  <div className="flex items-center">
                     <RiSubtractFill
                       className="text-3xl text-black cursor-pointer mx-2"
                       onClick={() => handleChangeQuantity(item, -1)}
@@ -251,6 +273,22 @@ const CartHold = () => {
                       onClick={() => handleChangeQuantity(item, 1)}
                     />
                   </div>
+                  {/* New column with Delete and View Details buttons */}
+                  <div className="flex flex-col items-center my-auto">
+                    <Button
+                      size="sm"
+                      onClick={() => {
+                        setSelectedItem(item);
+                        setIsOpen(true);
+                      }}
+                      className="mb-2 bg-black w-40 text-md text-white hover:bg-opacity-30"
+                    >
+                      Xóa
+                    </Button>
+                    <Link to={`/${item.productId}`} key={item.id}>
+                    <Button size="sm text-md">Xem chi tiết</Button>
+                    </Link>
+                  </div>
                 </div>
               ))}
             </div>
@@ -258,7 +296,7 @@ const CartHold = () => {
             {/* Payment Summary Section */}
             <div className="shadow-lg bg-white border border-gray-200 w-72 h-fit rounded-lg p-4 ml-4">
               <div className="flex justify-between text-2xl font-semibold mt-8">
-                <p>Tạm tính</p>
+                <p>Tổng</p>
                 <p>
                   {totalPrice.toLocaleString("vi-VN", {
                     style: "currency",
@@ -266,67 +304,45 @@ const CartHold = () => {
                   })}
                 </p>
               </div>
-              <div className="flex justify-between mt-10 font-medium text-xl">
-                <p>Phí ship</p>
-                <p>$20</p>
-              </div>
-              <div className="flex justify-between mt-10 font-medium text-xl">
-                <p>Thuế</p>
-                <p>$15</p>
-              </div>
-              <div className="my-4 border-t border-gray-300" />
-              <div className="flex justify-between font-medium text-xl">
-                <p>Total:</p>
-                <p>
-                  {(totalPrice + 20 + 15).toLocaleString("vi-VN", {
-                    style: "currency",
-                    currency: "VND",
-                  })}
-                </p>
-              </div>
               <button
-                onClick={() => handlePayment("MOMO")}
-                className="bg-black text-white py-2 px-4 rounded mt-4 w-full"
+                onClick={() => handlePayment("Thẻ")}
+                className="bg-black text-white py-2 px-4 mt-2 w-full rounded"
               >
                 Thanh toán Online
               </button>
               <button
-                onClick={() => handlePayment("Thẻ tín dụng")}
-                className="bg-black text-white py-2 px-4 rounded mt-4 w-full"
+                onClick={() => handlePayment("Tiền mặt")}
+                className="bg-black text-white py-2 px-4 mt-2 w-full rounded"
               >
-                Thanh toán khi nhận hàng
+                Thanh toán tiền mặt
               </button>
             </div>
           </div>
         </div>
       )}
 
-      {/* Alert Dialog for Remove Item */}
-      <AlertDialog isOpen={isOpen} onClose={handleCancelRemove}>
-        <AlertDialogOverlay />
-        <AlertDialogContent>
-          <AlertDialogHeader>Xác nhận xóa</AlertDialogHeader>
-          <AlertDialogBody>
-            Bạn có chắc chắn muốn xóa sản phẩm {selectedItem?.productName}?
-          </AlertDialogBody>
-          <AlertDialogFooter>
-            <Button
-              className="bg-white text-black"
-              onClick={handleCancelRemove}
-            >
-              Hủy
-            </Button>
-            <Button
-              backgroundColor={"black"}
-              textColor={"white"}
-              className="bg-black text-white"
-              onClick={handleRemoveItem}
-              ml={3}
-            >
-              Xóa
-            </Button>
-          </AlertDialogFooter>
-        </AlertDialogContent>
+      {/* Alert Dialog for Item Removal */}
+      <AlertDialog isOpen={isOpen} leastDestructiveRef={null}>
+        <AlertDialogOverlay>
+          <AlertDialogContent>
+            <AlertDialogHeader fontSize="lg" fontWeight="bold">
+              Xóa sản phẩm
+            </AlertDialogHeader>
+            <AlertDialogBody>
+              Bạn có chắc chắn muốn xóa sản phẩm này khỏi giỏ hàng?
+            </AlertDialogBody>
+            <AlertDialogFooter>
+              <Button onClick={handleCancelRemove}>Hủy</Button>
+              <Button
+                className="bg-black text-white hover:bg-opacity-30"
+                onClick={handleRemoveItem}
+                ml={3}
+              >
+                Xóa
+              </Button>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialogOverlay>
       </AlertDialog>
     </div>
   );

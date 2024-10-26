@@ -55,6 +55,7 @@ const SinglePage = () => {
         setSelectedVariant(data.skus[0]); // Đặt biến thể mặc định
         setSelectedSize(data.skus[0].size); // Đặt kích thước mặc định
         setSelectedColor(data.skus[0].color); // Đặt màu mặc định
+        setProduct({ ...data, id: data.skus[0].id }); // Cập nhật ID sản phẩm        
       } catch (error) {
         console.error("Error fetching product data:", error);
       }
