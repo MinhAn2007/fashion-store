@@ -19,6 +19,7 @@ import ScrollToTop from "./components/ScrollOnTop";
 import Login from "./components/Login";
 import SignUp from "./components/SignUp";
 import Profile from "./components/Profile";
+import CreateOrder from "./components/CreateOrder";
 
 function App() {
   return (
@@ -74,7 +75,7 @@ function App() {
               </>
             }
           />
-                    <Route
+          <Route
             path="/account"
             element={
               <>
@@ -130,6 +131,17 @@ function App() {
               <>
                 <NavBar />
                 <ProductFeed id={4} />
+                <SPFooter />
+              </>
+            }
+          />
+          <Route
+            path="/order"
+            component={<CreateOrder />}
+            element={
+              <>
+                <NavBar />
+                <CreateOrder />
                 <SPFooter />
               </>
             }

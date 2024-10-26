@@ -92,8 +92,8 @@ const CartHold = () => {
       const updatedItems = data.cartItems.map((item) => ({
         ...item,
         checked:
-          cartItems.find((cartItem) => cartItem.id === item.id)
-            ?.checked ?? true,
+          cartItems.find((cartItem) => cartItem.id === item.id)?.checked ??
+          true,
       }));
       setCartItems(updatedItems);
       calculateTotalPrice(updatedItems);
@@ -286,7 +286,7 @@ const CartHold = () => {
                       Xóa
                     </Button>
                     <Link to={`/${item.productId}`} key={item.id}>
-                    <Button size="sm text-md">Xem chi tiết</Button>
+                      <Button size="sm text-md">Xem chi tiết</Button>
                     </Link>
                   </div>
                 </div>
@@ -304,12 +304,24 @@ const CartHold = () => {
                   })}
                 </p>
               </div>
-              <button
-                onClick={() => handlePayment("Thẻ")}
-                className="bg-black text-white py-2 px-4 mt-2 w-full rounded"
+              <Link
+                to={{
+                  pathname: "/order",
+                  state: { cartItems, totalPrice },
+                }}
+                state={{
+                  cartItems: cartItems.filter((item) => item.checked),
+                  totalPrice,
+                }}
               >
-                Thanh toán Online
-              </button>
+                <button
+                  onClick={() => handlePayment("Thẻ")}
+                  className="bg-black text-white py-2 px-4 mt-2 w-full rounded"
+                >
+                  Thanh toán Online
+                </button>
+              </Link>
+
               <button
                 onClick={() => handlePayment("Tiền mặt")}
                 className="bg-black text-white py-2 px-4 mt-2 w-full rounded"
