@@ -1,9 +1,13 @@
 import { useEffect, useState } from "react";
-import {jwtDecode} from "jwt-decode";
+import { jwtDecode } from "jwt-decode";
+import { useToast } from "@chakra-ui/react";
+import { useNavigate } from "react-router-dom"; // Sử dụng useNavigate
 
-export const useAuth = () => {
+export const useAuthWithCheck = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [userData, setUserData] = useState(null);
+  const toast = useToast();
+  const navigate = useNavigate(); // Sử dụng useNavigate
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -26,5 +30,22 @@ export const useAuth = () => {
     checkAuth();
   }, []);
 
-  return { isAuthenticated, userData };
+  // Hàm kiểm tra phản hồi từ API
+  const checkApiResponse = (apiResponse) => {
+    if (apiResponse && apiResponse.status === 401) {
+      toast({
+        title: "Phiên làm việc đã hết hạn",
+        description: "Vui lòng đăng nhập lại.",
+        status: "warning",
+        duration: 5000,
+        isClosable: true,
+        position: "top",
+      });
+
+      // Chuyển hướng về trang đăng nhập
+      navigate("/login"); // Sử dụng navigate thay vì history.push
+    }
+  };
+
+  return { isAuthenticated, userData, checkApiResponse }; // Đảm bảo rằng checkApiResponse được trả về
 };

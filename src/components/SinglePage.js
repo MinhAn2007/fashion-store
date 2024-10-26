@@ -6,7 +6,7 @@ import { cartActions } from "../redux-state/CartState";
 import { useToast } from "@chakra-ui/react";
 import BreadCrumb from "./BreadCrumb";
 import Modal from "react-modal";
-import { useAuth } from "../hooks/useAuth";
+import { useAuthWithCheck } from "../hooks/useAuth";
 const colorMap = {
   Đỏ: "#FF0000",
   Xanh: "#0000FF",
@@ -30,7 +30,8 @@ const SinglePage = () => {
   const API = process.env.REACT_APP_API_ENDPOINT;
   const [isOverlayOpen, setIsOverlayOpen] = useState(false);
   const [selectedMedia, setSelectedMedia] = useState("");
-  const { isAuthenticated } = useAuth();
+
+  const { isAuthenticated } = useAuthWithCheck();
   const openOverlay = (media) => {
     setSelectedMedia(media);
     setIsOverlayOpen(true);

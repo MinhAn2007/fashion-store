@@ -11,12 +11,35 @@ const Login = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const API = process.env.REACT_APP_API_ENDPOINT;
+
   useEffect(() => {
     const token = localStorage.getItem("token");
-    if (token) {
-      navigate("/", { replace: true }); // Redirect to home if logged in
+    const tokenExpiry = localStorage.getItem("tokenExpiry");
+
+    if (token && tokenExpiry) {
+      const currentTime = Date.now();
+      if (currentTime >= tokenExpiry) {
+        // Token expired, clear and redirect to login
+        localStorage.removeItem("token");
+        localStorage.removeItem("tokenExpiry");
+        navigate("/login", { replace: true });
+      }
     }
   }, [navigate]);
+
+  useEffect(() => {
+    const intervalId = setInterval(() => {
+      const tokenExpiry = localStorage.getItem("tokenExpiry");
+      if (tokenExpiry && Date.now() >= tokenExpiry) {
+        localStorage.removeItem("token");
+        localStorage.removeItem("tokenExpiry");
+        navigate("/login", { replace: true });
+      }
+    }, 60000); // Check every 60 seconds
+
+    return () => clearInterval(intervalId); // Cleanup on component unmount
+  }, [navigate]);
+
   const handleLogin = async (e) => {
     e.preventDefault();
     setLoading(true); // Start loading
@@ -45,9 +68,10 @@ const Login = () => {
 
       localStorage.setItem("userId", userId);
       localStorage.setItem("token", token);
-      localStorage.setItem("cartQuantity", totalCartQuantity); // Save cart quantity
+      localStorage.setItem("tokenExpiry", Date.now() + 3600 * 1000); // 1 hour in ms
 
-      setSuccessMessage("Đăng nhập thành công!"); // Set success message
+      localStorage.setItem("cartQuantity", totalCartQuantity); // Save cart quantity
+      setSuccessMessage("Đăng nhập thành công!");
 
       const from = location.state?.from?.pathname || "/";
       setTimeout(() => {
@@ -73,7 +97,7 @@ const Login = () => {
             <IoMdArrowBack className="my-auto mr-2" /> Quay về trang chủ
           </Link>
           <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
-            Đăng nhập vào tài khoản của bạn tiếp tục
+            Đăng nhập vào tài khoản của bạn để tiếp tục
           </h2>
         </div>
         {successMessage && (
@@ -118,7 +142,6 @@ const Login = () => {
               />
             </div>
           </div>
-
           <div>
             <button
               type="submit"

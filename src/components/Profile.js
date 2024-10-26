@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { jwtDecode } from "jwt-decode";
+import { useAuthWithCheck } from "../hooks/useAuth";
 
 const Profile = () => {
   const [userInfo, setUserInfo] = useState(null);
@@ -8,7 +9,7 @@ const Profile = () => {
   const [errorMessage, setErrorMessage] = useState(null);
   const API = process.env.REACT_APP_API_ENDPOINT;
   const navigate = useNavigate();
-
+  const { checkApiResponse } = useAuthWithCheck();
   // Get token from localStorage
   const token = localStorage.getItem("token");
     
@@ -25,6 +26,7 @@ const Profile = () => {
             "Content-Type": "application/json",
           },
         });
+        checkApiResponse(response);
 
         if (!response.ok) {
           throw new Error("Không thể lấy thông tin người dùng. Vui lòng đăng nhập lại.");

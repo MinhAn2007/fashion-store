@@ -6,15 +6,15 @@ import { cartActions } from "../redux-state/CartState";
 import { Link } from "react-router-dom";
 import { useToast } from "@chakra-ui/react";
 import { useNavigate, useLocation } from "react-router-dom";
-import { useAuth } from "../hooks/useAuth";
+import { useAuthWithCheck } from "../hooks/useAuth";
 
 const OurBestSellers = (props) => {
   const { title, price, id, image } = props;
   const dispatch = useDispatch();
   const toast = useToast();
-  const { isAuthenticated } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
+  const { isAuthenticated } = useAuthWithCheck();
   const addItemToCartHandler = (e) => {
     if (!isAuthenticated) {
       navigate("/login", { state: { from: location } });
