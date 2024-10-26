@@ -43,7 +43,8 @@ export const useAuthWithCheck = () => {
       });
 
       // Chuyển hướng về trang đăng nhập
-      navigate("/login"); // Sử dụng navigate thay vì history.push
+      navigate("/login"); // Sử dụng navigate thay vì history.push\
+      return;
     }
   };
 

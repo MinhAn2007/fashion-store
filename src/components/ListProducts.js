@@ -7,6 +7,8 @@ import { Link } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import { cartActions } from "../redux-state/CartState";
 import { useToast } from "@chakra-ui/react";
+import { useNavigate, useLocation } from "react-router-dom";
+import { useAuthWithCheck } from "../hooks/useAuth";
 
 const filters = [
   {
@@ -63,7 +65,9 @@ export default function ShopPage(props) {
   const [allProducts, setAllProducts] = useState([]);
   const [sortedProducts, setSortedProducts] = useState([]);
   const API = process.env.REACT_APP_API_ENDPOINT;
-  const dispatch = useDispatch();
+  const { isAuthenticated } = useAuthWithCheck();
+  const location = useLocation();
+  const navigate = useNavigate();
   const toast = useToast();
   useEffect(() => {
     const fetchProducts = async () => {
@@ -74,8 +78,7 @@ export default function ShopPage(props) {
           nameBreadCrumb = mapProductType(props.id);
         } else {
           response = await fetch(`${API}/api/products`);
-          nameBreadCrumb = 'Tất cả sản phẩm';
-
+          nameBreadCrumb = "Tất cả sản phẩm";
         }
 
         const data = await response.json();
@@ -203,24 +206,59 @@ export default function ShopPage(props) {
     });
   };
 
-  const addItemToCartHandler = (product) => {
+  const addItemToCartHandler = async (product) => {
+    if (!isAuthenticated) {
+      navigate("/login", { state: { from: location } });
+      return;
+    }
+
     if (product.skus.length > 0) {
-      const selectedVariant = product.skus[0]; // Hoặc logic để chọn SKU phù hợp
-      dispatch(
-        cartActions.addItemToCart({
-          id: product.id,
-          price: selectedVariant.price,
-          title: product.name,
-          image: selectedVariant.image, // Hoặc activeImg nếu bạn đang sử dụng state này
-        })
-      );
-      toast({
-        title: "Thành công",
-        description: "Sản phẩm đã được thêm vào giỏ hàng",
-        status: "success",
-        duration: 1500,
-        isClosable: true,
-      });
+      const selectedVariant = product.skus[0]; // Chọn SKU phù hợp
+
+      try {
+        const userId = localStorage.getItem("userId");
+        const response = await fetch(`${API}/api/cart/add-item`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+          body: JSON.stringify({
+            productId: selectedVariant.id, // Sử dụng ID SKU nếu có
+            userId: userId,
+            quantity: 1,
+          }),
+        });
+
+        if (!response.ok) {
+          throw new Error("Failed to add item to cart");
+        }
+
+        const data = await response.json();
+
+        // Cập nhật local storage và dispatch sự kiện cho NavBar
+        localStorage.setItem("cartQuantity", data.totalQuantity);
+        window.dispatchEvent(
+          new CustomEvent("cartQuantityUpdated", { detail: data.totalQuantity })
+        );
+
+        toast({
+          title: "Thành công",
+          description: "Sản phẩm đã được thêm vào giỏ hàng",
+          status: "success",
+          duration: 1500,
+          isClosable: true,
+        });
+      } catch (error) {
+        console.error("Error adding item to cart:", error);
+        toast({
+          title: "Lỗi",
+          description: "Không thể thêm sản phẩm vào giỏ hàng",
+          status: "error",
+          duration: 1500,
+          isClosable: true,
+        });
+      }
     }
   };
 

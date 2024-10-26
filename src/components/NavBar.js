@@ -4,6 +4,7 @@ import { Link } from "react-router-dom";
 import { FaShoppingBag, FaUser, FaSearch } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 import { useAuthWithCheck } from "../hooks/useAuth";
+import { FaChevronDown, FaChevronRight } from "react-icons/fa";
 
 const NavBar = () => {
   const [isLoading, setIsLoading] = useState(false);
@@ -62,7 +63,104 @@ const NavBar = () => {
         </Link>
 
         <ul className="flex font-bold gap-x-24 -ml-40">
-          {/* Your menu items here */}
+          <li className="group relative">
+            <Link
+              to="/products"
+              className="cursor-pointer py-2 hover:text-gray-600 flex items-center"
+            >
+              SẢN PHẨM
+              <FaChevronDown className="ml-1 text-xs" />
+            </Link>
+            <ul className="absolute left-0 hidden group-hover:block bg-[#F8F8FF] shadow-lg w-48 transition-all ease-in-out opacity-0 group-hover:opacity-100">
+              <li className="group/nested relative p-4 hover:bg-gray-100">
+                <Link to="/ao">
+                  <span className="font-bold cursor-pointer flex items-center justify-between">
+                    Áo
+                    <FaChevronRight className="ml-1 text-xs" />
+                  </span>
+                </Link>
+                <ul className="absolute left-full top-0 hidden group-hover/nested:block bg-[#F8F8FF] shadow-lg w-48 transition-all ease-in-out opacity-0 group-hover/nested:opacity-100">
+                  <li className="p-4 hover:bg-gray-100">
+                    <p className="font-bold">Áo khoác</p>
+                  </li>
+                  <li className="p-4 hover:bg-gray-100">
+                    <p className="font-bold">Áo thun</p>
+                  </li>
+                  <li className="p-4 hover:bg-gray-100">
+                    <p className="font-bold">Áo Sơ mi</p>
+                  </li>
+                  <li className="p-4 hover:bg-gray-100">
+                    <p className="font-bold">Polo</p>
+                  </li>
+                </ul>
+              </li>
+              <li className="group/nested relative p-4 hover:bg-gray-100">
+                <Link to="/quan">
+                  <span className="font-bold cursor-pointer flex items-center justify-between">
+                    Quần
+                    <FaChevronRight className="ml-1 text-xs" />
+                  </span>
+                </Link>
+                <ul className="absolute left-full top-0 hidden group-hover/nested:block bg-[#F8F8FF] shadow-lg w-48 transition-all ease-in-out opacity-0 group-hover/nested:opacity-100">
+                  <li className="p-4 hover:bg-gray-100">
+                    <p className="font-bold">Quần vải</p>
+                  </li>
+                  <li className="p-4 hover:bg-gray-100">
+                    <p className="font-bold">Quần Tây</p>
+                  </li>
+                  <li className="p-4 hover:bg-gray-100">
+                    <p className="font-bold">Quần Jean</p>
+                  </li>
+                  <li className="p-4 hover:bg-gray-100">
+                    <p className="font-bold">Chân Váy</p>
+                  </li>
+                </ul>
+              </li>
+              <li className="p-4 hover:bg-gray-100">
+                <Link to="/phukien">
+                  <span>Phụ Kiện</span>
+                </Link>
+              </li>
+              <li className="p-4 hover:bg-gray-100">
+                <Link to="/giay">
+                  <span>Giày Dép</span>
+                </Link>
+              </li>
+            </ul>
+          </li>
+          <li className="group relative">
+            <span className="cursor-pointer py-2 hover:text-gray-600 flex items-center">
+              SẢN PHẨM SALE
+              <FaChevronDown className="ml-1 text-xs" />
+            </span>
+            <ul className="absolute left-0 hidden group-hover:block bg-[#F8F8FF] shadow-lg w-48 transition-all ease-in-out opacity-0 group-hover:opacity-100">
+              <li className="p-4 hover:bg-gray-100">
+                <span>Đồng giá 199k</span>
+              </li>
+              <li className="p-4 hover:bg-gray-100">
+                <span>Giảm sốc đến 50%</span>
+              </li>
+            </ul>
+          </li>
+          <li className="group relative">
+            <span className="cursor-pointer py-2 hover:text-gray-600 flex items-center">
+              SẢN PHẨM MỚI
+            </span>
+          </li>
+          <li className="group relative">
+            <span className="cursor-pointer py-2 hover:text-gray-600 flex items-center">
+              BỘ SƯU TẬP
+              <FaChevronDown className="ml-1 text-xs" />
+            </span>
+            <ul className="absolute left-0 hidden group-hover:block bg-[#F8F8FF] shadow-lg w-48 transition-all ease-in-out opacity-0 group-hover:opacity-100">
+              <li className="p-4 hover:bg-gray-100">
+                <span className="font-bold">Accessories Silver</span>
+              </li>
+              <li className="p-4 hover:bg-gray-100">
+                <span className="font-bold">Minimalism</span>
+              </li>
+            </ul>
+          </li>{" "}
         </ul>
 
         <div className="flex items-center space-x-6 mr-36">

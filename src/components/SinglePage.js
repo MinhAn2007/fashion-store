@@ -31,7 +31,7 @@ const SinglePage = () => {
   const [isOverlayOpen, setIsOverlayOpen] = useState(false);
   const [selectedMedia, setSelectedMedia] = useState("");
 
-  const { isAuthenticated } = useAuthWithCheck();
+  const { isAuthenticated, checkApiResponse } = useAuthWithCheck();
   const openOverlay = (media) => {
     setSelectedMedia(media);
     setIsOverlayOpen(true);
@@ -62,30 +62,66 @@ const SinglePage = () => {
     fetchProduct();
   }, [id]);
 
-  const addItemToCartHandler = () => {
+  const addItemToCartHandler = async () => {
     if (!isAuthenticated) {
       navigate("/login", { state: { from: location } });
       return;
     }
-    if (selectedVariant) {
-      dispatch(
-        cartActions.addItemToCart({
-          id,
-          price: selectedVariant.price,
-          title: product.name,
-          image: activeImg,
-        })
+
+    try {
+      const userId = localStorage.getItem("userId");
+      const response = await fetch(`${API}/api/cart/add-item`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+        body: JSON.stringify({
+          productId: id,
+          userId: userId,
+          quantity: 1,
+        }),
+      });
+      checkApiResponse(response);
+
+      if (!response.ok) {
+        throw new Error("Failed to add item to cart");
+      }
+
+      const data = await response.json();
+
+      // Update local storage and dispatch custom event for NavBar
+      localStorage.setItem("cartQuantity", data.totalQuantity);
+      window.dispatchEvent(
+        new CustomEvent("cartQuantityUpdated", { detail: data.totalQuantity })
       );
+
       toast({
         title: "Thành công",
-        description: "Sản phẩm đã được thêm vào giỏ hàng",
+        description: "Đã thêm sản phẩm vào giỏ hàng",
         status: "success",
+        duration: 1500,
+        isClosable: true,
+      });
+    } catch (error) {
+      console.error("Error adding item to cart:", error);
+      toast({
+        title: "Lỗi",
+        description: "Không thể thêm sản phẩm vào giỏ hàng",
+        status: "error",
         duration: 1500,
         isClosable: true,
       });
     }
   };
 
+  const updateCartQuantity = (quantity) => {
+    localStorage.setItem("cartQuantity", quantity);
+    // Dispatch custom event
+    window.dispatchEvent(
+      new CustomEvent("cartQuantityUpdated", { detail: quantity })
+    );
+  };
   const handleSizeChange = (size) => {
     setSelectedSize(size);
 

@@ -7,7 +7,6 @@ import { Link } from "react-router-dom";
 import { useToast } from "@chakra-ui/react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useAuthWithCheck } from "../hooks/useAuth";
-
 const OurBestSellers = (props) => {
   const { title, price, id, image } = props;
   const dispatch = useDispatch();
@@ -15,28 +14,59 @@ const OurBestSellers = (props) => {
   const navigate = useNavigate();
   const location = useLocation();
   const { isAuthenticated } = useAuthWithCheck();
-  const addItemToCartHandler = (e) => {
+  const API = process.env.REACT_APP_API_ENDPOINT;
+  const { checkApiResponse } = useAuthWithCheck();
+  const addItemToCartHandler = async () => {
     if (!isAuthenticated) {
       navigate("/login", { state: { from: location } });
       return;
     }
 
-    dispatch(
-      cartActions.addItemToCart({
-        id,
-        price,
-        title,
-        image,
-      })
-    );
+    try {
+      const userId = localStorage.getItem("userId");
+      const response = await fetch(`${API}/api/cart/add-item`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+        body: JSON.stringify({
+          productId: id,
+          userId: userId,
+          quantity: 1,
+        }),
+      });
+      checkApiResponse(response);
 
-    toast({
-      title: "",
-      description: "Successfully Added",
-      status: "success",
-      duration: 1500,
-      isClosable: true,
-    });
+      if (!response.ok) {
+        throw new Error("Failed to add item to cart");
+      }
+
+      const data = await response.json();
+
+      // Update local storage and dispatch custom event for NavBar
+      localStorage.setItem("cartQuantity", data.totalQuantity);
+      window.dispatchEvent(
+        new CustomEvent("cartQuantityUpdated", { detail: data.totalQuantity })
+      );
+
+      toast({
+        title: "Thành công",
+        description: "Đã thêm sản phẩm vào giỏ hàng",
+        status: "success",
+        duration: 1500,
+        isClosable: true,
+      });
+    } catch (error) {
+      console.error("Error adding item to cart:", error);
+      toast({
+        title: "Lỗi",
+        description: "Không thể thêm sản phẩm vào giỏ hàng",
+        status: "error",
+        duration: 1500,
+        isClosable: true,
+      });
+    }
   };
 
   return (
