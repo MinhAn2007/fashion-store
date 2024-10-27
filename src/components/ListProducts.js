@@ -236,7 +236,6 @@ export default function ShopPage(props) {
 
         const data = await response.json();
 
-        // Cập nhật local storage và dispatch sự kiện cho NavBar
         localStorage.setItem("cartQuantity", data.totalQuantity);
         window.dispatchEvent(
           new CustomEvent("cartQuantityUpdated", { detail: data.totalQuantity })

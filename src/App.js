@@ -20,6 +20,7 @@ import Login from "./components/Login";
 import SignUp from "./components/SignUp";
 import Profile from "./components/Profile";
 import CreateOrder from "./components/CreateOrder";
+import ResultVNPAYPage from "./components/VNPayResult";
 
 function App() {
   return (
@@ -142,6 +143,16 @@ function App() {
               <>
                 <NavBar />
                 <CreateOrder />
+                <SPFooter />
+              </>
+            }
+          />
+          <Route
+            path="/vn-pay-result"
+            element={
+              <>
+                <NavBar />
+                <ResultVNPAYPage />
                 <SPFooter />
               </>
             }

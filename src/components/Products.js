@@ -20,7 +20,8 @@ const Products = () => {
         }
         const data = await response.json();
         console.log(data);
-        
+        localStorage.setItem("cartQuantity", data.totalQuantity);
+
         setProducts(data.products || []);        
       } catch (error) {
         if (error.name !== 'AbortError') {
@@ -31,7 +32,6 @@ const Products = () => {
         setLoading(false);
       }
     };
-
     fetchProducts();
 
     return () => {

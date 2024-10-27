@@ -12,12 +12,15 @@ import { Link } from "react-router-dom";
 import { IoMdArrowBack } from "react-icons/io";
 import { jwtDecode } from "jwt-decode"; // Nhớ cài đặt jwt-decode nếu chưa có
 import { useAuthWithCheck } from "../hooks/useAuth";
+import { useNavigate } from "react-router-dom";
+import { Loader } from "rizzui";
 const CreateOrder = () => {
   const location = useLocation();
   const { cartItems } = location.state || {
     cartItems: [],
     totalPrice: 0,
   };
+  const navigate = useNavigate();
 
   const [userInfo, setUserInfo] = useState(null);
   const [addresses, setAddresses] = useState([]);
@@ -27,7 +30,8 @@ const CreateOrder = () => {
   const [loading, setLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState("");
   const { checkApiResponse } = useAuthWithCheck();
-  const token = localStorage.getItem("token"); // Lấy token từ localStorage
+  const token = localStorage.getItem("token");
+
   const API = process.env.REACT_APP_API_ENDPOINT;
   useEffect(() => {
     const fetchUserProfile = async () => {
@@ -69,22 +73,50 @@ const CreateOrder = () => {
       return;
     }
     const totalAmount = (
-        calculateTotal() +
-        30000 - 
-        (couponCode ? 50000 : 0)
-      );
+      calculateTotal() +
+      30000 -
+      (couponCode ? 50000 : 0)
+    ).toFixed(2);
     const orderData = {
-      userId: jwtDecode(token).userId, // Lấy userId từ token
+      userId: jwtDecode(token).userId,
       cartItems,
       selectedAddress: selectedAddress.label,
-      paymentId: paymentMethod.value, // Hoặc cấu trúc dữ liệu phù hợp với backend của bạn
-      couponId: couponCode, // Nếu bạn đang sử dụng mã giảm giá,
-      total : totalAmount
+      paymentId: paymentMethod.value,
+      couponId: couponCode,
+      total: totalAmount,
     };
+    setLoading(true);
 
+    if (orderData.paymentId === 2) {
+      try {
+        localStorage.setItem("orderData", JSON.stringify(orderData));
+
+        const response = await fetch(`${API}/api/create-payment-url`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            amount: 30000000,
+            bankCode: "NCB", // Mã ngân hàng nếu có
+            language: "vn", // Ngôn ngữ
+            userName: "Anh Khoa", // Tên người thanh toán
+          }),
+        });
+
+        if (!response.ok) {
+          throw new Error("Có lỗi xảy ra khi tạo URL thanh toán");
+        }
+
+        const data = await response.json();
+        console.log("Payment URL:", data.url);
+        window.open(data.url, "_blank");
+        return;
+      } catch (error) {
+        console.error("Lỗi khi gọi API:", error);
+      }
+    }
     try {
-        console.log(orderData);
-        
       const response = await fetch(`${API}/api/orders`, {
         method: "POST",
         headers: {
@@ -99,11 +131,14 @@ const CreateOrder = () => {
       }
 
       const result = await response.json();
-      // Có thể điều hướng hoặc hiển thị thông báo thành công tại đây
       console.log("Đơn hàng đã được tạo:", result);
       alert("Đơn hàng của bạn đã được tạo thành công!");
+      navigate("/");
     } catch (error) {
+      alert("Đã xảy ra lỗi khi tạo đơn hàng.");
       setErrorMessage(error.message || "Đã xảy ra lỗi khi tạo đơn hàng.");
+    } finally {
+      setLoading(false);
     }
   };
   // Calculate total based on cart items passed from the previous page
@@ -115,8 +150,12 @@ const CreateOrder = () => {
     { value: 1, label: "Thanh toán khi nhận hàng ( COD )" },
     { value: 2, label: "Thanh toán online ( Chuyển khoản )" },
   ];
-
-  if (loading) return <Text>Đang tải...</Text>;
+  if (loading)
+    return (
+        <div className="flex justify-center mx-auto">
+            <Loader size="lg" width={300} height={300} className="text-center my-40" />
+        </div>
+    );
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -282,12 +321,10 @@ const CreateOrder = () => {
                 )}
                 <div className="flex justify-between items-center font-semibold">
                   <Text>Tổng cộng</Text>
-                  <Text>
-                    {(
-                      calculateTotal() +
+                  <Text className="text-lg font-bold text-red-600">
+                    {calculateTotal() +
                       30000 -
-                      (couponCode ? 50000 : 0)
-                    ).toLocaleString()}
+                      (couponCode ? 50000 : 0).toFixed(0)}
                     đ
                   </Text>
                 </div>

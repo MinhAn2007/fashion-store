@@ -220,7 +220,7 @@ const CartHold = () => {
   if (loading) return <p>Loading...</p>;
 
   return (
-    <div>
+    <div className="min-h-[530px]">
       <MobileNav />
       {cartItems.length === 0 ? (
         <EmptyCart />
