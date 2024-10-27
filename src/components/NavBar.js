@@ -32,6 +32,8 @@ const NavBar = () => {
 
     // Tạo hàm lắng nghe sự kiện tùy chỉnh
     const handleCartUpdate = (event) => {
+      console.log("Cart quantity updated:", event.detail);
+      
       const newQuantity = event.detail;
       setCartQuantity(newQuantity);
     };
@@ -210,7 +212,7 @@ const NavBar = () => {
                     Đăng Nhập
                   </Link>
                   <Link
-                    to="/register"
+                    to="/signup"
                     className="block w-32 text-left px-4 py-2 text-gray-800 hover:bg-gray-100"
                   >
                     Đăng Ký

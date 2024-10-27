@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useNavigate, useLocation,Link } from 'react-router-dom';
+import { useNavigate, useLocation, Link } from 'react-router-dom';
 import { IoMdArrowBack } from 'react-icons/io';
 
 const Register = () => {
@@ -8,7 +8,7 @@ const Register = () => {
     lastName: '',
     email: '',
     password: '',
-    addresses: [{ addressLine: '', city: '', state: '', phoneNumber: '' }],
+    addresses: [{ addressLine: '', city: '', state: '', phoneNumber: '', type: '' }],
   });
   const [loading, setLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState(null);
@@ -18,6 +18,10 @@ const Register = () => {
   const API = process.env.REACT_APP_API_ENDPOINT;
 
   const handleChange = (e, index, field) => {
+    console.log(e.target.value);
+    console.log(index);
+    
+    
     if (index !== undefined) {
       const newAddresses = formValues.addresses.map((address, i) =>
         i === index ? { ...address, [field]: e.target.value } : address
@@ -31,7 +35,7 @@ const Register = () => {
   const addAddress = () => {
     setFormValues({
       ...formValues,
-      addresses: [...formValues.addresses, { addressLine: '', city: '', state: '', phoneNumber: '' }],
+      addresses: [...formValues.addresses, { addressLine: '', city: '', state: '', phoneNumber: '', type: '' }],
     });
   };
 
@@ -78,9 +82,9 @@ const Register = () => {
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-4xl w-full bg-white p-8 rounded-lg shadow-xl">
-      <Link to="/" className=" text-black flex">
-        <IoMdArrowBack className="my-auto mr-2"/> Quay về trang chủ
-      </Link>
+        <Link to="/" className=" text-black flex">
+          <IoMdArrowBack className="my-auto mr-2" /> Quay về trang chủ
+        </Link>
         <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">Tạo tài khoản mới</h2>
 
         {loading ? (
@@ -140,11 +144,27 @@ const Register = () => {
                 />
               </div>
             </div>
-
+            
             {formValues.addresses.map((address, index) => (
               <div key={index} className="space-y-4">
                 <div className="text-lg font-medium text-gray-700">Địa chỉ {index + 1}</div>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  
+                  <div>
+                    <label htmlFor={`type-${index}`} className="block text-sm font-medium text-gray-700">Loại địa chỉ</label>
+                    <select
+                      id={`type-${index}`}
+                      required
+                      className="mt-1 block w-full h-10 shadow-sm sm:text-sm border-gray-300 rounded-lg focus:ring-black focus:border-black"
+                      value={address.type}
+                      onChange={(e) => handleChange(e, index, 'type')}
+                    >
+                      <option value="Nhà riêng">Nhà riêng</option>
+                      <option value="Công ty">Công ty</option>
+                      <option value="Khác">Khác</option>
+                    </select>
+                  </div>
+
                   <div>
                     <label htmlFor={`addressLine-${index}`} className="block text-sm font-medium text-gray-700">Địa chỉ</label>
                     <input
@@ -192,6 +212,7 @@ const Register = () => {
                 </div>
               </div>
             ))}
+
             <button
               type="button"
               className="mt-4 w-full bg-white text-black py-2 px-4 border border-black rounded-md hover:bg-gray-100"

@@ -164,7 +164,7 @@ const CreateOrder = () => {
                 <Select
                   options={addresses.map((addr, index) => ({
                     value: index,
-                    label: `${addr.addressLine}, ${addr.city}, ${addr.state}, ${addr.country}`,
+                    label: `${addr.type}: ${addr.addressLine}, ${addr.city}, ${addr.state}, ${addr.country}`,
                   }))}
                   value={selectedAddress}
                   onChange={(value) => setSelectedAddress(value)}

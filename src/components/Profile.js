@@ -12,7 +12,7 @@ const Profile = () => {
   const { checkApiResponse } = useAuthWithCheck();
   // Get token from localStorage
   const token = localStorage.getItem("token");
-    
+  
   useEffect(() => {
     const fetchUserProfile = async () => {
       try {
@@ -50,7 +50,8 @@ const Profile = () => {
       navigate("/login");
     }
   }, [API, token, navigate]);
-
+  console.log(userInfo);
+  
   if (loading) {
     return (
       <div className="min-h-screen flex justify-center items-center mx-auto">
@@ -103,7 +104,7 @@ const Profile = () => {
             userInfo.addresses.map((address, index) => (
               <div key={index} className="p-4 mt-4 bg-gray-100 rounded-lg shadow-md border border-gray-200">
                 <p>
-                  <strong>Địa chỉ {index + 1}:</strong>
+                  <strong>Địa chỉ :</strong>
                 </p>
                 <p>Địa chỉ: {address.addressLine}</p>
                 <p>Thành phố: {address.city}</p>

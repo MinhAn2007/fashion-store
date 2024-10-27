@@ -39,7 +39,7 @@ const CartHold = () => {
       const data = await response.json();
       const cartItemsWithChecked = data.cartItems.map((item) => ({
         ...item,
-        checked: true,
+        checked: item.isInStock,
       }));
       setCartItems(cartItemsWithChecked);
       calculateTotalPrice(cartItemsWithChecked);
@@ -132,12 +132,18 @@ const CartHold = () => {
       [item.id]: item.quantity,
     }));
 
-    const updatedItems = cartItems.map((cartItem) =>
-      cartItem.id === item.id
-        ? { ...cartItem, quantity: newQuantity }
-        : cartItem
+    const updatedItems = cartItems
+      .filter((cartItem) => cartItem.isInStock === true)
+      .map((cartItem) =>
+        cartItem.id === item.id
+          ? { ...cartItem, quantity: newQuantity }
+          : cartItem
+      );
+    console.log(updatedItems);
+
+    updateCartQuantity(
+      updatedItems.reduce((total, item) => total + item.quantity, 0)
     );
-    updateCartQuantity(newQuantity);
 
     setCartItems(updatedItems);
     calculateTotalPrice(updatedItems);
@@ -211,10 +217,6 @@ const CartHold = () => {
     setSelectedItem(null);
   };
 
-  const handlePayment = (method) => {
-    alert(`Thanh toán bằng: ${method}`);
-  };
-
   if (loading) return <p>Loading...</p>;
 
   return (
@@ -236,7 +238,7 @@ const CartHold = () => {
               {cartItems.map((item) => (
                 <div
                   key={item.id}
-                  className="grid grid-cols-[0.5fr_1fr_2fr_1fr_1fr_1fr] items-center border-b border-gray-300 pb-6 mb-4" // Adds border bottom
+                  className="grid grid-cols-[0.5fr_1fr_2fr_1fr_1fr_1fr] items-center border-b border-gray-300 p-6 mb-4 bg-white" // Adds border bottom
                 >
                   <Checkbox
                     isChecked={item.checked}
@@ -263,17 +265,22 @@ const CartHold = () => {
                     })}
                   </p>
                   <div className="flex items-center">
-                    <RiSubtractFill
-                      className="text-3xl text-black cursor-pointer mx-2"
-                      onClick={() => handleChangeQuantity(item, -1)}
-                    />
-                    <span className="text-2xl">{item.quantity}</span>
-                    <MdAdd
-                      className="text-3xl text-black cursor-pointer mx-2"
-                      onClick={() => handleChangeQuantity(item, 1)}
-                    />
+                    {!item.isInStock ? (
+                      <span className="text-red-500 text-lg">Hết hàng</span>
+                    ) : (
+                      <>
+                        <RiSubtractFill
+                          className="text-3xl text-black cursor-pointer mx-2"
+                          onClick={() => handleChangeQuantity(item, -1)}
+                        />
+                        <span className="text-2xl">{item.quantity}</span>
+                        <MdAdd
+                          className="text-3xl text-black cursor-pointer mx-2"
+                          onClick={() => handleChangeQuantity(item, 1)}
+                        />
+                      </>
+                    )}
                   </div>
-                  {/* New column with Delete and View Details buttons */}
                   <div className="flex flex-col items-center my-auto">
                     <Button
                       size="sm"
@@ -293,10 +300,9 @@ const CartHold = () => {
               ))}
             </div>
 
-            {/* Payment Summary Section */}
-            <div className="shadow-lg bg-white border border-gray-200 w-72 h-fit rounded-lg p-4 ml-4">
-              <div className="flex justify-between text-2xl font-semibold mt-8">
-                <p>Tổng</p>
+            <div className="shadow-lg bg-white border border-gray-200 w-72 h-fit rounded-lg p-4 ml-4 mt-[3.1rem]">
+              <div className="flex justify-between text-lg font-semibold mt-8">
+                <p>Tạm Tính: </p>
                 <p>
                   {totalPrice.toLocaleString("vi-VN", {
                     style: "currency",
@@ -304,6 +310,7 @@ const CartHold = () => {
                   })}
                 </p>
               </div>
+              <hr className="my-4" />
               <Link
                 to={{
                   pathname: "/order",
@@ -314,20 +321,10 @@ const CartHold = () => {
                   totalPrice,
                 }}
               >
-                <button
-                  onClick={() => handlePayment("Thẻ")}
-                  className="bg-black text-white py-2 px-4 mt-2 w-full rounded"
-                >
-                  Thanh toán Online
+                <button className="bg-black text-white py-2 px-4 mt-2 w-full rounded">
+                  Thanh toán
                 </button>
               </Link>
-
-              <button
-                onClick={() => handlePayment("Tiền mặt")}
-                className="bg-black text-white py-2 px-4 mt-2 w-full rounded"
-              >
-                Thanh toán tiền mặt
-              </button>
             </div>
           </div>
         </div>
