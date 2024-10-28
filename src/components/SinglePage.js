@@ -7,6 +7,7 @@ import { useToast } from "@chakra-ui/react";
 import BreadCrumb from "./BreadCrumb";
 import Modal from "react-modal";
 import { useAuthWithCheck } from "../hooks/useAuth";
+import { formatPrice } from "../utils/utils";
 const colorMap = {
   Đỏ: "#FF0000",
   Xanh: "#0000FF",
@@ -55,7 +56,7 @@ const SinglePage = () => {
         setSelectedVariant(data.skus[0]); // Đặt biến thể mặc định
         setSelectedSize(data.skus[0].size); // Đặt kích thước mặc định
         setSelectedColor(data.skus[0].color); // Đặt màu mặc định
-        setProduct({ ...data, id: data.skus[0].id }); // Cập nhật ID sản phẩm        
+        setProduct({ ...data, id: data.skus[0].id }); // Cập nhật ID sản phẩm
       } catch (error) {
         console.error("Error fetching product data:", error);
       }
@@ -116,16 +117,15 @@ const SinglePage = () => {
     }
   };
 
-
   const handleSizeChange = (size) => {
     setSelectedSize(size);
-  
+
     const availableVariants = product.skus.filter((v) => v.size === size);
-  
+
     const currentColorAvailable = availableVariants.some(
       (v) => v.color === selectedColor
     );
-  
+
     if (!currentColorAvailable && availableVariants.length > 0) {
       setSelectedColor(availableVariants[0].color);
       setSelectedVariant(availableVariants[0]);
@@ -138,7 +138,7 @@ const SinglePage = () => {
       }
     }
   };
-  
+
   const handleColorChange = (color) => {
     const variant = product.skus.find(
       (v) => v.color === color && v.size === selectedSize
@@ -215,9 +215,12 @@ const SinglePage = () => {
           </p>{" "}
           <div className="flex flex-col gap-4">
             <p className="text-md font-bold">
-              Giá: $
-              {selectedVariant ? selectedVariant.price : product.skus[0].price}
+              Giá:
+              {formatPrice(
+                selectedVariant ? selectedVariant.price : product.skus[0].price
+              )}
             </p>
+
             <p>
               {selectedVariant
                 ? `Size: ${selectedVariant.size}, Color: ${selectedVariant.color}`

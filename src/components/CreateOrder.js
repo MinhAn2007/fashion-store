@@ -28,9 +28,10 @@ const CreateOrder = () => {
   const [loading, setLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState("");
   const { checkApiResponse } = useAuthWithCheck();
+  const [totalAmount, setTotalAmount] = useState(0);
   const token = localStorage.getItem("token");
   const API = process.env.REACT_APP_API_ENDPOINT;
-
+  const [baseTotal, setBaseTotal] = useState(0);
   useEffect(() => {
     const fetchUserProfile = async () => {
       try {
@@ -54,6 +55,9 @@ const CreateOrder = () => {
         const data = await response.json();
         setUserInfo(data.user);
         setAddresses(data.addresses);
+        const subtotal = calculateTotal();
+        setBaseTotal(subtotal + 30000);
+        setTotalAmount(subtotal + 30000);
       } catch (error) {
         setErrorMessage(
           error.message || "Đã xảy ra lỗi khi tải thông tin cá nhân."
@@ -71,12 +75,6 @@ const CreateOrder = () => {
       alert("Vui lòng chọn địa chỉ và phương thức thanh toán.");
       return;
     }
-
-    const totalAmount = (
-      calculateTotal() +
-      30000 -
-      (couponCode ? 50000 : 0)
-    ).toFixed(2);
 
     const orderData = {
       userId: jwtDecode(token).userId,
@@ -99,10 +97,9 @@ const CreateOrder = () => {
             "Content-Type": "application/json",
           },
           body: JSON.stringify({
-            amount: 30000000,
-            bankCode: "NCB",
+            amount: totalAmount * 100,
             language: "vn",
-            userName: "Anh Khoa",
+            userName: userInfo.firstName + " " + userInfo.lastName,
           }),
         });
 
@@ -156,6 +153,15 @@ const CreateOrder = () => {
     { value: 1, label: "Thanh toán khi nhận hàng ( COD )" },
     { value: 2, label: "Thanh toán online ( Chuyển khoản )" },
   ];
+
+  const handlePaymentMethodChange = (value) => {
+    setPaymentMethod(value);    
+    if (value.value === 2) {
+      setTotalAmount(baseTotal - 50000);
+    } else {
+      setTotalAmount(baseTotal);
+    }
+  };
 
   if (loading)
     return (
@@ -224,7 +230,7 @@ const CreateOrder = () => {
                 />
                 <Link to="/account">
                   <Button variant="outline" className="w-full mt-4">
-                    + Add New Address
+                    + Thêm địa chỉ mới
                   </Button>
                 </Link>
               </div>
@@ -243,7 +249,7 @@ const CreateOrder = () => {
                 value={paymentMethod}
                 dropdownClassName="bg-white w-auto p-2"
                 optionClassName="py-2 hover:bg-gray-300 items-center my-auto"
-                onChange={(value) => setPaymentMethod(value)}
+                onChange={handlePaymentMethodChange}
                 placeholder="Chọn phương thức thanh toán"
                 className="w-full h-10 bg-white"
               />
@@ -319,7 +325,7 @@ const CreateOrder = () => {
               </div>
 
               {/* Mã giảm giá */}
-              <div className="mb-6 pb-6 border-b border-gray-200">
+              <div className="mb-6 border-b border-gray-200">
                 <div className="flex items-center mb-4">
                   <FaTag className="w-5 h-5 mr-2" />
                   <Title as="h2" className="text-lg font-semibold">
@@ -333,11 +339,10 @@ const CreateOrder = () => {
                   className="flex-1"
                   inputClassName="pl-3"
                 />
-                <Button>Áp dụng</Button>
               </div>
 
-              <div className="border-t border-gray-300 pt-4 mb-6">
-                <div className="flex justify-between mb-2">
+              <div className=" border-gray-300 pt-4 mb-6">
+                <div className="flex justify-between">
                   <Text className="text-gray-700">Subtotal</Text>
                   <Text className="font-semibold">
                     {formatPrice(calculateTotal())}
@@ -353,18 +358,16 @@ const CreateOrder = () => {
                     <Text className="font-medium">-50,000đ</Text>
                   </div>
                 )}
+                {paymentMethod.value === 2 && (
+                  <div className="flex justify-between items-center text-green-600">
+                    <Text>Giảm giá thanh toán online</Text>
+                    <Text className="font-medium">-50,000đ</Text>
+                  </div>
+                )}
                 <div className="flex justify-between items-center font-semibold">
                   <Text>Tổng cộng</Text>
                   <Text className="text-lg font-bold text-red-600">
-                    {/* {(
-                      calculateTotal() +
-                      30000 -
-                      (couponCode ? 50000 : 0)
-                    ).toFixed(0)}
-                    đ */}
-                    {formatPrice(
-                      calculateTotal() + 30000 - (couponCode ? 50000 : 0)
-                    )}
+                    {formatPrice(totalAmount)}
                   </Text>
                 </div>
               </div>

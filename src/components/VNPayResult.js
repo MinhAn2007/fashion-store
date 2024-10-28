@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { formatPrice } from "../utils/utils.js";
 
 const ResultVNPAYPage = () => {
   const [paymentInfo, setPaymentInfo] = useState({});
@@ -44,8 +45,6 @@ const ResultVNPAYPage = () => {
 
       if (response.ok) {
         setMessage("Đơn hàng đã được tạo thành công!");
-      } else {
-        setMessage("Không thể tạo đơn hàng. Vui lòng thử lại sau.");
       }
     } catch (error) {
       console.error("Lỗi khi gọi API tạo đơn hàng:", error);
@@ -54,14 +53,16 @@ const ResultVNPAYPage = () => {
   };
 
   return (
-    <div className="min-h-screen flex justify-center bg-gray-100 p-4">
-      <div className="bg-white p-6 rounded-lg shadow-lg max-w-md w-full h-fit  mt-20 ">
+    <div className="min-h-[600px] flex justify-center bg-gray-100 p-4">
+      <div className="bg-white p-6 rounded-lg shadow-lg max-w-md w-full h-fit mt-20 ">
         <h2 className="text-2xl font-semibold mb-4">Kết quả giao dịch</h2>
         <p className="mb-2">Mã giao dịch: {paymentInfo.transactionId}</p>
-        <p className="mb-2">Số tiền: {paymentInfo.amount} VND</p>
+        <p className="mb-2">
+          Số tiền: <span>{formatPrice(paymentInfo.amount * 0.01)}</span>
+        </p>
         <p className="mb-2">Thông tin: {paymentInfo.orderInfo}</p>
         <p className="mb-2">
-          Trạng thái giao dịch:
+          Trạng thái giao dịch:{" "}
           <span
             className={
               paymentInfo.transactionStatus === "00"
@@ -76,6 +77,14 @@ const ResultVNPAYPage = () => {
         </p>{" "}
         <p className="mb-2">Mã tham chiếu giao dịch: {paymentInfo.txnRef}</p>
         <p className="text-lg font-semibold text-blue-600">{message}</p>
+        <div className="flex justify-center mt-4">
+          <a
+            href="/"
+            className="text-black hover:underline text-lg font-semibold"
+          >
+            Quay lại trang chủ
+          </a>
+        </div>
       </div>
     </div>
   );

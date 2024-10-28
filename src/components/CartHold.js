@@ -16,6 +16,7 @@ import MobileNav from "./MobileNav";
 import BreadCrumb from "./BreadCrumb";
 import { useAuthWithCheck } from "../hooks/useAuth";
 import { Button } from "rizzui";
+import { formatPrice } from "../utils/utils.js"; // Import formatPrice from utils
 import { Link } from "react-router-dom";
 
 const CartHold = () => {
@@ -133,7 +134,6 @@ const CartHold = () => {
     }));
 
     const updatedItems = cartItems
-      .filter((cartItem) => cartItem.isInStock === true)
       .map((cartItem) =>
         cartItem.id === item.id
           ? { ...cartItem, quantity: newQuantity }
@@ -142,7 +142,7 @@ const CartHold = () => {
     console.log(updatedItems);
 
     updateCartQuantity(
-      updatedItems.reduce((total, item) => total + item.quantity, 0)
+      updatedItems.filter((cartItem) => cartItem.isInStock === true).reduce((total, item) => total + item.quantity, 0)
     );
 
     setCartItems(updatedItems);
@@ -259,10 +259,7 @@ const CartHold = () => {
                     </p>
                   </div>
                   <p className="text-lg">
-                    {item.skuPrice.toLocaleString("vi-VN", {
-                      style: "currency",
-                      currency: "VND",
-                    })}
+                    {formatPrice(item.skuPrice)}
                   </p>
                   <div className="flex items-center">
                     {!item.isInStock ? (

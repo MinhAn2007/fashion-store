@@ -1,6 +1,6 @@
-import React, { useEffect, useState } from 'react';
-import OurBestSellers from './OurBestSellers';
-import { formatPrice } from '../utils/utils.js'; // Import formatPrice from utils
+import React, { useEffect, useState } from "react";
+import OurBestSellers from "./OurBestSellers";
+import { formatPrice } from "../utils/utils.js"; // Import formatPrice from utils
 const Products = () => {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -13,21 +13,38 @@ const Products = () => {
     const fetchProducts = async () => {
       try {
         const response = await fetch(`${API}/api/bestseller`, {
-          signal: controller.signal
+          signal: controller.signal,
         });
         if (!response.ok) {
-          throw new Error('Network response was not ok');
+          throw new Error("Network response was not ok");
         }
         const data = await response.json();
-        console.log(data);
-        localStorage.setItem("cartQuantity", data.totalQuantity);
+        setProducts(data.products || []);
+        console.log(data.products);
 
-        setProducts(data.products || []);        
+        const userId = localStorage.getItem("userId");
+        if (userId) {
+          const response = await fetch(`${API}/api/cart/${userId}`, {
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem("token")}`,
+            },
+          });
+          if (!response.ok) {
+            throw new Error("Network response was not ok");
+          }
+          const data = await response.json();
+          localStorage.setItem("cartQuantity", data.totalQuantity);
+          // Dispatch custom event
+          window.dispatchEvent(
+            new CustomEvent("cartQuantityUpdated", {
+              detail: data.totalQuantity,
+            })
+          );
+        }
       } catch (error) {
-        if (error.name !== 'AbortError') {
+        if (error.name !== "AbortError") {
           setError(error.message);
         }
-        
       } finally {
         setLoading(false);
       }
@@ -48,19 +65,18 @@ const Products = () => {
   }
 
   return (
-    <div className='flex flex-wrap gap-20 mt-14 justify-center'>
-    {products.map((item, index) => (
-      <div className='' key={item.id}>
-        <OurBestSellers
-          id={item.id}
-          title={item.name}
-          price={formatPrice(item.skus[0].price)} // Format the price using formatPrice
-          image={item.skus[0].image} // Randomize the image from cover array
-        />
-      </div>
-    ))}
-  </div>
-  
+    <div className="flex flex-wrap gap-20 mt-14 justify-center">
+      {products.map((item, index) => (
+        <div className="" key={item.id}>
+          <OurBestSellers
+            id={item.id}
+            title={item.name}
+            price={formatPrice(item.skus[0].price)} // Format the price using formatPrice
+            image={item.skus[0].image} // Randomize the image from cover array
+          />
+        </div>
+      ))}
+    </div>
   );
 };
 
