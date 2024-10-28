@@ -196,6 +196,13 @@ const NavBar = () => {
                   >
                     Thông tin tài khoản
                   </Link>
+
+                  <Link
+                    to="/order-list"
+                    className="block w-44 text-left  px-4 py-2 text-gray-800 hover:bg-gray-100"
+                  >
+                    Đơn hàng của tôi
+                  </Link>
                   <button
                     onClick={handleLogout}
                     className="block w-44 text-left px-4 py-2 text-gray-800 hover:bg-gray-100"

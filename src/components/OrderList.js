@@ -9,32 +9,27 @@ import {
   BsChevronDown,
   BsChevronUp,
 } from "react-icons/bs";
-import OrderDetailModal from "./OrderDetailModal"; // Import component modal
+import OrderDetailModal from "./OrderDetailModal";
+import { formatPrice } from "../utils/utils";
 
 const OrderList = () => {
-  // Nhận userId từ props
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [sortOrder, setSortOrder] = useState("desc");
-  const [selectedOrder, setSelectedOrder] = useState(null);
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const API = process.env.REACT_APP_API_ENDPOINT;
-  const userId = localStorage.getItem("userId"); // Lấy userId từ localStorage
   const [modalOrder, setModalOrder] = useState(null);
+  const API = process.env.REACT_APP_API_ENDPOINT;
+  const userId = localStorage.getItem("userId");
 
-  // Fetch orders from API
   useEffect(() => {
     const fetchOrders = async () => {
       try {
-        const response = await fetch(`${API}/api/orders?userId=${userId}`); // Truyền userId vào API endpoint
-        if (!response.ok) {
-          throw new Error("Failed to fetch orders");
-        }
+        const response = await fetch(`${API}/api/orders?userId=${userId}`);
+        if (!response.ok) throw new Error("Failed to fetch orders");
         const data = await response.json();
-
-        setOrders(data.data.nonComplete); // Assuming the API returns an array of orders
+        setOrders(data.data.nonComplete);
       } catch (err) {
         setError(err.message);
       } finally {
@@ -42,19 +37,24 @@ const OrderList = () => {
       }
     };
 
-    if (userId) {
-      // Kiểm tra nếu userId hợp lệ
-      fetchOrders();
-    }
-  }, [userId, API]); // Thêm userId vào dependency array
+    if (userId) fetchOrders();
+  }, [userId, API]);
+
+  const statusTranslation = {
+    "Pending Confirmation": "Chờ xác nhận",
+    "In Transit": "Đang vận chuyển",
+    Returned: "Đã trả hàng",
+    Cancelled: "Đã hủy",
+  };
+
   const getStatusIcon = (status) => {
     switch (status) {
       case "Pending Confirmation":
         return <BsClock className="w-5 h-5 text-yellow-500" />;
       case "In Transit":
         return <BsTruck className="w-5 h-5 text-blue-500" />;
-      case "Delivered":
-        return <BsCheckCircle className="w-5 h-5 text-green-500" />;
+      case "Returned":
+        return <BsCheckCircle className="w-5 h-5 text-black" />;
       case "Cancelled":
         return <BsXCircle className="w-5 h-5 text-red-500" />;
       default:
@@ -77,11 +77,23 @@ const OrderList = () => {
     }
   };
 
+  const handleCancelOrder = async (orderId) => {
+    try {
+      const response = await fetch(`${API}/api/orders/${orderId}/cancel`, {
+        method: "POST",
+      });
+      if (!response.ok) throw new Error("Failed to cancel order");
+      setOrders(orders.filter((order) => order.id !== orderId));
+    } catch (err) {
+      setError(err.message);
+    }
+  };
+
   const filteredOrders = orders
     .filter(
       (order) =>
         (statusFilter === "all" || order.status === statusFilter) &&
-        (String(order.id).includes(searchTerm) || // Chuyển đổi order.id thành chuỗi
+        (String(order.id).includes(searchTerm) ||
           order.items.some((item) => item.name.includes(searchTerm)))
     )
     .sort((a, b) => {
@@ -90,129 +102,164 @@ const OrderList = () => {
       return sortOrder === "desc" ? dateB - dateA : dateA - dateB;
     });
 
-  if (loading) {
-    return <div className="text-center">Loading...</div>; // Loading message
-  }
-
-  if (error) {
-    return <div className="text-center text-red-600">{error}</div>; // Error message
-  }
+  if (loading) return <div className="text-center p-8">Loading...</div>;
+  if (error) return <div className="text-center text-red-600 p-8">{error}</div>;
 
   return (
-    <div className="mx-32 p-4 bg-gray-50/50 min-h-[580px] text-center">
-      <div className="mb-6 bg-white rounded-lg shadow-sm p-5">
-        <div className="flex flex-col gap-4">
-          <h2 className="text-xl font-semibold text-gray-900">
-            Đơn hàng của tôi
-          </h2>
+    <div className="max-w-7xl mx-auto p-4">
+      {/* Header Section */}
+      <div className="bg-white rounded-lg shadow-sm p-6 mb-6">
+        <h2 className="text-2xl font-semibold text-gray-900 mb-6">
+          Đơn hàng của tôi
+        </h2>
 
-          <div className="flex flex-col md:flex-row gap-4 items-center justify-between">
-            <div className="relative w-full md:w-96">
-              <input
-                type="text"
-                placeholder="Tìm kiếm đơn hàng..."
-                className="w-full h-11 px-4 pl-10 text-sm bg-white border border-gray-200 rounded-md focus:outline-none focus:border-blue-600 focus:ring-1 focus:ring-blue-600"
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-              />
-              <AiOutlineSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 w-4 h-4" />
-            </div>
+        <div className="flex flex-col lg:flex-row gap-4">
+          {/* Search Bar */}
+          <div className="relative flex-1">
+            <input
+              type="text"
+              placeholder="Tìm kiếm đơn hàng..."
+              className="w-full h-10 pl-10 pr-4 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
+            <AiOutlineSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5" />
+          </div>
 
-            <div className="flex gap-3 w-full md:w-auto">
-              <select
-                className="h-11 px-4 text-sm bg-white border border-gray-200 rounded-md focus:outline-none focus:border-blue-600 focus:ring-1 focus:ring-blue-600"
-                value={statusFilter}
-                onChange={(e) => setStatusFilter(e.target.value)}
-              >
-                <option value="all">Tất cả trạng thái</option>
-                <option value="Pending Confirmation">Chờ xác nhận</option>
-                <option value="In Transit">Đang vận chuyển</option>
-                <option value="Delivered">Đã giao</option>
-                <option value="Cancelled">Đã hủy</option>
-              </select>
+          {/* Filters */}
+          <div className="flex gap-3">
+            <select
+              className="h-10 px-4 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              value={statusFilter}
+              onChange={(e) => setStatusFilter(e.target.value)}
+            >
+              <option value="all">Tất cả trạng thái</option>
+              {Object.entries(statusTranslation).map(([key, value]) => (
+                <option key={key} value={key}>
+                  {value}
+                </option>
+              ))}
+            </select>
 
-              <button
-                className="h-11 px-4 inline-flex items-center gap-2 text-sm bg-white border border-gray-200 rounded-md hover:bg-gray-50 focus:outline-none focus:border-blue-600 focus:ring-1 focus:ring-blue-600"
-                onClick={() =>
-                  setSortOrder((prev) => (prev === "desc" ? "asc" : "desc"))
-                }
-              >
-                <span>Ngày đặt</span>
-                {sortOrder === "desc" ? (
-                  <BsChevronDown className="w-4 h-4" />
-                ) : (
-                  <BsChevronUp className="w-4 h-4" />
-                )}
-              </button>
-            </div>
+            <button
+              className="px-4 flex items-center gap-2 text-sm border border-gray-300 rounded-lg hover:bg-gray-50"
+              onClick={() =>
+                setSortOrder((prev) => (prev === "desc" ? "asc" : "desc"))
+              }
+            >
+              <span>Ngày đặt</span>
+              {sortOrder === "desc" ? (
+                <BsChevronDown className="w-4 h-4" />
+              ) : (
+                <BsChevronUp className="w-4 h-4" />
+              )}
+            </button>
           </div>
         </div>
       </div>
 
-      <div className="grid gap-5">
-        {filteredOrders.map((order) => (
-          <div
-            key={order.id}
-            className="bg-white rounded-lg shadow-sm p-5 transition-all hover:shadow-md"
-          >
-            <div className="flex flex-col md:flex-row gap-6">
-              <div className="flex-1 space-y-4">
-                <div className="flex justify-between items-start">
-                  <div>
-                    <h3 className="text-base font-semibold text-gray-900">
-                      Đơn hàng #{order.id}
-                    </h3>
-                    <p className="text-sm text-gray-600">
-                      Ngày đặt:{" "}
-                      {new Date(order.created_at).toLocaleDateString()}
-                    </p>
-                  </div>
-                  <span
-                    className={`px-3 py-1 inline-flex items-center gap-2 text-xs font-medium rounded-full ring-1 ${getStatusColor(
-                      order.status
-                    )}`}
-                  >
-                    {getStatusIcon(order.status)}
-                    {order.status}
-                  </span>
-                </div>
+      {/* Orders List */}
+      <div className="space-y-4">
+        {filteredOrders.map((order) => {
+          const orderDate = new Date(order.created_at);
+          const currentTime = new Date();
+          const timeDiff = Math.floor((currentTime - orderDate) / 1000 / 60);
+          const remainingTime = Math.max(30 - timeDiff, 0);
 
-                <div className="space-y-2">
-                  {order.items.map((item) => (
-                    <div
-                      key={item.id}
-                      className="text-sm text-gray-600 flex items-center gap-2"
-                    >
-                      <span className="font-medium">{item.quantity}x</span>
-                      <span>{item.name}</span>
+          return (
+            <div
+              key={order.id}
+              className="bg-white rounded-lg shadow-sm overflow-hidden"
+            >
+              {/* Order Header */}
+              <div className="p-4 border-b border-gray-100 flex justify-between items-center">
+                <div>
+                  <span className="text-lg font-medium">
+                    Đơn hàng #{order.id}
+                  </span>
+                  <div className="text-sm text-gray-500 mt-1">
+                    {orderDate.toLocaleString("vi-VN")}
+                  </div>
+                </div>
+                <span
+                  className={`px-3 py-1 inline-flex items-center gap-2 text-sm font-medium rounded-full ring-1 ${getStatusColor(
+                    order.status
+                  )}`}
+                >
+                  {getStatusIcon(order.status)}
+                  {statusTranslation[order.status]}
+                </span>
+              </div>
+
+              {/* Order Items */}
+              <div className="p-4">
+                <div className="space-y-4">
+                  {order.items.map((item, idx) => (
+                    <div key={idx} className="flex items-start">
+                      <img
+                        src={item.image}
+                        alt={item.name}
+                        className="w-16 h-16 object-cover rounded-md"
+                      />
+                      <div className="ml-4 flex-1">
+                        <h4 className="font-medium">{item.product_name}</h4>
+                        <p className="text-sm text-gray-600">
+                          Số lượng: {item.quantity}
+                        </p>
+                        <p className="text-sm font-medium text-gray-900">
+                          {formatPrice(item.price)}
+                        </p>
+                      </div>
                     </div>
                   ))}
                 </div>
-              </div>
 
-              <div className="flex flex-col md:items-end justify-between gap-4">
-                <div className="text-right">
-                  <p className="text-lg font-semibold text-gray-900">
-                    {(order.total + order.shipping_fee).toLocaleString("vi-VN")}{" "}
-                    ₫
-                  </p>
-                  <p className="text-sm text-gray-600">
-                    {order.items.reduce((sum, item) => sum + item.quantity, 0)}{" "}
-                    sản phẩm
-                  </p>
+                {/* Order Footer */}
+                <div className="mt-4 pt-4 border-t border-gray-100 flex justify-between items-center">
+                  <div>
+                    <span className="text-sm text-gray-600">Tổng tiền:</span>
+                    <span className="ml-2 text-lg font-semibold">
+                      {formatPrice(order.total)}
+                    </span>
+                    {order.status === "Pending Confirmation" &&
+                      remainingTime > 0 && (
+                        <p className="text-sm text-red-500 mt-1">
+                          Thời gian còn lại để hủy: {remainingTime} phút
+                        </p>
+                      )}
+                  </div>
+
+                  <div className="flex gap-3">
+                    <button
+                      className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-10 hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500"
+                      onClick={() => setModalOrder(order)}
+                    >
+                      <AiOutlineEye className="inline-block mr-2" />
+                      Chi tiết
+                    </button>
+                    {order.status === "Pending Confirmation" &&
+                      remainingTime > 0 && (
+                        <button
+                          className="px-4 py-2 text-sm font-medium text-white bg-black hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
+                          onClick={() => handleCancelOrder(order.id)}
+                        >
+                          Hủy đơn
+                        </button>
+                      )}
+                  </div>
                 </div>
-
-                <button
-                  onClick={() => setModalOrder(order)} // Đặt đơn hàng được chọn vào modalOrder
-                  className="inline-flex items-center justify-center gap-2 px-3 py-2 rounded-md text-sm font-medium border border-blue-500 text-blue-500 bg-blue-50 hover:bg-blue-100 hover:text-blue-600 transition-colors"
-                >
-                  Xem chi tiết <AiOutlineEye className="w-4 h-4" />
-                </button>
               </div>
             </div>
+          );
+        })}
+
+        {filteredOrders.length === 0 && (
+          <div className="text-center py-8 bg-white rounded-lg">
+            <p className="text-gray-500">Không tìm thấy đơn hàng nào</p>
           </div>
-        ))}
+        )}
       </div>
+
       {modalOrder && (
         <OrderDetailModal
           order={modalOrder}
