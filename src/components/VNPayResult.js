@@ -45,6 +45,9 @@ const ResultVNPAYPage = () => {
 
       if (response.ok) {
         setMessage("Đơn hàng đã được tạo thành công!");
+      } else {
+        console.log(response);
+        setMessage("Đã xảy ra lỗi khi tạo đơn hàng.");
       }
     } catch (error) {
       console.error("Lỗi khi gọi API tạo đơn hàng:", error);
@@ -76,15 +79,19 @@ const ResultVNPAYPage = () => {
           </span>
         </p>{" "}
         <p className="mb-2">Mã tham chiếu giao dịch: {paymentInfo.txnRef}</p>
-        <p className="text-lg font-semibold text-blue-600">{message}</p>
-        <div className="flex justify-center mt-4">
-          <a
-            href="/"
-            className="text-black hover:underline text-lg font-semibold"
-          >
-            Quay lại trang chủ
-          </a>
-        </div>
+        <p className="text-lg font-semibold text-blue-600">
+          {message ? "Đang tạo đơn hàng" : ""}
+        </p>
+        {message && (
+          <div className="flex justify-center mt-4">
+            <a
+              href="/"
+              className="text-black hover:underline text-lg font-semibold"
+            >
+              Quay lại trang chủ
+            </a>
+          </div>
+        )}
       </div>
     </div>
   );
