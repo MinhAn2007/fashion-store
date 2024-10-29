@@ -10,12 +10,10 @@ import {
   BsChevronUp,
 } from "react-icons/bs";
 import OrderDetailModal from "./OrderDetailModal";
-import CancelOrderModal from "./CancelOrderModal";
 import { formatPrice } from "../utils/utils";
 
-const OrderList = () => {
+const OrderHistory = () => {
   const [searchTerm, setSearchTerm] = useState("");
-  const [statusFilter, setStatusFilter] = useState("all");
   const [sortOrder, setSortOrder] = useState("desc");
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -29,22 +27,15 @@ const OrderList = () => {
   const API = process.env.REACT_APP_API_ENDPOINT;
   const userId = localStorage.getItem("userId");
 
-  const [showCancelModal, setShowCancelModal] = useState(false);
-  const [orderToCancel, setOrderToCancel] = useState(null);
-
-  const handleCancelOrder = (orderId) => {
-    setOrderToCancel(orders.find((order) => order.id === orderId));
-    setShowCancelModal(true);
-  };
-
-
   useEffect(() => {
     const fetchOrders = async () => {
       try {
         const response = await fetch(`${API}/api/orders?userId=${userId}`);
         if (!response.ok) throw new Error("Failed to fetch orders");
         const data = await response.json();
-        setOrders(data.data.nonComplete);
+        console.log(data);
+
+        setOrders(data.data.complete);
       } catch (err) {
         setError(err.message);
       } finally {
@@ -57,24 +48,15 @@ const OrderList = () => {
 
   useEffect(() => {
     setCurrentPage(1);
-  }, [searchTerm, statusFilter]);
+  }, [searchTerm]);
 
   const statusTranslation = {
-    "Pending Confirmation": "Chờ xác nhận",
-    "In Transit": "Đang vận chuyển",
-    Delivered: "Đã giao hàng",
-    Returned: "Đã trả hàng",
     Cancelled: "Đã hủy",
+    Completed: "Đã hoàn thành",
   };
 
   const getStatusIcon = (status) => {
     switch (status) {
-      case "Pending Confirmation":
-        return <BsClock className="w-5 h-5 text-yellow-500" />;
-      case "In Transit":
-        return <BsTruck className="w-5 h-5 text-blue-500" />;
-      case "Returned":
-        return <BsCheckCircle className="w-5 h-5 text-black" />;
       case "Cancelled":
         return <BsXCircle className="w-5 h-5 text-red-500" />;
       default:
@@ -84,25 +66,18 @@ const OrderList = () => {
 
   const getStatusColor = (status) => {
     switch (status) {
-      case "Pending Confirmation":
-        return "bg-yellow-50 text-yellow-600 ring-yellow-500/30";
-      case "In Transit":
-        return "bg-blue-50 text-blue-600 ring-blue-500/30";
-      case "Delivered":
-        return "bg-green-50 text-green-600 ring-green-500/30";
       case "Cancelled":
         return "bg-red-50 text-red-600 ring-red-500/30";
       default:
-        return "bg-gray-50 text-gray-600 ring-gray-500/30";
+        return "bg-blue-50 text-gray-600 ring-gray-500/30";
     }
   };
 
   const filteredOrders = orders
     .filter(
       (order) =>
-        (statusFilter === "all" || order.status === statusFilter) &&
-        (String(order.id).includes(searchTerm) ||
-          order.items.some((item) => item.name.includes(searchTerm)))
+        String(order.id).includes(searchTerm) ||
+        order.items.some((item) => item.name.includes(searchTerm))
     )
     .sort((a, b) => {
       const dateA = new Date(a.created_at);
@@ -124,7 +99,7 @@ const OrderList = () => {
       {/* Header Section */}
       <div className="bg-white rounded-lg shadow-sm p-6 mb-6">
         <h2 className="text-2xl font-semibold text-gray-900 mb-6">
-          Đơn hàng của tôi
+          Lịch sử mua hàng
         </h2>
 
         <div className="flex flex-col lg:flex-row gap-4">
@@ -140,21 +115,8 @@ const OrderList = () => {
             <AiOutlineSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5" />
           </div>
 
-          {/* Filters */}
+          {/* Sorting */}
           <div className="flex gap-3">
-            <select
-              className="h-10 px-4 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-              value={statusFilter}
-              onChange={(e) => setStatusFilter(e.target.value)}
-            >
-              <option value="all">Tất cả trạng thái</option>
-              {Object.entries(statusTranslation).map(([key, value]) => (
-                <option key={key} value={key}>
-                  {value}
-                </option>
-              ))}
-            </select>
-
             <button
               className="px-4 flex items-center gap-2 text-sm border border-gray-300 rounded-lg hover:bg-gray-50"
               onClick={() =>
@@ -176,9 +138,6 @@ const OrderList = () => {
       <div className="space-y-4">
         {currentOrders.map((order) => {
           const orderDate = new Date(order.created_at);
-          const currentTime = new Date();
-          const timeDiff = Math.floor((currentTime - orderDate) / 1000 / 60);
-          const remainingTime = Math.max(30 - timeDiff, 0);
 
           return (
             <div
@@ -235,31 +194,21 @@ const OrderList = () => {
                     <span className="ml-2 text-lg font-semibold">
                       {formatPrice(order.total)}
                     </span>
-                    {order.status === "Pending Confirmation" &&
-                      remainingTime > 0 && (
-                        <p className="text-sm text-red-500 mt-1">
-                          Thời gian còn lại để hủy: {remainingTime} phút
-                        </p>
-                      )}
                   </div>
 
                   <div className="flex gap-3">
                     <button
-                      className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-10 hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500"
+                      className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-10 my-auto items-center justify-center hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500"
                       onClick={() => setModalOrder(order)}
                     >
                       <AiOutlineEye className="inline-block mr-2" />
                       Chi tiết
                     </button>
-                    {order.status === "Pending Confirmation" &&
-                      remainingTime > 0 && (
-                        <button
-                          className="px-4 py-2 text-sm font-medium text-white bg-black hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
-                          onClick={() => handleCancelOrder(order.id)}
-                        >
-                          Hủy đơn
-                        </button>
-                      )}
+                    <button
+                      className="px-4 py-2 text-sm font-medium text-white bg-black hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
+                    >
+                      Mua lại
+                    </button>
                   </div>
                 </div>
               </div>
@@ -307,15 +256,8 @@ const OrderList = () => {
           onClose={() => setModalOrder(null)}
         />
       )}
-
-      {showCancelModal && (
-        <CancelOrderModal
-          order={orderToCancel}
-          onClose={() => setShowCancelModal(false)}
-        />
-      )}
     </div>
   );
 };
 
-export default OrderList;
+export default OrderHistory;

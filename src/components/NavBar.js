@@ -203,6 +203,12 @@ const NavBar = () => {
                   >
                     Đơn hàng của tôi
                   </Link>
+                  <Link
+                    to="/history"
+                    className="block w-44 text-left  px-4 py-2 text-gray-800 hover:bg-gray-100"
+                  >
+                    Lịch sử mua hàng
+                  </Link>
                   <button
                     onClick={handleLogout}
                     className="block w-44 text-left px-4 py-2 text-gray-800 hover:bg-gray-100"

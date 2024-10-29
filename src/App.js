@@ -22,6 +22,7 @@ import Profile from "./components/Profile";
 import CreateOrder from "./components/CreateOrder";
 import ResultVNPAYPage from "./components/VNPayResult";
 import OrderList from "./components/OrderList";
+import OrderHistory from "./components/OrderHistory";
 
 function App() {
   return (
@@ -164,6 +165,16 @@ function App() {
               <>
                 <NavBar />
                 <OrderList/>
+                <SPFooter />
+              </>
+            }
+          />
+           <Route 
+            path="/history" 
+            element={
+              <>
+                <NavBar />
+                <OrderHistory/>
                 <SPFooter />
               </>
             }

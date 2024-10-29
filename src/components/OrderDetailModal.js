@@ -1,5 +1,14 @@
 import React, { useEffect, useState } from "react";
-import { FiClock, FiCheck, FiPackage, FiTruck, FiAlertCircle, FiX, FiPrinter, FiDownload } from "react-icons/fi";
+import {
+  FiClock,
+  FiCheck,
+  FiPackage,
+  FiTruck,
+  FiAlertCircle,
+  FiX,
+  FiPrinter,
+  FiDownload,
+} from "react-icons/fi";
 import { formatPrice } from "../utils/utils";
 import { useAuthWithCheck } from "../hooks/useAuth";
 
@@ -15,18 +24,22 @@ const getStatusConfig = (status) => {
       color: "bg-blue-100 text-blue-800",
       icon: FiTruck,
     },
-
-    "Delivered": {
+    Delivered: {
       label: "Đã giao hàng",
       color: "bg-gray-100 text-black",
       icon: FiCheck,
     },
-    "Returned": {
+    Completed: {
+      label: "Đã hoàn tất",
+      color: "bg-blue-100 text-black",
+      icon: FiCheck,
+    },
+    Returned: {
       label: "Đã trả hàng",
       color: "bg-gray-100 text-black",
       icon: FiCheck,
     },
-    "Cancelled": {
+    Cancelled: {
       label: "Đã hủy",
       color: "bg-red-100 text-red-800",
       icon: FiAlertCircle,
@@ -40,7 +53,9 @@ const StatusBadge = ({ status }) => {
   const Icon = config.icon;
 
   return (
-    <span className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full font-medium text-sm ${config.color}`}>
+    <span
+      className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full font-medium text-sm ${config.color}`}
+    >
       <Icon className="h-4 w-4" />
       {config.label}
     </span>
@@ -50,7 +65,7 @@ const StatusBadge = ({ status }) => {
 const OrderTimeline = ({ status, returnedAt }) => {
   const getFinalStatus = () => {
     if (status === "Cancelled") return "Cancelled";
-    if (returnedAt) return "Returned"; // Highlight both 'In Transit' and 'Returned'
+    if (returnedAt) return "Returned";
     return "Delivered";
   };
 
@@ -61,8 +76,16 @@ const OrderTimeline = ({ status, returnedAt }) => {
     { id: "Pending Confirmation", label: "Chờ xác nhận", icon: FiClock },
     { id: "In Transit", label: "Đang vận chuyển", icon: FiTruck },
     returnedAt
-      ? { id: "Returned", label: getStatusConfig("Returned").label, icon: getStatusConfig("Returned").icon }
-      : { id: finalStatus, label: getStatusConfig(finalStatus).label, icon: getStatusConfig(finalStatus).icon },
+      ? {
+          id: "Returned",
+          label: getStatusConfig("Returned").label,
+          icon: getStatusConfig("Returned").icon,
+        }
+      : {
+          id: finalStatus,
+          label: getStatusConfig(finalStatus).label,
+          icon: getStatusConfig(finalStatus).icon,
+        },
   ];
 
   const currentStep = steps.findIndex(
@@ -79,12 +102,26 @@ const OrderTimeline = ({ status, returnedAt }) => {
 
           return (
             <div key={step.id} className="flex flex-col items-center flex-1">
-              <div className={`w-10 h-10 rounded-full flex items-center justify-center
-                ${isCompleted ? "bg-green-500" : isActive ? "bg-blue-500" : "bg-gray-100"}
-                transition-colors duration-200`}>
-                <Icon className={`h-5 w-5 ${isActive ? "text-white" : "text-gray-400"}`} />
+              <div
+                className={`w-10 h-10 rounded-full flex items-center justify-center
+                ${
+                  isCompleted
+                    ? "bg-green-500"
+                    : isActive
+                    ? "bg-blue-500"
+                    : "bg-gray-100"
+                }
+                transition-colors duration-200`}
+              >
+                <Icon
+                  className={`h-5 w-5 ${
+                    isActive ? "text-white" : "text-gray-400"
+                  }`}
+                />
               </div>
-              <div className="mt-2 text-xs text-center text-gray-600">{step.label}</div>
+              <div className="mt-2 text-xs text-center text-gray-600">
+                {step.label}
+              </div>
             </div>
           );
         })}
@@ -92,8 +129,6 @@ const OrderTimeline = ({ status, returnedAt }) => {
     </div>
   );
 };
-
-
 
 const OrderDetailModal = ({ order, onClose }) => {
   const [user, setUser] = useState(null);
@@ -132,11 +167,19 @@ const OrderDetailModal = ({ order, onClose }) => {
   };
 
   console.log(order);
-  
+
   return (
-    <div className="fixed inset-0 overflow-y-auto z-[9999]" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+    <div
+      className="fixed inset-0 overflow-y-auto z-[9999]"
+      aria-labelledby="modal-title"
+      role="dialog"
+      aria-modal="true"
+    >
       <div className="flex items-end justify-center pt-4 px-4 pb-20 text-center sm:block sm:p-0">
-        <div className="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" onClick={handleOverlayClick}></div>
+        <div
+          className="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity"
+          onClick={handleOverlayClick}
+        ></div>
 
         <div className="inline-block align-bottom bg-white rounded-lg text-left shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-4xl sm:w-full">
           <div className="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
@@ -146,26 +189,41 @@ const OrderDetailModal = ({ order, onClose }) => {
                   Đơn hàng #{order.id}
                 </h3>
                 <p className="mt-1 text-sm text-gray-500">
-                  Ngày đặt: {new Date(order.created_at).toLocaleDateString("vi-VN")}
+                  Ngày đặt:{" "}
+                  {new Date(order.created_at).toLocaleDateString("vi-VN")}
                 </p>
               </div>
               <div className="flex items-center gap-3">
                 <StatusBadge status={order.status} />
-                <button className="p-2 hover:bg-gray-100 rounded-full" title="Tải PDF">
+                <button
+                  className="p-2 hover:bg-gray-100 rounded-full"
+                  title="Tải PDF"
+                >
                   <FiDownload className="h-5 w-5 text-gray-500" />
                 </button>
               </div>
             </div>
 
-            {order.status !== "Cancelled" && <OrderTimeline status={order.status} returnedAt={order.returned_at} />}
+            {(order.status !== "Cancelled" && order.status !== "Completed") && (
+              <OrderTimeline
+                status={order.status}
+                returnedAt={order.returned_at}
+              />
+            )}
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
               <div className="space-y-4">
-                <h4 className="text-base font-semibold">Thông tin khách hàng</h4>
+                <h4 className="text-base font-semibold">
+                  Thông tin khách hàng
+                </h4>
                 <div className="space-y-2">
                   <div className="flex items-center gap-2">
                     <span className="text-gray-500">Tên:</span>
-                    <span>{user ? `${user.firstName} ${user.lastName}` : "Đang tải..."}</span>
+                    <span>
+                      {user
+                        ? `${user.firstName} ${user.lastName}`
+                        : "Đang tải..."}
+                    </span>
                   </div>
                   <div className="flex items-center gap-2">
                     <span className="text-gray-500">Email:</span>
@@ -183,37 +241,48 @@ const OrderDetailModal = ({ order, onClose }) => {
                   </div>
                   <div className="flex items-center gap-2">
                     <span className="text-gray-500 min-w-28">Phương thức:</span>
-                    <span>{order.payment_id === 2 ? 'Thanh toán online ( được giảm 50.000d )' : 'Thanh toán khi nhận hàng'}</span>
+                    <span>
+                      {order.payment_id === 2
+                        ? "Thanh toán online ( được giảm 50.000d )"
+                        : "Thanh toán khi nhận hàng"}
+                    </span>
                   </div>
                   <div className="flex items-center gap-2">
                     <span className="text-gray-500 min-w-28">Ghi chú:</span>
                     <span>{order.note || "Không có"}</span>
                   </div>
-                  {
-                    order.status === "Cancelled" && (
-                      <div className="flex items-center gap-2">
-                        <span className="text-gray-500 min-w-28">Lý do hủy hàng:</span>
-                        <span>{order.cancel_reason || "Không có"}</span>
-                      </div>
-                    )
-                  }
-                  {
-                    (order.status === "Returned" || order.return_reason || order.returned_at) && (
-                      <div className="flex items-center gap-2">
-                        <span className="text-gray-500 min-w-28">Lý do trả hàng:</span>
-                        <span>{order.return_reason || "Không có"}</span>
-                      </div>
-                    )
-                  }
+                  {order.status === "Cancelled" && (
+                    <div className="flex items-center gap-2">
+                      <span className="text-gray-500 min-w-28">
+                        Lý do hủy hàng:
+                      </span>
+                      <span>{order.cancel_reason || "Không có"}</span>
+                    </div>
+                  )}
+                  {(order.status === "Returned" ||
+                    order.return_reason ||
+                    order.returned_at) && (
+                    <div className="flex items-center gap-2">
+                      <span className="text-gray-500 min-w-28">
+                        Lý do trả hàng:
+                      </span>
+                      <span>{order.return_reason || "Không có"}</span>
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
 
             <div className="mt-8">
-              <h4 className="text-base font-semibold mb-4">Chi tiết sản phẩm</h4>
+              <h4 className="text-base font-semibold mb-4">
+                Chi tiết sản phẩm
+              </h4>
               <div className="divide-y border rounded-lg">
                 {order.items.map((item) => (
-                  <div key={item.id} className="p-4 flex items-center justify-between">
+                  <div
+                    key={item.id}
+                    className="p-4 flex items-center justify-between"
+                  >
                     <div className="flex items-center gap-4">
                       <img
                         src={item.image}
@@ -227,7 +296,9 @@ const OrderDetailModal = ({ order, onClose }) => {
                         </p>
                       </div>
                     </div>
-                    <p className="font-medium">{formatPrice(item.price * item.quantity)}</p>
+                    <p className="font-medium">
+                      {formatPrice(item.price * item.quantity)}
+                    </p>
                   </div>
                 ))}
               </div>
@@ -236,11 +307,15 @@ const OrderDetailModal = ({ order, onClose }) => {
             <div className="mt-6 flex justify-between">
               <div>
                 <p className="text-gray-500">Phí vận chuyển:</p>
-                <p className="text-gray-900 font-medium">{formatPrice(order.shipping_fee)}</p>
+                <p className="text-gray-900 font-medium">
+                  {formatPrice(order.shipping_fee)}
+                </p>
               </div>
               <div>
                 <p className="text-gray-500">Tổng cộng:</p>
-                <p className="text-gray-900 font-medium">{formatPrice(order.total)}</p>
+                <p className="text-gray-900 font-medium">
+                  {formatPrice(order.total)}
+                </p>
               </div>
             </div>
           </div>
