@@ -47,19 +47,22 @@ const StatusBadge = ({ status }) => {
   );
 };
 
-const OrderTimeline = ({ status, returnedAt, canceledAt }) => {
-  console.log(status, returnedAt, canceledAt);
+const OrderTimeline = ({ status, returnedAt }) => {
+  console.log(status, returnedAt);
   
   const getFinalStatus = () => {
-    if (status === "Cancelled" ) return "Cancelled";
-    if (status === "Returned") return "Returned";
+    if (status === "Cancelled") return "Cancelled";
+    if (returnedAt) return "Delivered"; 
     return "Delivered";
   };
 
   const finalStatus = getFinalStatus();
 
+  // Adjust the order based on the status and returned time
   const steps = [
-    { id: "Pending Confirmation", label: "Chờ xác nhận", icon: FiClock },
+    returnedAt
+      ? { id: "Returned", label: getStatusConfig("Returned").label, icon: getStatusConfig("Returned").icon }
+      : { id: "Pending Confirmation", label: "Chờ xác nhận", icon: FiClock },
     { id: "In Transit", label: "Đang vận chuyển", icon: FiTruck },
     { id: finalStatus, label: getStatusConfig(finalStatus).label, icon: getStatusConfig(finalStatus).icon },
   ];
@@ -89,6 +92,7 @@ const OrderTimeline = ({ status, returnedAt, canceledAt }) => {
     </div>
   );
 };
+
 
 
 const OrderDetailModal = ({ order, onClose }) => {
@@ -127,6 +131,8 @@ const OrderDetailModal = ({ order, onClose }) => {
     }
   };
 
+  console.log(order);
+  
   return (
     <div className="fixed inset-0 overflow-y-auto z-[9999]" aria-labelledby="modal-title" role="dialog" aria-modal="true">
       <div className="flex items-end justify-center pt-4 px-4 pb-20 text-center sm:block sm:p-0">
@@ -154,7 +160,7 @@ const OrderDetailModal = ({ order, onClose }) => {
               </div>
             </div>
 
-            {order.status !== "Cancelled" && <OrderTimeline status={order.status} />}
+            {order.status !== "Cancelled" && <OrderTimeline status={order.status} returnedAt={order.returned_at} />}
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
               <div className="space-y-4">
