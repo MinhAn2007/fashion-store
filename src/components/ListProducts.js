@@ -4,11 +4,10 @@ import React, { useState, useEffect } from "react";
 import BreadCrumb from "./BreadCrumb";
 import "../styles/SinglePage.css";
 import { Link } from "react-router-dom";
-import { useDispatch } from "react-redux";
-import { cartActions } from "../redux-state/CartState";
 import { useToast } from "@chakra-ui/react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useAuthWithCheck } from "../hooks/useAuth";
+import { formatPrice } from "../utils/utils";
 
 const filters = [
   {
@@ -337,7 +336,7 @@ export default function ShopPage(props) {
               <div className="p-4 text-center">
                 <h2 className="text-lg font-semibold">{product.name}</h2>
                 <p className="text-gray-600 mt-1 mb-2">
-                  {product.skus[0].price}
+                {formatPrice(product.skus[0].price)}
                 </p>
                 <button
                   onClick={() => addItemToCartHandler(product)}

@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { FiClock, FiCheck, FiPackage, FiTruck, FiAlertCircle, FiX, FiPrinter, FiDownload } from "react-icons/fi";
 import { formatPrice } from "../utils/utils";
 import { useAuthWithCheck } from "../hooks/useAuth";
+
 const getStatusConfig = (status) => {
   const configs = {
     "Pending Confirmation": {
@@ -10,13 +11,19 @@ const getStatusConfig = (status) => {
       icon: FiClock,
     },
     "In Transit": {
-      label: "Đang vận chuyển", 
+      label: "Đang vận chuyển",
       color: "bg-blue-100 text-blue-800",
       icon: FiTruck,
     },
+
+    "Delivered": {
+      label: "Đã giao hàng",
+      color: "bg-gray-100 text-black",
+      icon: FiCheck,
+    },
     "Returned": {
       label: "Đã trả hàng",
-      color: "bg-gray-100 text-black", 
+      color: "bg-gray-100 text-black",
       icon: FiCheck,
     },
     "Cancelled": {
@@ -31,7 +38,7 @@ const getStatusConfig = (status) => {
 const StatusBadge = ({ status }) => {
   const config = getStatusConfig(status);
   const Icon = config.icon;
-  
+
   return (
     <span className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full font-medium text-sm ${config.color}`}>
       <Icon className="h-4 w-4" />
@@ -40,24 +47,32 @@ const StatusBadge = ({ status }) => {
   );
 };
 
-const OrderTimeline = ({ status }) => {
+const OrderTimeline = ({ status, returnedAt, canceledAt }) => {
+  console.log(status, returnedAt, canceledAt);
+  
+  const getFinalStatus = () => {
+    if (status === "Cancelled" ) return "Cancelled";
+    if (status === "Returned") return "Returned";
+    return "Delivered";
+  };
+
+  const finalStatus = getFinalStatus();
+
   const steps = [
     { id: "Pending Confirmation", label: "Chờ xác nhận", icon: FiClock },
-    { id: "Confirmed", label: "Đã xác nhận", icon: FiCheck },
-    { id: "Processing", label: "Đang xử lý", icon: FiPackage },
     { id: "In Transit", label: "Đang vận chuyển", icon: FiTruck },
-    { id: "Returned", label: "Đã trả hàng", icon: FiCheck },
+    { id: finalStatus, label: getStatusConfig(finalStatus).label, icon: getStatusConfig(finalStatus).icon },
   ];
 
-  const currentStep = steps.findIndex((step) => step.id === status);
+  const currentStep = steps.findIndex((step) => step.id === status || step.id === finalStatus);
 
   return (
     <div className="w-full py-6">
       <div className="relative flex justify-between">
         {steps.map((step, idx) => {
           const Icon = step.icon;
-          const isActive = idx <= currentStep && status !== "Cancelled";
-          const isCompleted = idx < currentStep && status !== "Cancelled";
+          const isActive = idx <= currentStep;
+          const isCompleted = idx < currentStep;
 
           return (
             <div key={step.id} className="flex flex-col items-center flex-1">
@@ -67,7 +82,6 @@ const OrderTimeline = ({ status }) => {
                 <Icon className={`h-5 w-5 ${isActive ? "text-white" : "text-gray-400"}`} />
               </div>
               <div className="mt-2 text-xs text-center text-gray-600">{step.label}</div>
-
             </div>
           );
         })}
@@ -76,11 +90,13 @@ const OrderTimeline = ({ status }) => {
   );
 };
 
+
 const OrderDetailModal = ({ order, onClose }) => {
   const [user, setUser] = useState(null);
   const API = process.env.REACT_APP_API_ENDPOINT;
   const token = localStorage.getItem("token");
   const { checkApiResponse } = useAuthWithCheck();
+
   useEffect(() => {
     const fetchUserInfo = async () => {
       try {
@@ -112,15 +128,12 @@ const OrderDetailModal = ({ order, onClose }) => {
   };
 
   return (
-    <div className="fixed inset-0 z-50 overflow-y-auto z-[9999]" aria-labelledby="modal-title" role="dialog" aria-modal="true">
-      <div className="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
-        {/* Background overlay */}
+    <div className="fixed inset-0 overflow-y-auto z-[9999]" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+      <div className="flex items-end justify-center pt-4 px-4 pb-20 text-center sm:block sm:p-0">
         <div className="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" onClick={handleOverlayClick}></div>
 
-        {/* Modal panel */}
         <div className="inline-block align-bottom bg-white rounded-lg text-left shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-4xl sm:w-full">
           <div className="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
-            {/* Modal header */}
             <div className="flex items-center justify-between border-b pb-4">
               <div>
                 <h3 className="text-lg font-medium leading-6 text-gray-900">
@@ -141,12 +154,9 @@ const OrderDetailModal = ({ order, onClose }) => {
               </div>
             </div>
 
-            {/* Timeline */}
             {order.status !== "Cancelled" && <OrderTimeline status={order.status} />}
 
-            {/* Order details */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
-              {/* Customer info */}
               <div className="space-y-4">
                 <h4 className="text-base font-semibold">Thông tin khách hàng</h4>
                 <div className="space-y-2">
@@ -161,27 +171,25 @@ const OrderDetailModal = ({ order, onClose }) => {
                 </div>
               </div>
 
-              {/* Shipping info */}
               <div className="space-y-4">
                 <h4 className="text-base font-semibold">Thông tin giao hàng</h4>
                 <div className="space-y-2">
-                  <div className="flex items-center gap-2">
-                    <span className="text-gray-500">Địa chỉ:</span>
-                    <span>{order.shipping_address}</span>
+                  <div className="flex gap-2">
+                    <span className="text-gray-500 min-w-24">Địa chỉ:</span>
+                    <span>{order.address}</span>
                   </div>
                   <div className="flex items-center gap-2">
-                    <span className="text-gray-500">Phương thức:</span>
-                    <span>{order.shipping_method}</span>
+                    <span className="text-gray-500 min-w-24">Phương thức:</span>
+                    <span>{order.payment_id === 2 ? 'Thanh toán online' : 'Thanh toán khi nhận hàng'}</span>
                   </div>
                   <div className="flex items-center gap-2">
-                    <span className="text-gray-500">Ghi chú:</span>
+                    <span className="text-gray-500 min-w-24">Ghi chú:</span>
                     <span>{order.note || "Không có"}</span>
                   </div>
                 </div>
               </div>
             </div>
 
-            {/* Product list */}
             <div className="mt-8">
               <h4 className="text-base font-semibold mb-4">Chi tiết sản phẩm</h4>
               <div className="divide-y border rounded-lg">
@@ -206,26 +214,24 @@ const OrderDetailModal = ({ order, onClose }) => {
               </div>
             </div>
 
-            {/* Order summary */}
-            <div className="mt-6 bg-gray-50 rounded-lg p-4 space-y-3">
-              <div className="flex justify-between">
-                <span className="text-gray-500">Phí vận chuyển</span>
-                <span>{formatPrice(order.shipping_fee || 0)}</span>
+            <div className="mt-6 flex justify-between">
+              <div>
+                <p className="text-gray-500">Phí vận chuyển:</p>
+                <p className="text-gray-900 font-medium">{formatPrice(order.shipping_fee)}</p>
               </div>
-              <div className="flex justify-between font-bold">
-                <span>Tổng cộng</span>
-                <span>{formatPrice(order.total)}</span>
+              <div>
+                <p className="text-gray-500">Tổng cộng:</p>
+                <p className="text-gray-900 font-medium">{formatPrice(order.total)}</p>
               </div>
             </div>
           </div>
-
-          {/* Modal footer */}
           <div className="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
             <button
               type="button"
-              className="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm"
+              className="inline-flex w-full justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-black text-base font-medium text-white hover:bg-red-600 sm:ml-3 sm:w-auto sm:text-sm"
               onClick={onClose}
             >
+              <FiX className="h-5 w-5 mr-2" />
               Đóng
             </button>
           </div>

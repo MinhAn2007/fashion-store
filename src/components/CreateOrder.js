@@ -85,8 +85,7 @@ const CreateOrder = () => {
       total: totalAmount,
     };
 
-    setLoading(true);
-
+    setLoading(true);    
     if (orderData.paymentId === 2) {
       try {
         localStorage.setItem("orderData", JSON.stringify(orderData));
