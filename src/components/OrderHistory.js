@@ -2,15 +2,12 @@ import React, { useState, useEffect } from "react";
 import { AiOutlineSearch, AiOutlineEye } from "react-icons/ai";
 import {
   BsBoxSeam,
-  BsTruck,
-  BsCheckCircle,
   BsXCircle,
-  BsClock,
-  BsChevronDown,
-  BsChevronUp,
 } from "react-icons/bs";
+import { BsChevronDown, BsChevronUp } from "react-icons/bs";
 import OrderDetailModal from "./OrderDetailModal";
 import { formatPrice } from "../utils/utils";
+import { Link } from "react-router-dom";
 
 const OrderHistory = () => {
   const [searchTerm, setSearchTerm] = useState("");
@@ -19,10 +16,8 @@ const OrderHistory = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [modalOrder, setModalOrder] = useState(null);
-
   const [currentPage, setCurrentPage] = useState(1);
   const ordersPerPage = 3;
-  const totalPages = Math.ceil(orders.length / ordersPerPage);
 
   const API = process.env.REACT_APP_API_ENDPOINT;
   const userId = localStorage.getItem("userId");
@@ -33,8 +28,6 @@ const OrderHistory = () => {
         const response = await fetch(`${API}/api/orders?userId=${userId}`);
         if (!response.ok) throw new Error("Failed to fetch orders");
         const data = await response.json();
-        console.log(data);
-
         setOrders(data.data.complete);
       } catch (err) {
         setError(err.message);
@@ -46,9 +39,25 @@ const OrderHistory = () => {
     if (userId) fetchOrders();
   }, [userId, API]);
 
-  useEffect(() => {
-    setCurrentPage(1);
-  }, [searchTerm]);
+  // New mapping function for order items
+  const mapOrderItemsForPurchase = (order) => {
+    return order.items.map(item => ({
+      id: item.id,
+      productId: item.product_id,
+      sku: item.sku,
+      skuPrice: item.price,
+      productImage: item.image,
+      quantity: item.quantity,
+      cartItemPrice: parseFloat(item.price),
+      stockQuantity: item.stock_quantity || 0,
+      size: item.size,
+      color: item.color,
+      productName: item.product_name,
+      created_at: order.created_at,
+      isInStock: true, // You might want to check this from your actual stock data
+      checked: true
+    }));
+  };
 
   const statusTranslation = {
     Cancelled: "Đã hủy",
@@ -74,10 +83,9 @@ const OrderHistory = () => {
   };
 
   const filteredOrders = orders
-    .filter(
-      (order) =>
-        String(order.id).includes(searchTerm) ||
-        order.items.some((item) => item.name.includes(searchTerm))
+    .filter(order =>
+      String(order.id).includes(searchTerm) ||
+      order.items.some(item => item.product_name.toLowerCase().includes(searchTerm.toLowerCase()))
     )
     .sort((a, b) => {
       const dateA = new Date(a.created_at);
@@ -85,7 +93,7 @@ const OrderHistory = () => {
       return sortOrder === "desc" ? dateB - dateA : dateA - dateB;
     });
 
-  // Calculate orders for the current page
+  const totalPages = Math.ceil(filteredOrders.length / ordersPerPage);
   const currentOrders = filteredOrders.slice(
     (currentPage - 1) * ordersPerPage,
     currentPage * ordersPerPage
@@ -101,9 +109,7 @@ const OrderHistory = () => {
         <h2 className="text-2xl font-semibold text-gray-900 mb-6">
           Lịch sử mua hàng
         </h2>
-
         <div className="flex flex-col lg:flex-row gap-4">
-          {/* Search Bar */}
           <div className="relative flex-1">
             <input
               type="text"
@@ -114,14 +120,10 @@ const OrderHistory = () => {
             />
             <AiOutlineSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5" />
           </div>
-
-          {/* Sorting */}
           <div className="flex gap-3">
             <button
               className="px-4 flex items-center gap-2 text-sm border border-gray-300 rounded-lg hover:bg-gray-50"
-              onClick={() =>
-                setSortOrder((prev) => (prev === "desc" ? "asc" : "desc"))
-              }
+              onClick={() => setSortOrder(prev => prev === "desc" ? "asc" : "desc")}
             >
               <span>Ngày đặt</span>
               {sortOrder === "desc" ? (
@@ -138,62 +140,45 @@ const OrderHistory = () => {
       <div className="space-y-4">
         {currentOrders.map((order) => {
           const orderDate = new Date(order.created_at);
+          const mappedItems = mapOrderItemsForPurchase(order);
 
           return (
-            <div
-              key={order.id}
-              className="bg-white rounded-lg shadow-sm overflow-hidden"
-            >
-              {/* Order Header */}
+            <div key={order.id} className="bg-white rounded-lg shadow-sm overflow-hidden">
               <div className="p-4 border-b border-gray-100 flex justify-between items-center">
                 <div>
-                  <span className="text-lg font-medium">
-                    Đơn hàng #{order.id}
-                  </span>
+                  <span className="text-lg font-medium">Đơn hàng #{order.id}</span>
                   <div className="text-sm text-gray-500 mt-1">
                     {orderDate.toLocaleString("vi-VN")}
                   </div>
                 </div>
-                <span
-                  className={`px-3 py-1 inline-flex items-center gap-2 text-sm font-medium rounded-full ring-1 ${getStatusColor(
-                    order.status
-                  )}`}
-                >
+                <span className={`px-3 py-1 inline-flex items-center gap-2 text-sm font-medium rounded-full ring-1 ${getStatusColor(order.status)}`}>
                   {getStatusIcon(order.status)}
                   {statusTranslation[order.status]}
                 </span>
               </div>
 
-              {/* Order Items */}
               <div className="p-4">
                 <div className="space-y-4">
                   {order.items.map((item, idx) => (
                     <div key={idx} className="flex items-start">
                       <img
                         src={item.image}
-                        alt={item.name}
+                        alt={item.product_name}
                         className="w-16 h-16 object-cover rounded-md"
                       />
                       <div className="ml-4 flex-1">
                         <h4 className="font-medium">{item.product_name}</h4>
-                        <p className="text-sm text-gray-600">
-                          Số lượng: {item.quantity}
-                        </p>
-                        <p className="text-sm font-medium text-gray-900">
-                          {formatPrice(item.price)}
-                        </p>
+                        <p className="text-sm text-gray-600">Số lượng: {item.quantity}</p>
+                        <p className="text-sm font-medium text-gray-900">{formatPrice(item.price)}</p>
                       </div>
                     </div>
                   ))}
                 </div>
 
-                {/* Order Footer */}
                 <div className="mt-4 pt-4 border-t border-gray-100 flex justify-between items-center">
                   <div>
                     <span className="text-sm text-gray-600">Tổng tiền:</span>
-                    <span className="ml-2 text-lg font-semibold">
-                      {formatPrice(order.total)}
-                    </span>
+                    <span className="ml-2 text-lg font-semibold">{formatPrice(order.total)}</span>
                   </div>
 
                   <div className="flex gap-3">
@@ -204,11 +189,17 @@ const OrderHistory = () => {
                       <AiOutlineEye className="inline-block mr-2" />
                       Chi tiết
                     </button>
-                    <button
-                      className="px-4 py-2 text-sm font-medium text-white bg-black hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
+                    <Link
+                      to="/order"
+                      state={{
+                        cartItems: mappedItems,
+                        totalPrice: order.total,
+                      }}
                     >
-                      Mua lại
-                    </button>
+                      <button className="px-4 py-2 text-sm font-medium text-white bg-black hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500">
+                        Mua lại
+                      </button>
+                    </Link>
                   </div>
                 </div>
               </div>
@@ -226,11 +217,9 @@ const OrderHistory = () => {
       {/* Pagination Controls */}
       <div className="flex justify-center space-x-4 mt-6">
         <button
-          onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+          onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
           disabled={currentPage === 1}
-          className={`px-4 py-2 rounded-md ${
-            currentPage === 1 ? "bg-gray-200" : "bg-black text-white"
-          }`}
+          className={`px-4 py-2 rounded-md ${currentPage === 1 ? "bg-gray-200" : "bg-black text-white"}`}
         >
           Trang trước
         </button>
@@ -238,13 +227,9 @@ const OrderHistory = () => {
           Trang {currentPage} / {totalPages}
         </span>
         <button
-          onClick={() =>
-            setCurrentPage((prev) => Math.min(prev + 1, totalPages))
-          }
+          onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
           disabled={currentPage === totalPages}
-          className={`px-4 py-2 rounded-md ${
-            currentPage === totalPages ? "bg-gray-200" : "bg-black text-white"
-          }`}
+          className={`px-4 py-2 rounded-md ${currentPage === totalPages ? "bg-gray-200" : "bg-black text-white"}`}
         >
           Trang sau
         </button>

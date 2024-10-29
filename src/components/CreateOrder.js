@@ -18,6 +18,9 @@ import { BsCurrencyDollar } from "react-icons/bs";
 const CreateOrder = () => {
   const location = useLocation();
   const { cartItems } = location.state || { cartItems: [], totalPrice: 0 };
+
+  console.log("Cart Items:", cartItems);
+  
   const navigate = useNavigate();
 
   const [userInfo, setUserInfo] = useState(null);
