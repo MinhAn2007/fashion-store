@@ -49,12 +49,11 @@ const OrderHistory = () => {
       productImage: item.image,
       quantity: item.quantity,
       cartItemPrice: parseFloat(item.price),
-      stockQuantity: item.stock_quantity || 0,
       size: item.size,
       color: item.color,
       productName: item.product_name,
       created_at: order.created_at,
-      isInStock: true, // You might want to check this from your actual stock data
+      isInStock: item.isInStock,
       checked: true
     }));
   };
