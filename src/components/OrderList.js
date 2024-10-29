@@ -10,6 +10,7 @@ import {
   BsChevronUp,
 } from "react-icons/bs";
 import OrderDetailModal from "./OrderDetailModal";
+import CancelOrderModal from "./CancelOrderModal";
 import { formatPrice } from "../utils/utils";
 
 const OrderList = () => {
@@ -27,6 +28,15 @@ const OrderList = () => {
 
   const API = process.env.REACT_APP_API_ENDPOINT;
   const userId = localStorage.getItem("userId");
+
+  const [showCancelModal, setShowCancelModal] = useState(false);
+  const [orderToCancel, setOrderToCancel] = useState(null);
+
+  const handleCancelOrder = (orderId) => {
+    setOrderToCancel(orders.find((order) => order.id === orderId));
+    setShowCancelModal(true);
+  };
+
 
   useEffect(() => {
     const fetchOrders = async () => {
@@ -52,6 +62,7 @@ const OrderList = () => {
   const statusTranslation = {
     "Pending Confirmation": "Chờ xác nhận",
     "In Transit": "Đang vận chuyển",
+    Delivered: "Đã giao hàng",
     Returned: "Đã trả hàng",
     Cancelled: "Đã hủy",
   };
@@ -83,18 +94,6 @@ const OrderList = () => {
         return "bg-red-50 text-red-600 ring-red-500/30";
       default:
         return "bg-gray-50 text-gray-600 ring-gray-500/30";
-    }
-  };
-
-  const handleCancelOrder = async (orderId) => {
-    try {
-      const response = await fetch(`${API}/api/orders/${orderId}/cancel`, {
-        method: "POST",
-      });
-      if (!response.ok) throw new Error("Failed to cancel order");
-      setOrders(orders.filter((order) => order.id !== orderId));
-    } catch (err) {
-      setError(err.message);
     }
   };
 
@@ -306,6 +305,13 @@ const OrderList = () => {
         <OrderDetailModal
           order={modalOrder}
           onClose={() => setModalOrder(null)}
+        />
+      )}
+
+      {showCancelModal && (
+        <CancelOrderModal
+          order={orderToCancel}
+          onClose={() => setShowCancelModal(false)}
         />
       )}
     </div>
