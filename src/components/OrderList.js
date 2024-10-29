@@ -20,6 +20,11 @@ const OrderList = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [modalOrder, setModalOrder] = useState(null);
+
+  const [currentPage, setCurrentPage] = useState(1);
+  const ordersPerPage = 3;
+  const totalPages = Math.ceil(orders.length / ordersPerPage);
+
   const API = process.env.REACT_APP_API_ENDPOINT;
   const userId = localStorage.getItem("userId");
 
@@ -39,6 +44,10 @@ const OrderList = () => {
 
     if (userId) fetchOrders();
   }, [userId, API]);
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm, statusFilter]);
 
   const statusTranslation = {
     "Pending Confirmation": "Chờ xác nhận",
@@ -102,11 +111,17 @@ const OrderList = () => {
       return sortOrder === "desc" ? dateB - dateA : dateA - dateB;
     });
 
+  // Calculate orders for the current page
+  const currentOrders = filteredOrders.slice(
+    (currentPage - 1) * ordersPerPage,
+    currentPage * ordersPerPage
+  );
+
   if (loading) return <div className="text-center p-8">Loading...</div>;
   if (error) return <div className="text-center text-red-600 p-8">{error}</div>;
 
   return (
-    <div className="max-w-7xl mx-auto p-4">
+    <div className="max-w-7xl mx-auto p-4 min-h-[600px]">
       {/* Header Section */}
       <div className="bg-white rounded-lg shadow-sm p-6 mb-6">
         <h2 className="text-2xl font-semibold text-gray-900 mb-6">
@@ -160,7 +175,7 @@ const OrderList = () => {
 
       {/* Orders List */}
       <div className="space-y-4">
-        {filteredOrders.map((order) => {
+        {currentOrders.map((order) => {
           const orderDate = new Date(order.created_at);
           const currentTime = new Date();
           const timeDiff = Math.floor((currentTime - orderDate) / 1000 / 60);
@@ -258,6 +273,33 @@ const OrderList = () => {
             <p className="text-gray-500">Không tìm thấy đơn hàng nào</p>
           </div>
         )}
+      </div>
+
+      {/* Pagination Controls */}
+      <div className="flex justify-center space-x-4 mt-6">
+        <button
+          onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+          disabled={currentPage === 1}
+          className={`px-4 py-2 rounded-md ${
+            currentPage === 1 ? "bg-gray-200" : "bg-black text-white"
+          }`}
+        >
+          Trang trước
+        </button>
+        <span className="text-gray-700">
+          Trang {currentPage} / {totalPages}
+        </span>
+        <button
+          onClick={() =>
+            setCurrentPage((prev) => Math.min(prev + 1, totalPages))
+          }
+          disabled={currentPage === totalPages}
+          className={`px-4 py-2 rounded-md ${
+            currentPage === totalPages ? "bg-gray-200" : "bg-black text-white"
+          }`}
+        >
+          Trang sau
+        </button>
       </div>
 
       {modalOrder && (

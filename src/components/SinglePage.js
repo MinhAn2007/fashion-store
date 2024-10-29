@@ -215,7 +215,7 @@ const SinglePage = () => {
           </p>{" "}
           <div className="flex flex-col gap-4">
             <p className="text-md font-bold">
-              Giá:
+              Giá: {""}
               {formatPrice(
                 selectedVariant ? selectedVariant.price : product.skus[0].price
               )}

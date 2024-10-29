@@ -48,11 +48,9 @@ const StatusBadge = ({ status }) => {
 };
 
 const OrderTimeline = ({ status, returnedAt }) => {
-  console.log(status, returnedAt);
-  
   const getFinalStatus = () => {
     if (status === "Cancelled") return "Cancelled";
-    if (returnedAt) return "Delivered"; 
+    if (returnedAt) return "Returned"; // Highlight both 'In Transit' and 'Returned'
     return "Delivered";
   };
 
@@ -60,14 +58,16 @@ const OrderTimeline = ({ status, returnedAt }) => {
 
   // Adjust the order based on the status and returned time
   const steps = [
+    { id: "Pending Confirmation", label: "Chờ xác nhận", icon: FiClock },
+    { id: "In Transit", label: "Đang vận chuyển", icon: FiTruck },
     returnedAt
       ? { id: "Returned", label: getStatusConfig("Returned").label, icon: getStatusConfig("Returned").icon }
-      : { id: "Pending Confirmation", label: "Chờ xác nhận", icon: FiClock },
-    { id: "In Transit", label: "Đang vận chuyển", icon: FiTruck },
-    { id: finalStatus, label: getStatusConfig(finalStatus).label, icon: getStatusConfig(finalStatus).icon },
+      : { id: finalStatus, label: getStatusConfig(finalStatus).label, icon: getStatusConfig(finalStatus).icon },
   ];
 
-  const currentStep = steps.findIndex((step) => step.id === status || step.id === finalStatus);
+  const currentStep = steps.findIndex(
+    (step) => (returnedAt && step.id === "Returned") || step.id === status
+  );
 
   return (
     <div className="w-full py-6">
@@ -151,9 +151,6 @@ const OrderDetailModal = ({ order, onClose }) => {
               </div>
               <div className="flex items-center gap-3">
                 <StatusBadge status={order.status} />
-                <button className="p-2 hover:bg-gray-100 rounded-full" title="In hóa đơn">
-                  <FiPrinter className="h-5 w-5 text-gray-500" />
-                </button>
                 <button className="p-2 hover:bg-gray-100 rounded-full" title="Tải PDF">
                   <FiDownload className="h-5 w-5 text-gray-500" />
                 </button>
@@ -181,17 +178,33 @@ const OrderDetailModal = ({ order, onClose }) => {
                 <h4 className="text-base font-semibold">Thông tin giao hàng</h4>
                 <div className="space-y-2">
                   <div className="flex gap-2">
-                    <span className="text-gray-500 min-w-24">Địa chỉ:</span>
+                    <span className="text-gray-500 min-w-28">Địa chỉ:</span>
                     <span>{order.address}</span>
                   </div>
                   <div className="flex items-center gap-2">
-                    <span className="text-gray-500 min-w-24">Phương thức:</span>
-                    <span>{order.payment_id === 2 ? 'Thanh toán online' : 'Thanh toán khi nhận hàng'}</span>
+                    <span className="text-gray-500 min-w-28">Phương thức:</span>
+                    <span>{order.payment_id === 2 ? 'Thanh toán online ( được giảm 50.000d )' : 'Thanh toán khi nhận hàng'}</span>
                   </div>
                   <div className="flex items-center gap-2">
-                    <span className="text-gray-500 min-w-24">Ghi chú:</span>
+                    <span className="text-gray-500 min-w-28">Ghi chú:</span>
                     <span>{order.note || "Không có"}</span>
                   </div>
+                  {
+                    order.status === "Cancelled" && (
+                      <div className="flex items-center gap-2">
+                        <span className="text-gray-500 min-w-28">Lý do hủy hàng:</span>
+                        <span>{order.cancel_reason || "Không có"}</span>
+                      </div>
+                    )
+                  }
+                  {
+                    (order.status === "Returned" || order.return_reason || order.returned_at) && (
+                      <div className="flex items-center gap-2">
+                        <span className="text-gray-500 min-w-28">Lý do trả hàng:</span>
+                        <span>{order.return_reason || "Không có"}</span>
+                      </div>
+                    )
+                  }
                 </div>
               </div>
             </div>
