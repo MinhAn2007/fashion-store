@@ -1,13 +1,11 @@
 import React, { useState, useEffect } from "react";
 import { AiOutlineSearch, AiOutlineEye } from "react-icons/ai";
-import {
-  BsBoxSeam,
-  BsXCircle,
-} from "react-icons/bs";
+import { BsBoxSeam, BsXCircle } from "react-icons/bs";
 import { BsChevronDown, BsChevronUp } from "react-icons/bs";
 import OrderDetailModal from "./OrderDetailModal";
 import { formatPrice } from "../utils/utils";
 import { Link } from "react-router-dom";
+import { Loader } from "rizzui";
 
 const OrderHistory = () => {
   const [searchTerm, setSearchTerm] = useState("");
@@ -41,7 +39,7 @@ const OrderHistory = () => {
 
   // New mapping function for order items
   const mapOrderItemsForPurchase = (order) => {
-    return order.items.map(item => ({
+    return order.items.map((item) => ({
       id: item.id,
       productId: item.product_id,
       sku: item.sku,
@@ -54,7 +52,7 @@ const OrderHistory = () => {
       productName: item.product_name,
       created_at: order.created_at,
       isInStock: item.isInStock,
-      checked: true
+      checked: true,
     }));
   };
 
@@ -82,9 +80,12 @@ const OrderHistory = () => {
   };
 
   const filteredOrders = orders
-    .filter(order =>
-      String(order.id).includes(searchTerm) ||
-      order.items.some(item => item.product_name.toLowerCase().includes(searchTerm.toLowerCase()))
+    .filter(
+      (order) =>
+        String(order.id).includes(searchTerm) ||
+        order.items.some((item) =>
+          item.product_name.toLowerCase().includes(searchTerm.toLowerCase())
+        )
     )
     .sort((a, b) => {
       const dateA = new Date(a.created_at);
@@ -98,7 +99,17 @@ const OrderHistory = () => {
     currentPage * ordersPerPage
   );
 
-  if (loading) return <div className="text-center p-8">Loading...</div>;
+  if (loading)
+    return (
+      <div className="flex justify-center mx-auto min-h-[700px]">
+        <Loader
+          size="md"
+          width={200}
+          height={200}
+          className="text-center my-40"
+        />
+      </div>
+    );
   if (error) return <div className="text-center text-red-600 p-8">{error}</div>;
 
   return (
@@ -122,7 +133,9 @@ const OrderHistory = () => {
           <div className="flex gap-3">
             <button
               className="px-4 flex items-center gap-2 text-sm border border-gray-300 rounded-lg hover:bg-gray-50"
-              onClick={() => setSortOrder(prev => prev === "desc" ? "asc" : "desc")}
+              onClick={() =>
+                setSortOrder((prev) => (prev === "desc" ? "asc" : "desc"))
+              }
             >
               <span>Ngày đặt</span>
               {sortOrder === "desc" ? (
@@ -142,15 +155,24 @@ const OrderHistory = () => {
           const mappedItems = mapOrderItemsForPurchase(order);
 
           return (
-            <div key={order.id} className="bg-white rounded-lg shadow-sm overflow-hidden">
+            <div
+              key={order.id}
+              className="bg-white rounded-lg shadow-sm overflow-hidden"
+            >
               <div className="p-4 border-b border-gray-100 flex justify-between items-center">
                 <div>
-                  <span className="text-lg font-medium">Đơn hàng #{order.id}</span>
+                  <span className="text-lg font-medium">
+                    Đơn hàng #{order.id}
+                  </span>
                   <div className="text-sm text-gray-500 mt-1">
                     {orderDate.toLocaleString("vi-VN")}
                   </div>
                 </div>
-                <span className={`px-3 py-1 inline-flex items-center gap-2 text-sm font-medium rounded-full ring-1 ${getStatusColor(order.status)}`}>
+                <span
+                  className={`px-3 py-1 inline-flex items-center gap-2 text-sm font-medium rounded-full ring-1 ${getStatusColor(
+                    order.status
+                  )}`}
+                >
                   {getStatusIcon(order.status)}
                   {statusTranslation[order.status]}
                 </span>
@@ -167,8 +189,12 @@ const OrderHistory = () => {
                       />
                       <div className="ml-4 flex-1">
                         <h4 className="font-medium">{item.product_name}</h4>
-                        <p className="text-sm text-gray-600">Số lượng: {item.quantity}</p>
-                        <p className="text-sm font-medium text-gray-900">{formatPrice(item.price)}</p>
+                        <p className="text-sm text-gray-600">
+                          Số lượng: {item.quantity}
+                        </p>
+                        <p className="text-sm font-medium text-gray-900">
+                          {formatPrice(item.price)}
+                        </p>
                       </div>
                     </div>
                   ))}
@@ -177,7 +203,9 @@ const OrderHistory = () => {
                 <div className="mt-4 pt-4 border-t border-gray-100 flex justify-between items-center">
                   <div>
                     <span className="text-sm text-gray-600">Tổng tiền:</span>
-                    <span className="ml-2 text-lg font-semibold">{formatPrice(order.total)}</span>
+                    <span className="ml-2 text-lg font-semibold">
+                      {formatPrice(order.total)}
+                    </span>
                   </div>
 
                   <div className="flex gap-3">
@@ -216,9 +244,11 @@ const OrderHistory = () => {
       {/* Pagination Controls */}
       <div className="flex justify-center space-x-4 mt-6">
         <button
-          onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+          onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
           disabled={currentPage === 1}
-          className={`px-4 py-2 rounded-md ${currentPage === 1 ? "bg-gray-200" : "bg-black text-white"}`}
+          className={`px-4 py-2 rounded-md ${
+            currentPage === 1 ? "bg-gray-200" : "bg-black text-white"
+          }`}
         >
           Trang trước
         </button>
@@ -226,9 +256,13 @@ const OrderHistory = () => {
           Trang {currentPage} / {totalPages}
         </span>
         <button
-          onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+          onClick={() =>
+            setCurrentPage((prev) => Math.min(prev + 1, totalPages))
+          }
           disabled={currentPage === totalPages}
-          className={`px-4 py-2 rounded-md ${currentPage === totalPages ? "bg-gray-200" : "bg-black text-white"}`}
+          className={`px-4 py-2 rounded-md ${
+            currentPage === totalPages ? "bg-gray-200" : "bg-black text-white"
+          }`}
         >
           Trang sau
         </button>

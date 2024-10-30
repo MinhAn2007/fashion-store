@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from "react";
 import OurBestSellers from "./OurBestSellers";
-import { formatPrice } from "../utils/utils.js"; // Import formatPrice from utils
+import { formatPrice } from "../utils/utils.js"; 
+import { Loader } from "rizzui";
+
 const Products = () => {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -57,7 +59,16 @@ const Products = () => {
   }, [API]);
 
   if (loading) {
-    return <p>Loading...</p>;
+    return (
+      <div className="flex justify-center mx-auto min-h-[700px]">
+        <Loader
+          size="md"
+          width={200}
+          height={200}
+          className="text-center my-40"
+        />
+      </div>
+    );
   }
 
   if (error) {

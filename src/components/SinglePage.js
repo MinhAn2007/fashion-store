@@ -2,12 +2,12 @@ import React, { useEffect, useState } from "react";
 import { AiFillStar } from "react-icons/ai";
 import { useParams, useNavigate, useLocation } from "react-router-dom";
 import { useDispatch } from "react-redux";
-import { cartActions } from "../redux-state/CartState";
 import { useToast } from "@chakra-ui/react";
 import BreadCrumb from "./BreadCrumb";
-import Modal from "react-modal";
 import { useAuthWithCheck } from "../hooks/useAuth";
 import { formatPrice } from "../utils/utils";
+import { Loader } from "rizzui";
+
 const colorMap = {
   Đỏ: "#FF0000",
   Xanh: "#0000FF",
@@ -150,9 +150,18 @@ const SinglePage = () => {
     }
   };
 
-  if (!product) return <div>Loading...</div>;
+  if (!product)
+    return (
+      <div className="flex justify-center mx-auto min-h-[700px]">
+        <Loader
+          size="md"
+          width={200}
+          height={200}
+          className="text-center my-40"
+        />
+      </div>
+    );
 
-  // Lấy danh sách màu sắc không trùng lặp cho kích thước đã chọn
   const availableColors = Array.from(
     new Set(
       product.skus

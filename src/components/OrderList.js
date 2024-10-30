@@ -12,6 +12,7 @@ import {
 import OrderDetailModal from "./OrderDetailModal";
 import CancelOrderModal from "./CancelOrderModal";
 import { formatPrice } from "../utils/utils";
+import { Loader } from "rizzui";
 
 const OrderList = () => {
   const [searchTerm, setSearchTerm] = useState("");
@@ -36,7 +37,6 @@ const OrderList = () => {
     setOrderToCancel(orders.find((order) => order.id === orderId));
     setShowCancelModal(true);
   };
-
 
   useEffect(() => {
     const fetchOrders = async () => {
@@ -115,8 +115,17 @@ const OrderList = () => {
     (currentPage - 1) * ordersPerPage,
     currentPage * ordersPerPage
   );
-
-  if (loading) return <div className="text-center p-8">Loading...</div>;
+  if (loading)
+    return (
+      <div className="flex justify-center mx-auto min-h-[700px]">
+        <Loader
+          size="md"
+          width={200}
+          height={200}
+          className="text-center my-40"
+        />
+      </div>
+    );
   if (error) return <div className="text-center text-red-600 p-8">{error}</div>;
 
   return (

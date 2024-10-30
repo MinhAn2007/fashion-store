@@ -294,6 +294,9 @@ const OrderDetailModal = ({ order, onClose }) => {
                         <p className="text-sm text-gray-500">
                           {formatPrice(item.price)} x {item.quantity}
                         </p>
+                        <p className="text-sm text-gray-500">
+                         Size: {item.size} | Màu: {item.color}
+                        </p>
                       </div>
                     </div>
                     <p className="font-medium">

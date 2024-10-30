@@ -18,6 +18,7 @@ import { useAuthWithCheck } from "../hooks/useAuth";
 import { Button } from "rizzui";
 import { formatPrice } from "../utils/utils.js"; // Import formatPrice from utils
 import { Link } from "react-router-dom";
+import { Loader } from "rizzui";
 
 const CartHold = () => {
   const [cartItems, setCartItems] = useState([]);
@@ -133,16 +134,17 @@ const CartHold = () => {
       [item.id]: item.quantity,
     }));
 
-    const updatedItems = cartItems
-      .map((cartItem) =>
-        cartItem.id === item.id
-          ? { ...cartItem, quantity: newQuantity }
-          : cartItem
-      );
+    const updatedItems = cartItems.map((cartItem) =>
+      cartItem.id === item.id
+        ? { ...cartItem, quantity: newQuantity }
+        : cartItem
+    );
     console.log(updatedItems);
 
     updateCartQuantity(
-      updatedItems.filter((cartItem) => cartItem.isInStock === true).reduce((total, item) => total + item.quantity, 0)
+      updatedItems
+        .filter((cartItem) => cartItem.isInStock === true)
+        .reduce((total, item) => total + item.quantity, 0)
     );
 
     setCartItems(updatedItems);
@@ -217,10 +219,20 @@ const CartHold = () => {
     setSelectedItem(null);
   };
 
-  if (loading) return <p>Loading...</p>;
+  if (loading)
+    return (
+      <div className="flex justify-center mx-auto min-h-[700px]">
+        <Loader
+          size="md"
+          width={200}
+          height={200}
+          className="text-center my-40"
+        />
+      </div>
+    );
 
   return (
-    <div className="min-h-[530px]">
+    <div className="min-h-[650px]">
       <MobileNav />
       {cartItems.length === 0 ? (
         <EmptyCart />
@@ -258,9 +270,7 @@ const CartHold = () => {
                       Màu sắc: {item.color} | Kích thước: {item.size}
                     </p>
                   </div>
-                  <p className="text-lg">
-                    {formatPrice(item.skuPrice)}
-                  </p>
+                  <p className="text-lg">{formatPrice(item.skuPrice)}</p>
                   <div className="flex items-center">
                     {!item.isInStock ? (
                       <span className="text-red-500 text-lg">Hết hàng</span>

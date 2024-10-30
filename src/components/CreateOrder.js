@@ -167,11 +167,11 @@ const CreateOrder = () => {
 
   if (loading)
     return (
-      <div className="flex justify-center mx-auto">
+      <div className="flex justify-center mx-auto min-h-[700px]">
         <Loader
-          size="lg"
-          width={300}
-          height={300}
+          size="md"
+          width={200}
+          height={200}
           className="text-center my-40"
         />
       </div>
