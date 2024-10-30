@@ -38,6 +38,28 @@ const OrderList = () => {
     setShowCancelModal(true);
   };
 
+  const handleCompleteOrder = async (orderId) => {
+    try {
+      const response = await fetch(`${API}/api/orders/${orderId}/complete`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ status: "Completed" }),
+      });
+
+      if (!response.ok) throw new Error("Failed to complete order");
+
+      setOrders(
+        orders.map((order) =>
+          order.id === orderId ? { ...order, status: "Completed" } : order
+        )
+      );
+    } catch (err) {
+      console.error("Error completing order:", err);
+    }
+  };
+
   useEffect(() => {
     const fetchOrders = async () => {
       try {
@@ -64,7 +86,6 @@ const OrderList = () => {
     "In Transit": "Đang vận chuyển",
     Delivered: "Đã giao hàng",
     Returned: "Đã trả hàng",
-    Cancelled: "Đã hủy",
   };
 
   const getStatusIcon = (status) => {
@@ -77,6 +98,8 @@ const OrderList = () => {
         return <BsCheckCircle className="w-5 h-5 text-black" />;
       case "Cancelled":
         return <BsXCircle className="w-5 h-5 text-red-500" />;
+      case "Completed":
+        return <BsCheckCircle className="w-5 h-5 text-green-500" />;
       default:
         return <BsBoxSeam className="w-5 h-5 text-gray-500" />;
     }
@@ -92,6 +115,8 @@ const OrderList = () => {
         return "bg-green-50 text-green-600 ring-green-500/30";
       case "Cancelled":
         return "bg-red-50 text-red-600 ring-red-500/30";
+      case "Completed":
+        return "bg-green-50 text-green-600 ring-green-500/30";
       default:
         return "bg-gray-50 text-gray-600 ring-gray-500/30";
     }
@@ -115,6 +140,7 @@ const OrderList = () => {
     (currentPage - 1) * ordersPerPage,
     currentPage * ordersPerPage
   );
+
   if (loading)
     return (
       <div className="flex justify-center mx-auto min-h-[700px]">
@@ -129,7 +155,7 @@ const OrderList = () => {
   if (error) return <div className="text-center text-red-600 p-8">{error}</div>;
 
   return (
-    <div className="max-w-7xl mx-auto p-4 min-h-[600px]">
+    <div className="max-w-7xl mx-auto p-4 min-h-[600px] mb-6">
       {/* Header Section */}
       <div className="bg-white rounded-lg shadow-sm p-6 mb-6">
         <h2 className="text-2xl font-semibold text-gray-900 mb-6">
@@ -269,6 +295,14 @@ const OrderList = () => {
                           Hủy đơn
                         </button>
                       )}
+                    {order.status === "Delivered" && (
+                      <button
+                        className="px-4 py-2 text-sm font-medium text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
+                        onClick={() => handleCompleteOrder(order.id)}
+                      >
+                        Hoàn thành đơn hàng
+                      </button>
+                    )}
                   </div>
                 </div>
               </div>
@@ -320,7 +354,10 @@ const OrderList = () => {
       {showCancelModal && (
         <CancelOrderModal
           order={orderToCancel}
-          onClose={() => setShowCancelModal(false)}
+          onClose={() => {
+            setShowCancelModal(false);
+            setOrderToCancel(null);
+          }}
         />
       )}
     </div>
