@@ -15,6 +15,7 @@ import ReturnOrderModal from "./ReturnOrderModal";
 import { formatPrice, downloadPDF } from "../utils/utils";
 import { Loader } from "rizzui";
 import { useAuthWithCheck } from "../hooks/useAuth";
+import { useNavigate } from "react-router-dom";
 
 const OrderList = () => {
   const [searchTerm, setSearchTerm] = useState("");
@@ -31,7 +32,7 @@ const OrderList = () => {
 
   const API = process.env.REACT_APP_API_ENDPOINT;
   const userId = localStorage.getItem("userId");
-
+  const navigate = useNavigate();
   const [showCancelModal, setShowCancelModal] = useState(false);
   const [orderToCancel, setOrderToCancel] = useState(null);
   const [showReturnModal, setShowReturnModal] = useState(false);
@@ -45,7 +46,25 @@ const OrderList = () => {
     setOrderToCancel(orders.find((order) => order.id === orderId));
     setShowCancelModal(true);
   };
-
+  const handleReview = (order) => {
+    console.log("order", order);
+    
+    navigate("/review", {
+      state: {
+        cartItems: order.items.map((item) => ({
+          orderId : order.id,
+          id: item.id,
+          productId: item.product_id,
+          productName: item.product_name,
+          productImage: item.image,
+          size: item.size,
+          color: item.color,
+          quantity: item.quantity,
+          cartItemPrice: parseFloat(item.price),
+        })),
+      },
+    });
+  };
   const handleCompleteOrder = async (orderId) => {
     try {
       const response = await fetch(`${API}/api/orders/${orderId}/complete`, {
@@ -306,17 +325,23 @@ const OrderList = () => {
                     {order.status === "Delivered" && (
                       <>
                         <button
-                          className="px-4 py-2 text-sm font-medium text-white bg-gray-800 hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-600"
+                          className="px-4 py-2 text-sm font-medium text-black bg-white hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-600"
                           onClick={() => handleCompleteOrder(order.id)}
                         >
                           Hoàn thành đơn hàng
                         </button>
                         <button
-                          className="px-4 py-2 text-sm font-medium text-white bg-red-600 hover:bg-red-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
+                          className="px-4 py-2 text-sm font-medium text-white bg-black hover:bg-opacity-30 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
                           onClick={() => handleReturnOrder(order.id)}
                         >
                           Trả hàng
                         </button>
+                        <button
+                          className="px-4 py-2 text-sm font-medium text-white bg-black hover:bg-opacity-30 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
+                          onClick={() => handleReview(order)}
+                        >
+                          Đánh giá sản phẩm
+                        </button>{" "}
                       </>
                     )}
                   </div>

@@ -22,15 +22,12 @@ const OrderHistory = () => {
   const [modalOrder, setModalOrder] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
   const ordersPerPage = 3;
+  const [statusFilter, setStatusFilter] = useState("all");
 
   const API = process.env.REACT_APP_API_ENDPOINT;
   const userId = localStorage.getItem("userId");
-  const [statusFilter, setStatusFilter] = useState("all");
   const { checkApiResponse } = useAuthWithCheck();
 
-  useEffect(() => {
-    setCurrentPage(1);
-  }, [searchTerm, statusFilter]);
   useEffect(() => {
     const fetchOrders = async () => {
       try {
@@ -39,8 +36,6 @@ const OrderHistory = () => {
         const data = await response.json();
         checkApiResponse(data);
         setOrders(data.data.complete);
-        console.log(data.data.complete);
-        
       } catch (err) {
         setError(err.message);
       } finally {
@@ -101,21 +96,21 @@ const OrderHistory = () => {
     }
   };
 
-  const filteredOrders = orders
-    .filter(
-      (order) =>
-        (statusFilter === "all" || order.status === statusFilter) &&
-        (String(order.id).includes(searchTerm) ||
-          order.items.some((item) => item.name.includes(searchTerm)))
-    )
-    .sort((a, b) => {
-      const dateA = new Date(a.created_at);
-      const dateB = new Date(b.created_at);
-      return sortOrder === "desc" ? dateB - dateA : dateA - dateB;
-    });
+  const filteredOrders = orders.filter(
+    (order) =>
+      (statusFilter === "all" || order.status === statusFilter) &&
+      (String(order.id).includes(searchTerm) ||
+        order.items.some((item) => item.name.includes(searchTerm)))
+  );
 
-  const totalPages = Math.ceil(filteredOrders.length / ordersPerPage);
-  const currentOrders = filteredOrders.slice(
+  const sortedOrders = filteredOrders.sort((a, b) => {
+    const dateA = new Date(a.created_at);
+    const dateB = new Date(b.created_at);
+    return sortOrder === "desc" ? dateB - dateA : dateA - dateB;
+  });
+
+  const totalPages = Math.ceil(sortedOrders.length / ordersPerPage);
+  const currentOrders = sortedOrders.slice(
     (currentPage - 1) * ordersPerPage,
     currentPage * ordersPerPage
   );
@@ -152,7 +147,7 @@ const OrderHistory = () => {
             <AiOutlineSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5" />
           </div>
           <div className="flex gap-3">
-           <select
+            <select
               className="h-10 px-4 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value)}
@@ -315,7 +310,7 @@ const OrderHistory = () => {
           );
         })}
 
-        {filteredOrders.length === 0 && (
+        {sortedOrders.length === 0 && (
           <div className="text-center py-8 bg-white rounded-lg">
             <p className="text-gray-500">Không tìm thấy đơn hàng nào</p>
           </div>

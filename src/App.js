@@ -23,6 +23,7 @@ import CreateOrder from "./components/CreateOrder";
 import ResultVNPAYPage from "./components/VNPayResult";
 import OrderList from "./components/OrderList";
 import OrderHistory from "./components/OrderHistory";
+import ProductReview from "./components/ReviewOrder";
 
 function App() {
   return (
@@ -175,6 +176,16 @@ function App() {
               <>
                 <NavBar />
                 <OrderHistory/>
+                <SPFooter />
+              </>
+            }
+          />
+           <Route 
+            path="/review" 
+            element={
+              <>
+                <NavBar />
+                <ProductReview/>
                 <SPFooter />
               </>
             }

@@ -18,7 +18,7 @@ const CartTotal = (props) => {
   return (
     <div className="shadow-[0_6px_16px_rgba(0,0,0,0.12)] bg-white border-2 border-whitesmoke w-72 h-[37rem] rounded-lg absolute right-0 mr-40 top-64">
       <div className="flex flex-row gap-36 font-semibold text-2xl mt-8 mobTextSize gap6rem">
-        <p className=" ml-14"> SUBTOTAL </p>
+        <p className=" ml-14"> Tạm Tính </p>
         <p> ${Math.round(props.totalPr)} </p>
       </div>
 
