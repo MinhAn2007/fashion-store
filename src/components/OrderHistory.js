@@ -1,7 +1,12 @@
 import React, { useState, useEffect } from "react";
 import { AiOutlineSearch, AiOutlineEye } from "react-icons/ai";
-import { BsBoxSeam, BsXCircle } from "react-icons/bs";
-import { BsChevronDown, BsChevronUp } from "react-icons/bs";
+import {
+  BsBoxSeam,
+  BsXCircle,
+  BsChevronDown,
+  BsChevronUp,
+  BsExclamationOctagon as AlertCircle,
+} from "react-icons/bs";
 import OrderDetailModal from "./OrderDetailModal";
 import { formatPrice } from "../utils/utils";
 import { Link } from "react-router-dom";
@@ -54,6 +59,14 @@ const OrderHistory = () => {
       isInStock: item.isInStock,
       checked: true,
     }));
+  };
+
+  const checkOutOfStockItems = (items) => {
+    const outOfStockItems = items.filter((item) => !item.isInStock);
+    return {
+      hasOutOfStock: outOfStockItems.length > 0,
+      outOfStockItems,
+    };
   };
 
   const statusTranslation = {
@@ -153,6 +166,8 @@ const OrderHistory = () => {
         {currentOrders.map((order) => {
           const orderDate = new Date(order.created_at);
           const mappedItems = mapOrderItemsForPurchase(order);
+          const { hasOutOfStock, outOfStockItems } =
+            checkOutOfStockItems(mappedItems);
 
           return (
             <div
@@ -179,27 +194,59 @@ const OrderHistory = () => {
               </div>
 
               <div className="p-4">
-                <div className="space-y-4">
-                  {order.items.map((item, idx) => (
-                    <div key={idx} className="flex items-start">
-                      <img
-                        src={item.image}
-                        alt={item.product_name}
-                        className="w-16 h-16 object-cover rounded-md"
-                      />
-                      <div className="ml-4 flex-1">
-                        <h4 className="font-medium">{item.product_name}</h4>
-                        <p className="text-sm text-gray-600">
-                          Số lượng: {item.quantity}
-                        </p>
-                        <p className="text-sm font-medium text-gray-900">
-                          {formatPrice(item.price)}
-                        </p>
-                      </div>
+                {" "}
+                {hasOutOfStock && (
+                  <div className="flex items-start p-3 mb-4 bg-red-100 border border-red-400 text-red-700 rounded-lg">
+                    <AlertCircle className="h-4 w-4 mr-2 mt-1" />
+                    <div>
+                      <p className="font-medium">
+                        Một số sản phẩm đã hết hàng:
+                      </p>
+                      <ul className="list-disc list-inside mt-1">
+                        {outOfStockItems.map((item, index) => (
+                          <li key={index} className="text-sm">
+                            {item.productName} - {item.size} - {item.color}
+                          </li>
+                        ))}
+                      </ul>
                     </div>
-                  ))}
+                  </div>
+                )}
+                <div className="space-y-4">
+                  {order.items.map((item, idx) => {
+                    const isOutOfStock = !mappedItems[idx].isInStock;
+                    return (
+                      <div key={idx} className="flex items-start">
+                        <img
+                          src={item.image}
+                          alt={item.product_name}
+                          className={`w-16 h-16 object-cover rounded-md ${
+                            isOutOfStock ? "opacity-50" : ""
+                          }`}
+                        />
+                        <div className="ml-4 flex-1">
+                          <div className="flex items-center gap-2">
+                            <h4 className="font-medium">{item.product_name}</h4>
+                            {isOutOfStock && (
+                              <span className="text-xs text-red-500 font-medium px-2 py-1 bg-red-50 rounded">
+                                Hết hàng
+                              </span>
+                            )}
+                          </div>
+                          <p className="text-sm text-gray-600">
+                            Size: {item.size} - Màu: {item.color}
+                          </p>
+                          <p className="text-sm text-gray-600">
+                            Số lượng: {item.quantity}
+                          </p>
+                          <p className="text-sm font-medium text-gray-900">
+                            {formatPrice(item.price)}
+                          </p>
+                        </div>
+                      </div>
+                    );
+                  })}
                 </div>
-
                 <div className="mt-4 pt-4 border-t border-gray-100 flex justify-between items-center">
                   <div>
                     <span className="text-sm text-gray-600">Tổng tiền:</span>
@@ -219,11 +266,25 @@ const OrderHistory = () => {
                     <Link
                       to="/order"
                       state={{
-                        cartItems: mappedItems,
-                        totalPrice: order.total,
+                        cartItems: mappedItems.filter((item) => item.isInStock),
+                        totalPrice: mappedItems
+                          .filter((item) => item.isInStock)
+                          .reduce(
+                            (sum, item) =>
+                              sum + item.cartItemPrice * item.quantity,
+                            0
+                          ),
                       }}
                     >
-                      <button className="px-4 py-2 text-sm font-medium text-white bg-black hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500">
+                      <button
+                        className={`px-4 py-2 text-sm font-medium text-white 
+                          ${
+                            hasOutOfStock
+                              ? "bg-gray-400 cursor-not-allowed"
+                              : "bg-black hover:bg-red-700 focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
+                          }`}
+                        disabled={hasOutOfStock}
+                      >
                         Mua lại
                       </button>
                     </Link>
