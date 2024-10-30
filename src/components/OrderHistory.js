@@ -12,6 +12,7 @@ import { formatPrice } from "../utils/utils";
 import { Link } from "react-router-dom";
 import { Loader } from "rizzui";
 import { useAuthWithCheck } from "../hooks/useAuth";
+import { useNavigate } from "react-router-dom";
 
 const OrderHistory = () => {
   const [searchTerm, setSearchTerm] = useState("");
@@ -23,6 +24,7 @@ const OrderHistory = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const ordersPerPage = 3;
   const [statusFilter, setStatusFilter] = useState("all");
+  const navigate = useNavigate();
 
   const API = process.env.REACT_APP_API_ENDPOINT;
   const userId = localStorage.getItem("userId");
@@ -94,6 +96,26 @@ const OrderHistory = () => {
       default:
         return "bg-blue-50 text-gray-600 ring-gray-500/30";
     }
+  };
+
+  const handleReview = (order) => {
+    console.log("order", order);
+    
+    navigate("/review", {
+      state: {
+        cartItems: order.items.map((item) => ({
+          orderId : order.id,
+          id: item.id,
+          productId: item.product_id,
+          productName: item.product_name,
+          productImage: item.image,
+          size: item.size,
+          color: item.color,
+          quantity: item.quantity,
+          cartItemPrice: parseFloat(item.price),
+        })),
+      },
+    });
   };
 
   const filteredOrders = orders.filter(
@@ -296,13 +318,23 @@ const OrderHistory = () => {
                           ${
                             hasOutOfStock
                               ? "bg-gray-400 cursor-not-allowed"
-                              : "bg-black hover:bg-red-700 focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
+                              : "bg-black hover:bg-gray-200 focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
                           }`}
                         disabled={hasOutOfStock}
                       >
                         Mua lại
                       </button>
                     </Link>
+                  {
+                    order.status === "Completed" && (
+                      <button
+                        className="px-4 py-2 text-sm font-medium text-white bg-black hover:bg-gray-200 focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
+                        onClick={() => handleReview(order)}
+                      >
+                        Đánh giá
+                      </button>
+                    )
+                  }
                   </div>
                 </div>
               </div>

@@ -32,7 +32,6 @@ const OrderList = () => {
 
   const API = process.env.REACT_APP_API_ENDPOINT;
   const userId = localStorage.getItem("userId");
-  const navigate = useNavigate();
   const [showCancelModal, setShowCancelModal] = useState(false);
   const [orderToCancel, setOrderToCancel] = useState(null);
   const [showReturnModal, setShowReturnModal] = useState(false);
@@ -46,25 +45,7 @@ const OrderList = () => {
     setOrderToCancel(orders.find((order) => order.id === orderId));
     setShowCancelModal(true);
   };
-  const handleReview = (order) => {
-    console.log("order", order);
-    
-    navigate("/review", {
-      state: {
-        cartItems: order.items.map((item) => ({
-          orderId : order.id,
-          id: item.id,
-          productId: item.product_id,
-          productName: item.product_name,
-          productImage: item.image,
-          size: item.size,
-          color: item.color,
-          quantity: item.quantity,
-          cartItemPrice: parseFloat(item.price),
-        })),
-      },
-    });
-  };
+
   const handleCompleteOrder = async (orderId) => {
     try {
       const response = await fetch(`${API}/api/orders/${orderId}/complete`, {
@@ -336,12 +317,6 @@ const OrderList = () => {
                         >
                           Trả hàng
                         </button>
-                        <button
-                          className="px-4 py-2 text-sm font-medium text-white bg-black hover:bg-opacity-30 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
-                          onClick={() => handleReview(order)}
-                        >
-                          Đánh giá sản phẩm
-                        </button>{" "}
                       </>
                     )}
                   </div>
