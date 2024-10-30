@@ -11,6 +11,7 @@ import {
 } from "react-icons/fi";
 import { formatPrice } from "../utils/utils";
 import { useAuthWithCheck } from "../hooks/useAuth";
+import { downloadPDF } from "../utils/utils";
 
 const getStatusConfig = (status) => {
   const configs = {
@@ -48,21 +49,24 @@ const getStatusConfig = (status) => {
   return configs[status] || configs["Pending Confirmation"];
 };
 
-const StatusBadge = ({ status }) => {
+const StatusBadge = ({ status, order }) => {
   const config = getStatusConfig(status);
   const Icon = config.icon;
 
   return (
-    <span
-      className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full font-medium text-sm ${config.color}`}
-    >
-      <Icon className="h-4 w-4" />
-      {config.label}
-    </span>
+    <div >
+
+      <span
+        className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full font-medium text-sm ${config.color}`}
+      >
+        <Icon className="h-4 w-4" />
+        {config.label}
+      </span>
+    </div>
   );
 };
 
-const OrderTimeline = ({ status, returnedAt }) => {
+const OrderTimeline = ({ status, returnedAt, statusTimestamps }) => {
   const getFinalStatus = () => {
     if (status === "Cancelled") return "Cancelled";
     if (returnedAt) return "Returned";
@@ -71,7 +75,6 @@ const OrderTimeline = ({ status, returnedAt }) => {
 
   const finalStatus = getFinalStatus();
 
-  // Adjust the order based on the status and returned time
   const steps = [
     { id: "Pending Confirmation", label: "Chờ xác nhận", icon: FiClock },
     { id: "In Transit", label: "Đang vận chuyển", icon: FiTruck },
@@ -99,19 +102,18 @@ const OrderTimeline = ({ status, returnedAt }) => {
           const Icon = step.icon;
           const isActive = idx <= currentStep;
           const isCompleted = idx < currentStep;
+          const timestamp = statusTimestamps[step.id];
 
           return (
             <div key={step.id} className="flex flex-col items-center flex-1">
               <div
-                className={`w-10 h-10 rounded-full flex items-center justify-center
-                ${
+                className={`w-10 h-10 rounded-full flex items-center justify-center ${
                   isCompleted
                     ? "bg-green-500"
                     : isActive
                     ? "bg-blue-500"
                     : "bg-gray-100"
-                }
-                transition-colors duration-200`}
+                } transition-colors duration-200`}
               >
                 <Icon
                   className={`h-5 w-5 ${
@@ -122,6 +124,11 @@ const OrderTimeline = ({ status, returnedAt }) => {
               <div className="mt-2 text-xs text-center text-gray-600">
                 {step.label}
               </div>
+              {timestamp && (
+                <div className="text-xs text-gray-500">
+                  {new Date(timestamp).toLocaleString("vi-VN")}
+                </div>
+              )}
             </div>
           );
         })}
@@ -160,13 +167,14 @@ const OrderDetailModal = ({ order, onClose }) => {
 
   if (!order) return null;
 
-  const handleOverlayClick = (e) => {
-    if (e.target === e.currentTarget) {
-      onClose();
-    }
+  const statusTimestamps = {
+    "Pending Confirmation": order.created_at,
+    "In Transit": order.shipping_at,
+    Delivered: order.delivery_at,
+    Completed: order.completed_at,
+    Returned: order.returned_at,
+    Cancelled: order.cancelled_at,
   };
-
-  console.log(order);
 
   return (
     <div
@@ -174,12 +182,10 @@ const OrderDetailModal = ({ order, onClose }) => {
       aria-labelledby="modal-title"
       role="dialog"
       aria-modal="true"
+      onClick={(e) => e.target === e.currentTarget && onClose()}
     >
       <div className="flex items-end justify-center pt-4 px-4 pb-20 text-center sm:block sm:p-0">
-        <div
-          className="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity"
-          onClick={handleOverlayClick}
-        ></div>
+        <div className="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity"></div>
 
         <div className="inline-block align-bottom bg-white rounded-lg text-left shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-4xl sm:w-full">
           <div className="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
@@ -194,20 +200,22 @@ const OrderDetailModal = ({ order, onClose }) => {
                 </p>
               </div>
               <div className="flex items-center gap-3">
-                <StatusBadge status={order.status} />
+                <StatusBadge status={order.status} order={order} />
                 <button
                   className="p-2 hover:bg-gray-100 rounded-full"
                   title="Tải PDF"
+                  onClick={() => downloadPDF(order.id, "order.pdf")}
                 >
                   <FiDownload className="h-5 w-5 text-gray-500" />
                 </button>
               </div>
             </div>
 
-            {(order.status !== "Cancelled" && order.status !== "Completed") && (
+            {order.status !== "Cancelled" && order.status !== "Completed" && (
               <OrderTimeline
                 status={order.status}
                 returnedAt={order.returned_at}
+                statusTimestamps={statusTimestamps}
               />
             )}
 
@@ -295,7 +303,7 @@ const OrderDetailModal = ({ order, onClose }) => {
                           {formatPrice(item.price)} x {item.quantity}
                         </p>
                         <p className="text-sm text-gray-500">
-                         Size: {item.size} | Màu: {item.color}
+                          Size: {item.size} | Màu: {item.color}
                         </p>
                       </div>
                     </div>
@@ -322,13 +330,13 @@ const OrderDetailModal = ({ order, onClose }) => {
               </div>
             </div>
           </div>
-          <div className="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
+
+          <div className="bg-gray-50 px-4 py-3 sm:px-6 flex justify-end">
             <button
               type="button"
-              className="inline-flex w-full justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-black text-base font-medium text-white hover:bg-red-600 sm:ml-3 sm:w-auto sm:text-sm"
+              className="text-gray-500 hover:bg-gray-200 transition-colors rounded-md px-4 py-2"
               onClick={onClose}
             >
-              <FiX className="h-5 w-5 mr-2" />
               Đóng
             </button>
           </div>

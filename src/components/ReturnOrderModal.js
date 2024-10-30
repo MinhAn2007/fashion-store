@@ -1,54 +1,55 @@
 import React, { useState } from "react";
 
-const CancelOrderModal = ({ order, onClose }) => {
+const ReturnOrderModal = ({ order, onClose }) => {
   const [selectedReasons, setSelectedReasons] = useState([]);
   const [otherReason, setOtherReason] = useState("");
   const [showConfirmation, setShowConfirmation] = useState(false);
-  const [showSuccessMessage, setShowSuccessMessage] = useState(false); // Trạng thái để hiển thị thông báo thành công
+  const [showSuccessMessage, setShowSuccessMessage] = useState(false);
   const API = process.env.REACT_APP_API_ENDPOINT;
   const reasons = [
     { id: "Sản phẩm không đúng", label: "Sản phẩm không đúng" },
+    { id: "Không như mô tả", label: "Không như mô tả" },
+    { id: "Lỗi", label: "Lỗi sản phẩm" },
     { id: "Không cần thiết nữa", label: "Không cần thiết nữa" },
-    { id: "Sai màu sắc", label: "Sai màu sắc" },
-    { id: "Không phù hợp", label: "Không phù hợp" },
     { id: "khac", label: "Lý do khác" },
   ];
 
   const handleCheckboxChange = (reasonId) => {
-      setSelectedReasons((prev) =>
-          prev.includes(reasonId)
-            ? prev.filter((id) => id !== reasonId)
-            : [...prev, reasonId]
-        );
-    };
+   setSelectedReasons((prev) =>
+        prev.includes(reasonId)
+          ? prev.filter((id) => id !== reasonId)
+          : [...prev, reasonId]
+      );
+  };
   
-  const handleCancelOrder = () => {
+
+  const handleReturnOrder = () => {
     if (selectedReasons.length === 0) {
-      alert("Vui lòng chọn lý do hủy đơn hàng.");
+      alert("Vui lòng chọn lý do trả hàng.");
       return;
     }
-    setShowConfirmation(true); 
+    setShowConfirmation(true);
   };
 
-  const handleConfirmCancel = async () => {
-    const reasonsToCancel = selectedReasons.includes("khac")
+  const handleConfirmReturn = async () => {
+    const reasonsToReturn = selectedReasons.includes("khac")
       ? [...selectedReasons, otherReason]
       : selectedReasons;
 
-    const response = await fetch(`${API}/api/orders/${order.id}`, {
-      method: "DELETE",
-      body: JSON.stringify({ reason: reasonsToCancel.join(", ") }),
+    const response = await fetch(`${API}/api/orders/${order.id}/return`, {
+      method: "PUT",
+      body: JSON.stringify({ reason: reasonsToReturn.join(", ") }),
       headers: {
         "Content-Type": "application/json",
       },
     });
 
     if (!response.ok) {
-      alert("Đã xảy ra lỗi khi hủy đơn hàng. Vui lòng thử lại sau."); // Thông báo lỗi
+      alert("Đã xảy ra lỗi khi trả hàng. Vui lòng thử lại sau.");
       return;
     }
 
-    setShowSuccessMessage(true); // Hiển thị thông báo thành công
+    setShowSuccessMessage(true);
     setShowConfirmation(false);
   };
 
@@ -58,7 +59,7 @@ const CancelOrderModal = ({ order, onClose }) => {
 
   const handleCloseSuccessMessage = () => {
     setShowSuccessMessage(false);
-    onClose(); // Đóng modal chính khi thông báo được đóng
+    onClose();
   };
 
   return (
@@ -79,9 +80,9 @@ const CancelOrderModal = ({ order, onClose }) => {
 
           <div className="inline-block align-bottom bg-white rounded-lg px-4 pt-5 pb-4 text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
             <div>
-              <div className="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-red-100">
+              <div className="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-yellow-100">
                 <svg
-                  className="h-6 w-6 text-red-600"
+                  className="h-6 w-6 text-yellow-600"
                   xmlns="http://www.w3.org/2000/svg"
                   fill="none"
                   viewBox="0 0 24 24"
@@ -98,11 +99,11 @@ const CancelOrderModal = ({ order, onClose }) => {
               </div>
               <div className="mt-3 text-center sm:mt-5">
                 <h3 className="text-lg leading-6 font-medium text-gray-900">
-                  Hủy đơn hàng #{order.id}
+                  Trả hàng đơn #{order.id}
                 </h3>
                 <div className="mt-2">
                   <p className="text-sm text-gray-500">
-                    Vui lòng chọn lý do bạn muốn hủy đơn hàng này:
+                    Vui lòng chọn lý do bạn muốn trả lại đơn hàng này:
                   </p>
                   <div className="mt-4">
                     {reasons.map((reason) => (
@@ -112,7 +113,11 @@ const CancelOrderModal = ({ order, onClose }) => {
                           id={reason.id}
                           checked={selectedReasons.includes(reason.id)}
                           onChange={() => handleCheckboxChange(reason.id)}
-                          className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
+                          className={`h-4 w-4 ${
+                            selectedReasons.includes("khac") && reason.id === "khac"
+                              ? "text-black focus:ring-black border-gray-300"
+                              : "text-indigo-600 focus:ring-indigo-500 border-gray-300"
+                          } rounded`}
                         />
                         <label
                           htmlFor={reason.id}
@@ -130,20 +135,33 @@ const CancelOrderModal = ({ order, onClose }) => {
                         placeholder="Nhập lý do khác..."
                         value={otherReason}
                         onChange={(e) => setOtherReason(e.target.value)}
-                        className="mt-1 block w-full p-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500"
+                        className="mt-1 block w-full p-2 border border-gray-300 rounded-md focus:ring-black focus:border-black"
                       />
                     </div>
                   )}
+                </div>
+                <div className="mt-4 text-left">
+                  <p className="text-sm text-gray-500">
+                    Để trả hàng, vui lòng:
+                  </p>
+                  <ul className="list-disc pl-6 text-sm text-gray-500">
+                    <li>Chụp ảnh sản phẩm cần trả</li>
+                    <li>Liên hệ với người bán trên Zalo số 0837710747</li>
+                    <li>
+                      Gửi sản phẩm về địa chỉ: 12 Nguyễn Văn Bảo, Gò Vấp (người
+                      trả sẽ chịu phí vận chuyển)
+                    </li>
+                  </ul>
                 </div>
               </div>
             </div>
             <div className="mt-5 sm:mt-6 sm:grid sm:grid-cols-2 sm:gap-3 sm:grid-flow-row-dense">
               <button
                 type="button"
-                className="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-black text-base font-medium text-white hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 sm:col-start-2 sm:text-sm"
-                onClick={handleCancelOrder}
+                className="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-black text-base font-medium text-white hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 sm:col-start-2 sm:text-sm"
+                onClick={handleReturnOrder}
               >
-                Hủy đơn
+                Trả hàng
               </button>
               <button
                 type="button"
@@ -157,16 +175,16 @@ const CancelOrderModal = ({ order, onClose }) => {
         </div>
       </div>
 
-      {/* Modal Xác Nhận */}
+      {/* Confirmation Modal */}
       {showConfirmation && (
         <ConfirmationModal
           orderId={order.id}
-          onConfirm={handleConfirmCancel}
+          onConfirm={handleConfirmReturn}
           onCancel={handleCancelConfirmation}
         />
       )}
 
-      {/* Modal Thông Báo Thành Công */}
+      {/* Success Modal */}
       {showSuccessMessage && (
         <SuccessModal
           onClose={handleCloseSuccessMessage}
@@ -196,18 +214,18 @@ const ConfirmationModal = ({ onConfirm, onCancel, orderId }) => {
         <div className="inline-block align-bottom bg-white rounded-lg px-4 pt-5 pb-4 text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
           <div>
             <h3 className="text-lg leading-6 font-medium text-gray-900">
-              Xác nhận hủy đơn hàng #{orderId}
+              Xác nhận trả hàng đơn #{orderId}
             </h3>
             <div className="mt-2">
               <p className="text-sm text-gray-500">
-                Bạn có chắc chắn muốn hủy đơn hàng này?
+                Bạn có chắc chắn muốn trả lại đơn hàng này?
               </p>
             </div>
           </div>
           <div className="mt-5 sm:mt-6 sm:grid sm:grid-cols-2 sm:gap-3 sm:grid-flow-row-dense">
             <button
               type="button"
-              className="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-red-600 text-base font-medium text-white hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 sm:col-start-2 sm:text-sm"
+              className="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-yellow-600 text-base font-medium text-white hover:bg-yellow-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-yellow-500 sm:col-start-2 sm:text-sm"
               onClick={onConfirm}
             >
               Xác nhận
@@ -245,11 +263,11 @@ const SuccessModal = ({ onClose, orderId }) => {
         <div className="inline-block align-bottom bg-white rounded-lg px-4 pt-5 pb-4 text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
           <div>
             <h3 className="text-lg leading-6 font-medium text-gray-900">
-              Hủy đơn hàng thành công!
+              Trả hàng thành công!
             </h3>
             <div className="mt-2">
               <p className="text-sm text-gray-500">
-                Đơn hàng #{orderId} đã được hủy thành công.
+                Đơn hàng #{orderId} đã được trả hàng thành công.
               </p>
             </div>
           </div>
@@ -268,4 +286,4 @@ const SuccessModal = ({ onClose, orderId }) => {
   );
 };
 
-export default CancelOrderModal;
+export default ReturnOrderModal;

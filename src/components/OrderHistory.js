@@ -11,6 +11,7 @@ import OrderDetailModal from "./OrderDetailModal";
 import { formatPrice } from "../utils/utils";
 import { Link } from "react-router-dom";
 import { Loader } from "rizzui";
+import { useAuthWithCheck } from "../hooks/useAuth";
 
 const OrderHistory = () => {
   const [searchTerm, setSearchTerm] = useState("");
@@ -24,14 +25,22 @@ const OrderHistory = () => {
 
   const API = process.env.REACT_APP_API_ENDPOINT;
   const userId = localStorage.getItem("userId");
+  const [statusFilter, setStatusFilter] = useState("all");
+  const { checkApiResponse } = useAuthWithCheck();
 
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm, statusFilter]);
   useEffect(() => {
     const fetchOrders = async () => {
       try {
         const response = await fetch(`${API}/api/orders?userId=${userId}`);
         if (!response.ok) throw new Error("Failed to fetch orders");
         const data = await response.json();
+        checkApiResponse(data);
         setOrders(data.data.complete);
+        console.log(data.data.complete);
+        
       } catch (err) {
         setError(err.message);
       } finally {
@@ -42,7 +51,6 @@ const OrderHistory = () => {
     if (userId) fetchOrders();
   }, [userId, API]);
 
-  // New mapping function for order items
   const mapOrderItemsForPurchase = (order) => {
     return order.items.map((item) => ({
       id: item.id,
@@ -72,6 +80,7 @@ const OrderHistory = () => {
   const statusTranslation = {
     Cancelled: "Đã hủy",
     Completed: "Đã hoàn thành",
+    Returned: "Đã trả hàng",
   };
 
   const getStatusIcon = (status) => {
@@ -95,10 +104,9 @@ const OrderHistory = () => {
   const filteredOrders = orders
     .filter(
       (order) =>
-        String(order.id).includes(searchTerm) ||
-        order.items.some((item) =>
-          item.product_name.toLowerCase().includes(searchTerm.toLowerCase())
-        )
+        (statusFilter === "all" || order.status === statusFilter) &&
+        (String(order.id).includes(searchTerm) ||
+          order.items.some((item) => item.name.includes(searchTerm)))
     )
     .sort((a, b) => {
       const dateA = new Date(a.created_at);
@@ -144,6 +152,18 @@ const OrderHistory = () => {
             <AiOutlineSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5" />
           </div>
           <div className="flex gap-3">
+           <select
+              className="h-10 px-4 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              value={statusFilter}
+              onChange={(e) => setStatusFilter(e.target.value)}
+            >
+              <option value="all">Tất cả trạng thái</option>
+              {Object.entries(statusTranslation).map(([key, value]) => (
+                <option key={key} value={key}>
+                  {value}
+                </option>
+              ))}
+            </select>
             <button
               className="px-4 flex items-center gap-2 text-sm border border-gray-300 rounded-lg hover:bg-gray-50"
               onClick={() =>

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { AiOutlineSearch, AiOutlineEye } from "react-icons/ai";
 import {
   BsBoxSeam,
@@ -11,8 +11,10 @@ import {
 } from "react-icons/bs";
 import OrderDetailModal from "./OrderDetailModal";
 import CancelOrderModal from "./CancelOrderModal";
-import { formatPrice } from "../utils/utils";
+import ReturnOrderModal from "./ReturnOrderModal";
+import { formatPrice, downloadPDF } from "../utils/utils";
 import { Loader } from "rizzui";
+import { useAuthWithCheck } from "../hooks/useAuth";
 
 const OrderList = () => {
   const [searchTerm, setSearchTerm] = useState("");
@@ -32,7 +34,13 @@ const OrderList = () => {
 
   const [showCancelModal, setShowCancelModal] = useState(false);
   const [orderToCancel, setOrderToCancel] = useState(null);
-
+  const [showReturnModal, setShowReturnModal] = useState(false);
+  const [orderToReturn, setOrderToReturn] = useState(null);
+  const { checkApiResponse } = useAuthWithCheck();
+  const handleReturnOrder = (orderId) => {
+    setOrderToReturn(orders.find((order) => order.id === orderId));
+    setShowReturnModal(true);
+  };
   const handleCancelOrder = (orderId) => {
     setOrderToCancel(orders.find((order) => order.id === orderId));
     setShowCancelModal(true);
@@ -47,6 +55,7 @@ const OrderList = () => {
         },
         body: JSON.stringify({ status: "Completed" }),
       });
+      checkApiResponse(response);
 
       if (!response.ok) throw new Error("Failed to complete order");
 
@@ -85,7 +94,6 @@ const OrderList = () => {
     "Pending Confirmation": "Chờ xác nhận",
     "In Transit": "Đang vận chuyển",
     Delivered: "Đã giao hàng",
-    Returned: "Đã trả hàng",
   };
 
   const getStatusIcon = (status) => {
@@ -296,12 +304,20 @@ const OrderList = () => {
                         </button>
                       )}
                     {order.status === "Delivered" && (
-                      <button
-                        className="px-4 py-2 text-sm font-medium text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
-                        onClick={() => handleCompleteOrder(order.id)}
-                      >
-                        Hoàn thành đơn hàng
-                      </button>
+                      <>
+                        <button
+                          className="px-4 py-2 text-sm font-medium text-white bg-gray-800 hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-600"
+                          onClick={() => handleCompleteOrder(order.id)}
+                        >
+                          Hoàn thành đơn hàng
+                        </button>
+                        <button
+                          className="px-4 py-2 text-sm font-medium text-white bg-red-600 hover:bg-red-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
+                          onClick={() => handleReturnOrder(order.id)}
+                        >
+                          Trả hàng
+                        </button>
+                      </>
                     )}
                   </div>
                 </div>
@@ -357,6 +373,16 @@ const OrderList = () => {
           onClose={() => {
             setShowCancelModal(false);
             setOrderToCancel(null);
+          }}
+        />
+      )}
+
+      {showReturnModal && (
+        <ReturnOrderModal
+          order={orderToReturn}
+          onClose={() => {
+            setShowReturnModal(false);
+            setOrderToReturn(null);
           }}
         />
       )}
