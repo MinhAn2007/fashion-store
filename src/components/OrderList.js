@@ -28,7 +28,6 @@ const OrderList = () => {
 
   const [currentPage, setCurrentPage] = useState(1);
   const ordersPerPage = 3;
-  const totalPages = Math.ceil(orders.length / ordersPerPage);
 
   const API = process.env.REACT_APP_API_ENDPOINT;
   const userId = localStorage.getItem("userId");
@@ -37,6 +36,7 @@ const OrderList = () => {
   const [showReturnModal, setShowReturnModal] = useState(false);
   const [orderToReturn, setOrderToReturn] = useState(null);
   const { checkApiResponse } = useAuthWithCheck();
+  const navigate = useNavigate();
   const handleReturnOrder = (orderId) => {
     setOrderToReturn(orders.find((order) => order.id === orderId));
     setShowReturnModal(true);
@@ -45,10 +45,29 @@ const OrderList = () => {
     setOrderToCancel(orders.find((order) => order.id === orderId));
     setShowCancelModal(true);
   };
+  const fetchOrders = async () => {
+    try {
+      setLoading(true);
+      const response = await fetch(`${API}/api/orders?userId=${userId}`);
+      if (!response.ok) throw new Error("Failed to fetch orders");
+      const data = await response.json();
+      setOrders(data.data.nonComplete);
+
+      // Reset filter states
+      setSearchTerm("");
+      setStatusFilter("all");
+      setSortOrder("desc");
+      setCurrentPage(1);
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleCompleteOrder = async (orderId) => {
     try {
-      const response = await fetch(`${API}/api/orders/${orderId}/complete`, {
+      const response = await fetch(`${API}/api/orders/${orderId}`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
@@ -57,33 +76,19 @@ const OrderList = () => {
       });
       checkApiResponse(response);
 
-      if (!response.ok) throw new Error("Failed to complete order");
-
-      setOrders(
-        orders.map((order) =>
-          order.id === orderId ? { ...order, status: "Completed" } : order
-        )
-      );
+      if (!response.ok) {
+        alert("Đã xảy ra lỗi khi hoàn thành đơn hàng");
+        return;
+      }
+      alert("Đã hoàn thành đơn hàng, vui lòng kiểm tra ở mục lịch sử mua hàng");
+      navigate("/history");
     } catch (err) {
       console.error("Error completing order:", err);
     }
   };
 
   useEffect(() => {
-    const fetchOrders = async () => {
-      try {
-        const response = await fetch(`${API}/api/orders?userId=${userId}`);
-        if (!response.ok) throw new Error("Failed to fetch orders");
-        const data = await response.json();
-        setOrders(data.data.nonComplete);
-      } catch (err) {
-        setError(err.message);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    if (userId) fetchOrders();
+    fetchOrders();
   }, [userId, API]);
 
   useEffect(() => {
@@ -130,24 +135,32 @@ const OrderList = () => {
     }
   };
 
-  const filteredOrders = orders
-    .filter(
-      (order) =>
-        (statusFilter === "all" || order.status === statusFilter) &&
-        (String(order.id).includes(searchTerm) ||
-          order.items.some((item) => item.name.includes(searchTerm)))
-    )
-    .sort((a, b) => {
-      const dateA = new Date(a.created_at);
-      const dateB = new Date(b.created_at);
-      return sortOrder === "desc" ? dateB - dateA : dateA - dateB;
-    });
+  const filteredOrders = orders.filter(
+    (order) =>
+      (statusFilter === "all" || order.status === statusFilter) &&
+      (String(order.id).includes(searchTerm) ||
+        order.items.some((item) => item.name.includes(searchTerm)))
+  );
 
-  // Calculate orders for the current page
-  const currentOrders = filteredOrders.slice(
+  const sortedOrders = filteredOrders.sort((a, b) => {
+    const dateA = new Date(a.created_at);
+    const dateB = new Date(b.created_at);
+    return sortOrder === "desc" ? dateB - dateA : dateA - dateB;
+  });
+
+  // Tính toán lại totalPages mỗi khi danh sách đơn hàng thay đổi
+  const totalPages = Math.ceil(sortedOrders.length / ordersPerPage);
+
+  // Lấy các đơn hàng theo trang
+  const currentOrders = sortedOrders.slice(
     (currentPage - 1) * ordersPerPage,
     currentPage * ordersPerPage
   );
+
+  // Reset currentPage về 1 khi thay đổi bộ lọc hoặc tìm kiếm
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm, statusFilter, sortOrder]);
 
   if (loading)
     return (
