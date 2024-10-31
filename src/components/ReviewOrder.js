@@ -1,28 +1,27 @@
 import React, { useState } from "react";
-import { useLocation, useNavigate } from "react-router-dom";
+import { useLocation } from "react-router-dom";
 import { BsStarFill, BsStarHalf, BsStar } from "react-icons/bs";
 import { formatPrice } from "../utils/utils";
 
 const ProductReview = () => {
   const location = useLocation();
-  const navigate = useNavigate();
   const { cartItems } = location.state;
-    console.log(cartItems);
-    
+  const API = process.env.REACT_APP_API_ENDPOINT;
+  const userId = localStorage.getItem("userId");
+  const name = localStorage.getItem("name");
   const [reviews, setReviews] = useState(
     cartItems.map((item) => ({
       productId: item.productId,
       rating: 0,
       comment: "",
-      file: null,
       images: [],
       video: null,
     }))
   );
 
-  const [files, setFiles] = useState([]);
   const [images, setImages] = useState([]);
   const [videos, setVideos] = useState([]);
+  const [isLoading, setIsLoading] = useState(false);
 
   const handleRatingChange = (index, value) => {
     setReviews((prev) =>
@@ -37,13 +36,6 @@ const ProductReview = () => {
       prev.map((review, i) =>
         i === index ? { ...review, comment: value } : review
       )
-    );
-  };
-
-  const handleFileUpload = (index, file) => {
-    setFiles((prev) => prev.map((f, i) => (i === index ? file : f)));
-    setReviews((prev) =>
-      prev.map((review, i) => (i === index ? { ...review, file } : review))
     );
   };
 
@@ -65,17 +57,105 @@ const ProductReview = () => {
     );
   };
 
-  const handleSubmit = () => {
-    const reviewData = reviews.map((review, index) => ({
-      ...review,
-      file: files[index],
-      images: images[index],
-      video: videos[index],
-    }));
+  const uploadToS3 = async (file, userId, fileType = "image") => {
+    try {
+      const formData = new FormData();
+      formData.append(fileType, file);
 
-    // Logic to submit reviews
-    console.log(reviewData);
-    navigate("/order-history");
+      const response = await fetch(`${API}/api/uploadAvatarS3/${userId}`, {
+        method: "POST",
+        body: formData,
+      });
+
+      if (!response.ok) {
+        throw new Error(`Failed to upload ${fileType}`);
+      }
+
+      const data = await response.json();
+      return data.avatar;
+    } catch (error) {
+      console.error(`Upload ${fileType} error:`, error);
+      throw error;
+    }
+  };
+
+  const validateReview = (review) => {
+    if (!review.rating || review.rating === 0) {
+      alert("Vui lòng chọn số sao đánh giá");
+      return false;
+    }
+
+    if (
+      review.rating < 3 &&
+      (!review.comment || review.comment.trim() === "")
+    ) {
+      alert("Vui lòng nhập nội dung đánh giá cho đánh giá dưới 3 sao");
+      return false;
+    }
+
+    return true;
+  };
+
+  const handleSubmit = async () => {
+    const isValid = reviews.every(validateReview);
+    if (!isValid) return;
+
+    setIsLoading(true);
+
+    try {
+      for (const review of reviews) {
+        const reviewData = {
+          productId: review.productId,
+          userId: userId,
+          rating: review.rating,
+          content: review.comment,
+          title: name,
+          images: [],
+          video: null,
+        };
+
+        if (review.images && review.images.length > 0) {
+          const imageUrls = await Promise.all(
+            review.images.map((image) => uploadToS3(image, userId, "image"))
+          );
+          reviewData.images = imageUrls;
+        }
+
+        // Tải video lên và thêm vào reviewData
+        if (review.video) {
+          const videoUrl = await uploadToS3(review.video, userId, "image");
+          reviewData.video = videoUrl;
+        }
+        console.log(reviewData);  
+        
+        // Gửi đánh giá
+        const reviewResponse = await fetch(`${API}/api/reviews`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            productId: reviewData.productId,
+            userId,
+            rating: reviewData.rating,
+            content: reviewData.content,
+            images: JSON.stringify(reviewData.images),
+            video: JSON.stringify(reviewData.video),
+            title: `${name}`, 
+            orderId: cartItems[0].orderId
+          }),
+        });
+
+        if (!reviewResponse.ok) {
+          throw new Error("Failed to submit review");
+        }
+      }
+      alert("All reviews submitted successfully");
+    } catch (error) {
+      console.error("Error submitting reviews:", error);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const Rating = ({ value, onChange, icon }) => {
@@ -115,11 +195,12 @@ const ProductReview = () => {
       </div>
     );
   };
-  console.log(cartItems);
-  
+
   return (
     <div className="max-w-3xl mx-auto p-4 space-y-8">
-      <h1 className="text-3xl font-bold text-center">Đánh giá sản phẩm của đơn hàng #{cartItems[0].orderId}</h1>
+      <h1 className="text-3xl font-bold text-center">
+        Đánh giá sản phẩm của đơn hàng #{cartItems[0].orderId}
+      </h1>
       {cartItems.map((item, index) => (
         <div
           key={item.id}
@@ -193,15 +274,18 @@ const ProductReview = () => {
               }
             />
             {images[index]?.length > 0 && (
-              <div className="mt-2 grid grid-cols-3 gap-2">
-                {images[index].map((image, imageIndex) => (
-                  <img
-                    key={imageIndex}
-                    src={URL.createObjectURL(image)}
-                    alt={`Uploaded Image ${imageIndex}`}
-                    className="w-full h-24 object-cover rounded-md"
-                  />
-                ))}
+              <div className="mt-2">
+                <p className="font-medium">Hình ảnh đã chọn:</p>
+                <div className="flex gap-2">
+                  {images[index].map((file, idx) => (
+                    <img
+                      key={idx}
+                      src={URL.createObjectURL(file)}
+                      alt={`Preview ${idx}`}
+                      className="w-20 h-20 object-cover rounded-md"
+                    />
+                  ))}
+                </div>
               </div>
             )}
           </div>
@@ -221,31 +305,29 @@ const ProductReview = () => {
               onChange={(e) => handleVideoUpload(index, e.target.files[0])}
             />
             {videos[index] && (
-              <div className="mt-2">
-                <span className="font-medium">Video đã tải lên:</span>
-                <video
-                  controls
-                  className="w-full h-48 object-cover rounded-md mt-2"
-                >
-                  <source
-                    src={URL.createObjectURL(videos[index])}
-                    type="video/mp4"
-                  />
-                  Trình duyệt không hỗ trợ xem video.
-                </video>
-              </div>
+              <video
+                controls
+                className="mt-2 w-full h-48 object-cover rounded-md"
+                src={URL.createObjectURL(videos[index])}
+              />
             )}
           </div>
         </div>
       ))}
-      <div className="flex justify-end">
+
+      {/* Step 3: Conditionally render loading indicator */}
+      {isLoading ? (
+        <div className="flex justify-center items-center">
+          <span className="text-lg text-gray-700">Đang gửi đánh giá...</span>
+        </div>
+      ) : (
         <button
-          className="bg-black text-white py-2 px-6 rounded-lg hover:bg-red-700 focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
           onClick={handleSubmit}
+          className="w-full bg-black text-white py-2 rounded-lg hover:bg-opacity-30 transition duration-200"
         >
-          Gửi đánh giá
+          Gửi Đánh Giá
         </button>
-      </div>
+      )}
     </div>
   );
 };

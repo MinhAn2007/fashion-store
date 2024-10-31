@@ -8,6 +8,7 @@ import {
   BsExclamationOctagon as AlertCircle,
 } from "react-icons/bs";
 import OrderDetailModal from "./OrderDetailModal";
+import ReviewModal from "./ReviewModal";
 import { formatPrice } from "../utils/utils";
 import { Link } from "react-router-dom";
 import { Loader } from "rizzui";
@@ -29,6 +30,7 @@ const OrderHistory = () => {
   const API = process.env.REACT_APP_API_ENDPOINT;
   const userId = localStorage.getItem("userId");
   const { checkApiResponse } = useAuthWithCheck();
+  const [showReviewModal, setShowReviewModal] = useState(false);
 
   useEffect(() => {
     const fetchOrders = async () => {
@@ -99,12 +101,16 @@ const OrderHistory = () => {
   };
 
   const handleReview = (order) => {
-    console.log("order", order);
-    
+    console.log(order);
+
+    if (order.isReview) {
+      setShowReviewModal(true);
+      return;
+    }
     navigate("/review", {
       state: {
         cartItems: order.items.map((item) => ({
-          orderId : order.id,
+          orderId: order.id,
           id: item.id,
           productId: item.product_id,
           productName: item.product_name,
@@ -325,16 +331,20 @@ const OrderHistory = () => {
                         Mua lại
                       </button>
                     </Link>
-                  {
-                    order.status === "Completed" && (
+                    {order.status === "Completed" && (
                       <button
                         className="px-4 py-2 text-sm font-medium text-white bg-black hover:bg-gray-200 focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
                         onClick={() => handleReview(order)}
                       >
-                        Đánh giá
+                        {order.isReview ? "Xem đánh giá của bạn" : "Đánh giá"}
                       </button>
-                    )
-                  }
+                    )}
+                    {showReviewModal && (
+                      <ReviewModal
+                        onClose={() => setShowReviewModal(false)}
+                        orderId={order.id}
+                      />
+                    )}
                   </div>
                 </div>
               </div>

@@ -66,7 +66,9 @@ const Login = () => {
       const totalCartQuantity = data.user.totalCartQuantity; // Assuming your API returns this
       const userId = data.user.userId;
 
-      localStorage.setItem("userId", userId);
+      localStorage.setItem("userId", userId);      
+      localStorage.setItem("name", data.user.firstName + " " + data.user.lastName);
+
       localStorage.setItem("token", token);
       localStorage.setItem("tokenExpiry", Date.now() + 3600 * 1000); // 1 hour in ms
 
