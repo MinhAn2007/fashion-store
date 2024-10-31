@@ -31,7 +31,7 @@ const OrderHistory = () => {
   const userId = localStorage.getItem("userId");
   const { checkApiResponse } = useAuthWithCheck();
   const [showReviewModal, setShowReviewModal] = useState(false);
-
+  const [modalOrderReview, setModalOrderReview] = useState(null);
   useEffect(() => {
     const fetchOrders = async () => {
       try {
@@ -101,9 +101,8 @@ const OrderHistory = () => {
   };
 
   const handleReview = (order) => {
-    console.log(order);
-
     if (order.isReview) {
+      setModalOrderReview(order);
       setShowReviewModal(true);
       return;
     }
@@ -339,12 +338,6 @@ const OrderHistory = () => {
                         {order.isReview ? "Xem đánh giá của bạn" : "Đánh giá"}
                       </button>
                     )}
-                    {showReviewModal && (
-                      <ReviewModal
-                        onClose={() => setShowReviewModal(false)}
-                        orderId={order.id}
-                      />
-                    )}
                   </div>
                 </div>
               </div>
@@ -390,6 +383,12 @@ const OrderHistory = () => {
         <OrderDetailModal
           order={modalOrder}
           onClose={() => setModalOrder(null)}
+        />
+      )}
+      {showReviewModal && (
+        <ReviewModal
+          onClose={() => setShowReviewModal(false)}
+          order={modalOrderReview}
         />
       )}
     </div>

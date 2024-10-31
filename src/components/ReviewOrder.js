@@ -2,8 +2,11 @@ import React, { useState } from "react";
 import { useLocation } from "react-router-dom";
 import { BsStarFill, BsStarHalf, BsStar } from "react-icons/bs";
 import { formatPrice } from "../utils/utils";
+import { useNavigate } from "react-router-dom";
 
 const ProductReview = () => {
+  const navigate  = useNavigate();
+
   const location = useLocation();
   const { cartItems } = location.state;
   const API = process.env.REACT_APP_API_ENDPOINT;
@@ -150,7 +153,9 @@ const ProductReview = () => {
           throw new Error("Failed to submit review");
         }
       }
-      alert("All reviews submitted successfully");
+      alert("Đánh giả của bạn đã được gửi thành công, bạn có thể xem lại lịch sử mua hàng của mình");
+      navigate("/history");
+
     } catch (error) {
       console.error("Error submitting reviews:", error);
     } finally {
