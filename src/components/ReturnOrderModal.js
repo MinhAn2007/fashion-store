@@ -37,7 +37,7 @@ const ReturnOrderModal = ({ order, onClose }) => {
       : selectedReasons;
 
     const response = await fetch(`${API}/api/orders/${order.id}/return`, {
-      method: "PUT",
+      method: "POST",
       body: JSON.stringify({ reason: reasonsToReturn.join(", ") }),
       headers: {
         "Content-Type": "application/json",
@@ -48,7 +48,6 @@ const ReturnOrderModal = ({ order, onClose }) => {
       alert("Đã xảy ra lỗi khi trả hàng. Vui lòng thử lại sau.");
       return;
     }
-
     setShowSuccessMessage(true);
     setShowConfirmation(false);
   };
@@ -60,6 +59,7 @@ const ReturnOrderModal = ({ order, onClose }) => {
   const handleCloseSuccessMessage = () => {
     setShowSuccessMessage(false);
     onClose();
+    window.location.reload();
   };
 
   return (
@@ -225,7 +225,7 @@ const ConfirmationModal = ({ onConfirm, onCancel, orderId }) => {
           <div className="mt-5 sm:mt-6 sm:grid sm:grid-cols-2 sm:gap-3 sm:grid-flow-row-dense">
             <button
               type="button"
-              className="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-yellow-600 text-base font-medium text-white hover:bg-yellow-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-yellow-500 sm:col-start-2 sm:text-sm"
+              className="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-black text-base font-medium text-white hover:bg-yellow-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-yellow-500 sm:col-start-2 sm:text-sm"
               onClick={onConfirm}
             >
               Xác nhận
@@ -267,7 +267,7 @@ const SuccessModal = ({ onClose, orderId }) => {
             </h3>
             <div className="mt-2">
               <p className="text-sm text-gray-500">
-                Đơn hàng #{orderId} đã được trả hàng thành công.
+                Đơn hàng #{orderId} đã được yêu cầu trả hàng vui lòng chú ý email và điện thoại shop sẽ liên hệ với bạn sớm nhất có thể.
               </p>
             </div>
           </div>

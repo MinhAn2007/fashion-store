@@ -54,8 +54,7 @@ const StatusBadge = ({ status, order }) => {
   const Icon = config.icon;
 
   return (
-    <div >
-
+    <div>
       <span
         className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full font-medium text-sm ${config.color}`}
       >
@@ -76,25 +75,28 @@ const OrderTimeline = ({ status, returnedAt, statusTimestamps }) => {
   const finalStatus = getFinalStatus();
 
   const steps = [
-    { id: "Pending Confirmation", label: "Chờ xác nhận", icon: FiClock },
-    { id: "In Transit", label: "Đang vận chuyển", icon: FiTruck },
-    returnedAt
-      ? {
-          id: "Returned",
-          label: getStatusConfig("Returned").label,
-          icon: getStatusConfig("Returned").icon,
-        }
-      : {
-          id: finalStatus,
-          label: getStatusConfig(finalStatus).label,
-          icon: getStatusConfig(finalStatus).icon,
-        },
+    {
+      id: returnedAt ? "Returned" : "Pending Confirmation",
+      label: getStatusConfig(returnedAt ? "Returned" : "Pending Confirmation")
+        .label,
+      icon: getStatusConfig(returnedAt ? "Returned" : "Pending Confirmation")
+        .icon,
+    },
+    {
+      id: "In Transit",
+      label: "Đang vận chuyển",
+      icon: FiTruck,
+    },
+    {
+      id: "Delivered",
+      label: "Đã giao hàng",
+      icon: FiCheck,
+    },
   ];
 
   const currentStep = steps.findIndex(
     (step) => (returnedAt && step.id === "Returned") || step.id === status
   );
-
   return (
     <div className="w-full py-6">
       <div className="relative flex justify-between">
