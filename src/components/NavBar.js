@@ -1,10 +1,35 @@
 import React, { useState, useEffect } from "react";
 import logo from "../assets/al.png";
-import { Link } from "react-router-dom";
-import { FaShoppingBag, FaUser, FaSearch } from "react-icons/fa";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import {
+  FaShoppingBag,
+  FaUser,
+  FaSearch,
+  FaChevronDown,
+  FaChevronRight,
+} from "react-icons/fa";
 import { useAuthWithCheck } from "../hooks/useAuth";
-import { FaChevronDown, FaChevronRight } from "react-icons/fa";
+import { debounce } from "lodash";
+
+// Định nghĩa categories để matching
+const categories = {
+  ao: {
+    name: "Áo",
+    subcategories: ["Áo khoác", "Áo thun", "Áo Sơ mi", "Polo"],
+  },
+  quan: {
+    name: "Quần",
+    subcategories: ["Quần vải", "Quần Tây", "Quần Jean", "Chân Váy"],
+  },
+  phukien: {
+    name: "Phụ Kiện",
+    subcategories: [],
+  },
+  giay: {
+    name: "Giày Dép",
+    subcategories: [],
+  },
+};
 
 const NavBar = () => {
   const [isLoading, setIsLoading] = useState(false);
@@ -13,37 +38,148 @@ const NavBar = () => {
   const [cartQuantity, setCartQuantity] = useState(0);
   const { isAuthenticated } = useAuthWithCheck();
 
+  // Search states
+  const [searchTerm, setSearchTerm] = useState("");
+  const [searchResults, setSearchResults] = useState([]);
+  const [showResults, setShowResults] = useState(false);
+  const [isSearching, setIsSearching] = useState(false);
+
   const handleLogout = () => {
     setIsLoading(true);
     setTimeout(() => {
       localStorage.clear();
       setIsLoading(false);
       setLogoutMessage("Đăng xuất thành công!");
-      setTimeout(() => setLogoutMessage(""), 3000); // Reset message after 3 seconds
+      setTimeout(() => setLogoutMessage(""), 3000);
       navigate("/");
       window.location.reload();
-    }, 2000); // Simulate loading time
+    }, 2000);
   };
 
   useEffect(() => {
-    // Khởi tạo giá trị ban đầu
     const quantity = localStorage.getItem("cartQuantity");
     setCartQuantity(quantity ? parseInt(quantity) : 0);
 
-    // Tạo hàm lắng nghe sự kiện tùy chỉnh
     const handleCartUpdate = (event) => {
       console.log("Cart quantity updated:", event.detail);
-
       const newQuantity = event.detail;
       setCartQuantity(newQuantity);
     };
 
-    // Đăng ký lắng nghe sự kiện
     window.addEventListener("cartQuantityUpdated", handleCartUpdate);
-
-    // Cleanup
     return () => {
       window.removeEventListener("cartQuantityUpdated", handleCartUpdate);
+    };
+  }, []);
+
+  // Hàm kiểm tra category matching
+  const checkCategoryMatch = (term) => {
+    term = term.toLowerCase();
+
+    for (const [key, category] of Object.entries(categories)) {
+      if (category.name.toLowerCase().includes(term)) {
+        return {
+          type: "category",
+          message: `Tìm kiếm sản phẩm trong: ${category.name}`,
+          path: `/${key}`,
+        };
+      }
+
+      for (const subcat of category.subcategories) {
+        if (subcat.toLowerCase().includes(term)) {
+          return {
+            type: "subcategory",
+            message: `Tìm kiếm ${subcat} trong ${category.name}`,
+            path: `/${key}?subcategory=${subcat}`,
+          };
+        }
+      }
+    }
+    return null;
+  };
+
+  // Mock API call - thay thế bằng API thực tế của bạn
+  const fetchSearchResults = async (term) => {
+    setIsSearching(true);
+    try {
+      await new Promise((resolve) => setTimeout(resolve, 500));
+
+      const categoryMatch = checkCategoryMatch(term);
+      if (categoryMatch) {
+        setSearchResults([categoryMatch]);
+        return;
+      }
+
+      // Thay thế bằng API call thực tế
+      const mockProducts = [
+        { id: 1, name: "Áo thun basic", price: "199.000đ", type: "product" },
+        {
+          id: 2,
+          name: "Quần jean slim fit",
+          price: "399.000đ",
+          type: "product",
+        },
+      ].filter((p) => p.name.toLowerCase().includes(term.toLowerCase()));
+
+      if (mockProducts.length > 0) {
+        setSearchResults(mockProducts);
+      } else {
+        setSearchResults([
+          {
+            type: "message",
+            message: "Không tìm thấy sản phẩm phù hợp",
+          },
+        ]);
+      }
+    } catch (error) {
+      console.error("Search error:", error);
+      setSearchResults([
+        {
+          type: "message",
+          message: "Có lỗi xảy ra khi tìm kiếm",
+        },
+      ]);
+    } finally {
+      setIsSearching(false);
+    }
+  };
+
+  const debouncedSearch = debounce((term) => {
+    if (term.trim().length >= 2) {
+      fetchSearchResults(term);
+    } else {
+      setSearchResults([]);
+    }
+  }, 300);
+
+  const handleSearchChange = (e) => {
+    const value = e.target.value;
+    setSearchTerm(value);
+    setShowResults(true);
+    debouncedSearch(value);
+  };
+
+  const handleSearchClick = (result) => {
+    if (result.type === "category" || result.type === "subcategory") {
+      navigate(result.path);
+    } else if (result.type === "product") {
+      navigate(`/product/${result.id}`);
+    }
+    setShowResults(false);
+    setSearchTerm("");
+  };
+
+  // Close search results when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (!event.target.closest(".search-container")) {
+        setShowResults(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
     };
   }, []);
 
@@ -162,24 +298,63 @@ const NavBar = () => {
                 </li>
               </Link>
               <li className="p-4 hover:bg-gray-100">
-              <Link to="/accessories" className="hover:text-gray-600">
-
-                <span className="font-bold">Accessories Silver</span>
-              </Link>
+                <Link to="/accessories" className="hover:text-gray-600">
+                  <span className="font-bold">Accessories Silver</span>
+                </Link>
               </li>
             </ul>
-          </li>{" "}
+          </li>
         </ul>
 
         <div className="flex items-center space-x-6 mr-36">
-          <div className="relative w-3/5">
+          <div className="relative w-3/5 search-container">
             <input
               type="text"
-              placeholder="Tìm kiếm..."
+              value={searchTerm}
+              onChange={handleSearchChange}
+              onFocus={() => setShowResults(true)}
+              placeholder="Nhập tên sản phẩm..."
               className="border border-gray-300 rounded-full py-1 pl-10 pr-4 focus:outline-none w-full"
             />
             <FaSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+
+            {/* Search Results Dropdown */}
+            {showResults && searchTerm.length >= 2 && (
+              <div className="absolute z-50 w-full mt-2 bg-white rounded-lg shadow-lg max-h-96 overflow-y-auto">
+                {isSearching ? (
+                  <div className="p-4 text-center text-gray-500">
+                    Đang tìm kiếm...
+                  </div>
+                ) : (
+                  <div>
+                    {searchResults.map((result, index) => (
+                      <div
+                        key={index}
+                        className="p-3 hover:bg-gray-100 cursor-pointer"
+                        onClick={() => handleSearchClick(result)}
+                      >
+                        {result.type === "message" ? (
+                          <p className="text-gray-500">{result.message}</p>
+                        ) : result.type === "category" ||
+                          result.type === "subcategory" ? (
+                          <div className="flex items-center">
+                            <FaSearch className="mr-2 text-gray-400" />
+                            <p>{result.message}</p>
+                          </div>
+                        ) : (
+                          <div className="flex justify-between items-center">
+                            <p>{result.name}</p>
+                            <p className="text-gray-600">{result.price}</p>
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
           </div>
+
           <Link to="/cart" className="relative hover:text-gray-600">
             <FaShoppingBag className="text-2xl" />
             {cartQuantity > 0 && (
