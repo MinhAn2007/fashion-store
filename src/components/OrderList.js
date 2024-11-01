@@ -16,6 +16,7 @@ import { formatPrice, downloadPDF } from "../utils/utils";
 import { Loader } from "rizzui";
 import { useAuthWithCheck } from "../hooks/useAuth";
 import { useNavigate } from "react-router-dom";
+import CompleteOrderModal from "./CompleteOrderModal";
 
 const OrderList = () => {
   const [searchTerm, setSearchTerm] = useState("");
@@ -37,6 +38,9 @@ const OrderList = () => {
   const [orderToReturn, setOrderToReturn] = useState(null);
   const { checkApiResponse } = useAuthWithCheck();
   const navigate = useNavigate();
+  const [showCompleteModal, setShowCompleteModal] = useState(false);
+  const [orderToComplete, setOrderToComplete] = useState(null);
+
   const handleReturnOrder = (orderId) => {
     setOrderToReturn(orders.find((order) => order.id === orderId));
     setShowReturnModal(true);
@@ -65,9 +69,14 @@ const OrderList = () => {
     }
   };
 
-  const handleCompleteOrder = async (orderId) => {
+  const handleCompleteOrder = (orderId) => {
+    setOrderToComplete(orders.find((order) => order.id === orderId));
+    setShowCompleteModal(true);
+  };
+
+  const confirmCompleteOrder = async () => {
     try {
-      const response = await fetch(`${API}/api/orders/${orderId}`, {
+      const response = await fetch(`${API}/api/orders/${orderToComplete.id}`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
@@ -84,6 +93,9 @@ const OrderList = () => {
       navigate("/history");
     } catch (err) {
       console.error("Error completing order:", err);
+    } finally {
+      setShowCompleteModal(false);
+      setOrderToComplete(null);
     }
   };
 
@@ -156,6 +168,19 @@ const OrderList = () => {
     (currentPage - 1) * ordersPerPage,
     currentPage * ordersPerPage
   );
+
+  const getLatestTimestamp = (order) => {
+    const timestamps = [
+      order.created_at,
+      order.delivery_at,
+      order.completed_at,
+      order.canceled_at,
+      order.returned_at,
+      order.shipping_at,
+    ].filter(Boolean);
+
+    return new Date(Math.max(...timestamps.map((date) => new Date(date))));
+  };
 
   // Reset currentPage về 1 khi thay đổi bộ lọc hoặc tìm kiếm
   useEffect(() => {
@@ -248,7 +273,8 @@ const OrderList = () => {
                     Đơn hàng #{order.id}
                   </span>
                   <div className="text-sm text-gray-500 mt-1">
-                    {orderDate.toLocaleString("vi-VN")}
+                    Thời gian cập nhật gần nhất:{" "}
+                    {getLatestTimestamp(order).toLocaleString("vi-VN")}
                   </div>
                 </div>
                 <span
@@ -396,6 +422,16 @@ const OrderList = () => {
           onClose={() => {
             setShowReturnModal(false);
             setOrderToReturn(null);
+          }}
+        />
+      )}
+      {showCompleteModal && (
+        <CompleteOrderModal
+          orderId={orderToComplete?.id}
+          onConfirm={confirmCompleteOrder}
+          onClose={() => {
+            setShowCompleteModal(false);
+            setOrderToComplete(null);
           }}
         />
       )}

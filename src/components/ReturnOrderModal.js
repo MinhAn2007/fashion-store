@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 const ReturnOrderModal = ({ order, onClose }) => {
   const [selectedReasons, setSelectedReasons] = useState([]);
@@ -6,6 +7,7 @@ const ReturnOrderModal = ({ order, onClose }) => {
   const [showConfirmation, setShowConfirmation] = useState(false);
   const [showSuccessMessage, setShowSuccessMessage] = useState(false);
   const API = process.env.REACT_APP_API_ENDPOINT;
+  const navigate = useNavigate();
   const reasons = [
     { id: "Sản phẩm không đúng", label: "Sản phẩm không đúng" },
     { id: "Không như mô tả", label: "Không như mô tả" },
@@ -59,7 +61,7 @@ const ReturnOrderModal = ({ order, onClose }) => {
   const handleCloseSuccessMessage = () => {
     setShowSuccessMessage(false);
     onClose();
-    window.location.reload();
+    navigate("/history");
   };
 
   return (
@@ -211,7 +213,7 @@ const ConfirmationModal = ({ onConfirm, onCancel, orderId }) => {
           &#8203;
         </span>
 
-        <div className="inline-block align-bottom bg-white rounded-lg px-4 pt-5 pb-4 text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
+        <div className="inline-block align-bottom bg-white rounded-lg px-4 pt-5 pb-4 text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-96">
           <div>
             <h3 className="text-lg leading-6 font-medium text-gray-900">
               Xác nhận trả hàng đơn #{orderId}
@@ -225,7 +227,7 @@ const ConfirmationModal = ({ onConfirm, onCancel, orderId }) => {
           <div className="mt-5 sm:mt-6 sm:grid sm:grid-cols-2 sm:gap-3 sm:grid-flow-row-dense">
             <button
               type="button"
-              className="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-black text-base font-medium text-white hover:bg-yellow-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-yellow-500 sm:col-start-2 sm:text-sm"
+              className="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-black text-base font-medium text-white hover:bg-opacity-30 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-black sm:col-start-2 sm:text-sm"
               onClick={onConfirm}
             >
               Xác nhận
@@ -260,14 +262,14 @@ const SuccessModal = ({ onClose, orderId }) => {
           &#8203;
         </span>
 
-        <div className="inline-block align-bottom bg-white rounded-lg px-4 pt-5 pb-4 text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
+        <div className="inline-block align-bottom bg-white rounded-lg px-4 pt-5 pb-4 text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-96">
           <div>
             <h3 className="text-lg leading-6 font-medium text-gray-900">
               Trả hàng thành công!
             </h3>
             <div className="mt-2">
               <p className="text-sm text-gray-500">
-                Đơn hàng #{orderId} đã được yêu cầu trả hàng vui lòng chú ý email và điện thoại shop sẽ liên hệ với bạn sớm nhất có thể.
+                Đơn hàng #{orderId} đã được yêu cầu trả hàng vui lòng chú ý email và điện thoại shop sẽ liên hệ với bạn sớm nhất.
               </p>
             </div>
           </div>

@@ -142,6 +142,19 @@ const OrderHistory = () => {
     currentPage * ordersPerPage
   );
 
+  const getLatestTimestamp = (order) => {
+    const timestamps = [
+      order.created_at,
+      order.delivery_at,
+      order.completed_at,
+      order.canceled_at,
+      order.returned_at,
+      order.shipping_at,
+    ].filter(Boolean);
+
+    return new Date(Math.max(...timestamps.map((date) => new Date(date))));
+  };
+
   if (loading)
     return (
       <div className="flex justify-center mx-auto min-h-[700px]">
@@ -206,7 +219,6 @@ const OrderHistory = () => {
       {/* Orders List */}
       <div className="space-y-4">
         {currentOrders.map((order) => {
-          const orderDate = new Date(order.created_at);
           const mappedItems = mapOrderItemsForPurchase(order);
           const { hasOutOfStock, outOfStockItems } =
             checkOutOfStockItems(mappedItems);
@@ -222,7 +234,8 @@ const OrderHistory = () => {
                     Đơn hàng #{order.id}
                   </span>
                   <div className="text-sm text-gray-500 mt-1">
-                    {orderDate.toLocaleString("vi-VN")}
+                    Thời gian cập nhật gần nhất:{" "}
+                    {getLatestTimestamp(order).toLocaleString("vi-VN")}
                   </div>
                 </div>
                 <span
