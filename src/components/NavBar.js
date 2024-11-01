@@ -137,16 +137,18 @@ const NavBar = () => {
             </span>
             <ul className="absolute left-0 hidden group-hover:block bg-[#F8F8FF] shadow-lg w-48 transition-all ease-in-out opacity-0 group-hover:opacity-100">
               <Link to="/sale-199k" className="hover:text-gray-600">
-              <li className="p-4 hover:bg-gray-100">
-              <span>Đồng giá 199k</span>
+                <li className="p-4 hover:bg-gray-100">
+                  <span>Đồng giá 199k</span>
                 </li>
               </Link>
             </ul>
           </li>
           <li className="group relative">
+            <Link to="/new-products" className="hover:text-gray-600">
               <span className="cursor-pointer py-2 hover:text-gray-600 flex items-center">
                 SẢN PHẨM MỚI
-            </span>
+              </span>
+            </Link>
           </li>
           <li className="group relative">
             <span className="cursor-pointer py-2 hover:text-gray-600 flex items-center">

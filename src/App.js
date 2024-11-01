@@ -25,6 +25,7 @@ import OrderList from "./components/OrderList";
 import OrderHistory from "./components/OrderHistory";
 import ProductReview from "./components/ReviewOrder";
 import SaleProductsPage from "./components/SaleProduct";
+import NewProductsPage from "./components/NewProducts";
 
 function App() {
   return (
@@ -161,42 +162,52 @@ function App() {
               </>
             }
           />
-          <Route 
-            path="/order-list" 
+          <Route
+            path="/order-list"
             element={
               <>
                 <NavBar />
-                <OrderList/>
+                <OrderList />
                 <SPFooter />
               </>
             }
           />
-           <Route 
-            path="/history" 
+          <Route
+            path="/history"
             element={
               <>
                 <NavBar />
-                <OrderHistory/>
+                <OrderHistory />
                 <SPFooter />
               </>
             }
           />
-           <Route 
-            path="/review" 
+          <Route
+            path="/review"
             element={
               <>
                 <NavBar />
-                <ProductReview/>
+                <ProductReview />
                 <SPFooter />
               </>
             }
           />
-                     <Route 
-            path="/sale-199k" 
+          <Route
+            path="/sale-199k"
             element={
               <>
                 <NavBar />
-                <SaleProductsPage/>
+                <SaleProductsPage />
+                <SPFooter />
+              </>
+            }
+          />
+          <Route
+            path="/new-products"
+            element={
+              <>
+                <NavBar />
+                <NewProductsPage />
                 <SPFooter />
               </>
             }
