@@ -103,12 +103,11 @@ const NavBar = () => {
     try {
       const categoryMatch = checkCategoryMatch(term);
       let finalResults = [];
-      
+
       if (categoryMatch) {
         finalResults.push(categoryMatch);
       }
 
-      // Then fetch product results
       const response = await fetch(`${API}/api/search?q=${term}`);
       const data = await response.json();
 
@@ -120,12 +119,10 @@ const NavBar = () => {
           min_price: formatPrice(product.skus[0].price),
           image: product.skus[0].image,
         }));
-        
-        // Add product results after category results
+
         finalResults = [...finalResults, ...productResults];
       }
 
-      // If no results found at all
       if (finalResults.length === 0) {
         finalResults = [
           {
@@ -222,18 +219,27 @@ const NavBar = () => {
                   </span>
                 </Link>
                 <ul className="absolute left-full top-0 hidden group-hover/nested:block bg-[#F8F8FF] shadow-lg w-48 transition-all ease-in-out opacity-0 group-hover/nested:opacity-100">
-                  <li className="p-4 hover:bg-gray-100">
-                    <p className="font-bold">Áo khoác</p>
-                  </li>
-                  <li className="p-4 hover:bg-gray-100">
-                    <p className="font-bold">Áo thun</p>
-                  </li>
-                  <li className="p-4 hover:bg-gray-100">
-                    <p className="font-bold">Áo Sơ mi</p>
-                  </li>
-                  <li className="p-4 hover:bg-gray-100">
-                    <p className="font-bold">Polo</p>
-                  </li>
+                  <Link to="/ao-khoac" className="hover:text-gray-600">
+                    <li className="p-4 hover:bg-gray-100">
+                      <p className="font-bold">Áo khoác</p>
+                    </li>
+                  </Link>
+
+                  <Link to="/ao-thun" className="hover:text-gray-600">
+                    <li className="p-4 hover:bg-gray-100">
+                      <p className="font-bold">Áo thun</p>
+                    </li>
+                  </Link>
+                  <Link to="/ao-somi" className="hover:text-gray-600">
+                    <li className="p-4 hover:bg-gray-100">
+                      <p className="font-bold">Áo Sơ mi</p>
+                    </li>
+                  </Link>
+                  <Link to="/polo" className="hover:text-gray-600">
+                    <li className="p-4 hover:bg-gray-100">
+                      <p className="font-bold">Polo</p>
+                    </li>
+                  </Link>
                 </ul>
               </li>
               <li className="group/nested relative p-4 hover:bg-gray-100">
@@ -244,29 +250,73 @@ const NavBar = () => {
                   </span>
                 </Link>
                 <ul className="absolute left-full top-0 hidden group-hover/nested:block bg-[#F8F8FF] shadow-lg w-48 transition-all ease-in-out opacity-0 group-hover/nested:opacity-100">
-                  <li className="p-4 hover:bg-gray-100">
-                    <p className="font-bold">Quần vải</p>
-                  </li>
-                  <li className="p-4 hover:bg-gray-100">
-                    <p className="font-bold">Quần Tây</p>
-                  </li>
-                  <li className="p-4 hover:bg-gray-100">
-                    <p className="font-bold">Quần Jean</p>
-                  </li>
-                  <li className="p-4 hover:bg-gray-100">
-                    <p className="font-bold">Chân Váy</p>
-                  </li>
+                  <Link to="/quan-vai" className="hover:text-gray-600">
+                    <li className="p-4 hover:bg-gray-100">
+                      <p className="font-bold">Quần Vải</p>
+                    </li>
+                  </Link>
+                  <Link to="/quan-tay" className="hover:text-gray-600">
+                    <li className="p-4 hover:bg-gray-100">
+                      <p className="font-bold">Quần Tây</p>
+                    </li>
+                  </Link>
+                  <Link to="/quan-jean" className="hover:text-gray-600">
+                    <li className="p-4 hover:bg-gray-100">
+                      <p className="font-bold">Quần Jean</p>
+                    </li>
+                  </Link>
+                  <Link to="/chan-vay" className="hover:text-gray-600">
+                    <li className="p-4 hover:bg-gray-100">
+                      <p className="font-bold">Chân Váy</p>
+                    </li>
+                  </Link>
                 </ul>
               </li>
-              <li className="p-4 hover:bg-gray-100">
+              <li className="group/nested relative p-4 hover:bg-gray-100">
                 <Link to="/phukien">
-                  <span>Phụ Kiện</span>
+                  <span className="font-bold cursor-pointer flex items-center justify-between">
+                    Phụ Kiện
+                    <FaChevronRight className="ml-1 text-xs" />
+                  </span>
                 </Link>
+                <ul className="absolute left-full top-0 hidden group-hover/nested:block bg-[#F8F8FF] shadow-lg w-48 transition-all ease-in-out opacity-0 group-hover/nested:opacity-100">
+                  <Link to="/vong-co" className="hover:text-gray-600">
+                    <li className="p-4 hover:bg-gray-100">
+                      <p className="font-bold">Vòng Cổ</p>
+                    </li>
+                  </Link>
+                  <Link to="/lac-tay" className="hover:text-gray-600">
+                    <li className="p-4 hover:bg-gray-100">
+                      <p className="font-bold">Lắc Tay</p>
+                    </li>
+                  </Link>
+                  <Link to="/khuyen-tai" className="hover:text-gray-600">
+                    <li className="p-4 hover:bg-gray-100">
+                      <p className="font-bold">Khuyên Tai</p>
+                    </li>
+                  </Link>
+                </ul>
               </li>
-              <li className="p-4 hover:bg-gray-100">
+
+              <li className="group/nested relative p-4 hover:bg-gray-100">
                 <Link to="/giay">
-                  <span>Giày Dép</span>
+                  <span className="font-bold cursor-pointer flex items-center justify-between">
+                    Giày Dép
+                    <FaChevronRight className="ml-1 text-xs" />
+                  </span>
                 </Link>
+                <ul className="absolute left-full top-0 hidden group-hover/nested:block bg-[#F8F8FF] shadow-lg w-48 transition-all ease-in-out opacity-0 group-hover/nested:opacity-100">
+                  <Link to="/giay-the-thao" className="hover:text-gray-600">
+                    <li className="p-4 hover:bg-gray-100">
+                      <p className="font-bold">Giày thể thao</p>
+                    </li>
+                  </Link>
+                  <Link to="/giay-cao-got" className="hover:text-gray-600">
+                    <li className="p-4 hover:bg-gray-100">
+                      <p className="font-bold">Giày cao gót</p>
+                    </li>
+                  </Link>
+                </ul>
               </li>
             </ul>
           </li>

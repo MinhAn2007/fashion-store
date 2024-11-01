@@ -47,6 +47,22 @@ const mapProductType = (id) => {
     2: "Quần",
     3: "Phụ kiện",
     4: "Giày dép",
+    5: "Áo khoác",
+    6: "Giày sneaker",
+    7: "Áo thun",
+    8: "Quần jean",
+    9: "Túi xách",
+    10: "Nón",
+    11: "Áo sơ mi",
+    12: "Polo",
+    13: "Quần vải",
+    14: "Quần tây",
+    15: "Chân váy",
+    16: "Vòng cổ",
+    17: "Lắc tay",
+    18: "Khuyên tai",
+    19: "Giày cao gót",
+    20: "Giày thể thao",
   };
   return productTypes[id] || "Tất cả sản phẩm";
 };

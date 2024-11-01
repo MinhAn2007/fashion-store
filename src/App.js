@@ -28,7 +28,7 @@ import SaleProductsPage from "./components/SaleProduct";
 import NewProductsPage from "./components/NewProducts";
 import EditProfile from "./components/EditProfile";
 import MinimumStyle from "./components/MinimumStyle";
-import SilverAccessories from "./components/SilverAccessories"
+import SilverAccessories from "./components/SilverAccessories";
 
 function App() {
   return (
@@ -153,6 +153,140 @@ function App() {
               <>
                 <NavBar />
                 <ProductFeed id={4} />
+                <SPFooter />
+              </>
+            }
+          />
+          <Route
+            path="/ao-khoac"
+            element={
+              <>
+                <NavBar />
+                <ProductFeed id={5} />
+                <SPFooter />
+              </>
+            }
+          />
+          <Route
+            path="/ao-thun"
+            element={
+              <>
+                <NavBar />
+                <ProductFeed id={7} />
+                <SPFooter />
+              </>
+            }
+          />
+          <Route
+            path="/ao-somi"
+            element={
+              <>
+                <NavBar />
+                <ProductFeed id={11} />
+                <SPFooter />
+              </>
+            }
+          />
+          <Route
+            path="/polo"
+            element={
+              <>
+                <NavBar />
+                <ProductFeed id={12} />
+                <SPFooter />
+              </>
+            }
+          />
+          <Route
+            path="/quan-vai"
+            element={
+              <>
+                <NavBar />
+                <ProductFeed id={13} />
+                <SPFooter />
+              </>
+            }
+          />
+          <Route
+            path="/quan-tay"
+            element={
+              <>
+                <NavBar />
+                <ProductFeed id={14} />
+                <SPFooter />
+              </>
+            }
+          />
+
+          <Route
+            path="/quan-jean"
+            element={
+              <>
+                <NavBar />
+                <ProductFeed id={8} />
+                <SPFooter />
+              </>
+            }
+          />
+
+          <Route
+            path="/chan-vay"
+            element={
+              <>
+                <NavBar />
+                <ProductFeed id={15} />
+                <SPFooter />
+              </>
+            }
+          />
+          <Route
+            path="/vong-co"
+            element={
+              <>
+                <NavBar />
+                <ProductFeed id={16} />
+                <SPFooter />
+              </>
+            }
+          />
+
+          <Route
+            path="/lac-tay"
+            element={
+              <>
+                <NavBar />
+                <ProductFeed id={17} />
+                <SPFooter />
+              </>
+            }
+          />
+
+          <Route
+            path="/khuyen-tai"
+            element={
+              <>
+                <NavBar />
+                <ProductFeed id={18} />
+                <SPFooter />
+              </>
+            }
+          />
+          <Route
+            path="/giay-cao-got"
+            element={
+              <>
+                <NavBar />
+                <ProductFeed id={19} />
+                <SPFooter />
+              </>
+            }
+          />
+          <Route
+            path="/giay-the-thao"
+            element={
+              <>
+                <NavBar />
+                <ProductFeed id={20} />
                 <SPFooter />
               </>
             }
