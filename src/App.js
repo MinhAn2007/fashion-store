@@ -27,6 +27,8 @@ import ProductReview from "./components/ReviewOrder";
 import SaleProductsPage from "./components/SaleProduct";
 import NewProductsPage from "./components/NewProducts";
 import EditProfile from "./components/EditProfile";
+import MinimumStyle from "./components/MinimumStyle";
+import SilverAccessories from "./components/SilverAccessories"
 
 function App() {
   return (
