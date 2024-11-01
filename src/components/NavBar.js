@@ -10,8 +10,8 @@ import {
 } from "react-icons/fa";
 import { useAuthWithCheck } from "../hooks/useAuth";
 import { debounce } from "lodash";
+import { formatPrice } from "../utils/utils";
 
-// Định nghĩa categories để matching
 const categories = {
   ao: {
     name: "Áo",
@@ -38,11 +38,11 @@ const NavBar = () => {
   const [cartQuantity, setCartQuantity] = useState(0);
   const { isAuthenticated } = useAuthWithCheck();
 
-  // Search states
   const [searchTerm, setSearchTerm] = useState("");
   const [searchResults, setSearchResults] = useState([]);
   const [showResults, setShowResults] = useState(false);
   const [isSearching, setIsSearching] = useState(false);
+  const API = process.env.REACT_APP_API_ENDPOINT;
 
   const handleLogout = () => {
     setIsLoading(true);
@@ -98,39 +98,44 @@ const NavBar = () => {
     return null;
   };
 
-  // Mock API call - thay thế bằng API thực tế của bạn
   const fetchSearchResults = async (term) => {
     setIsSearching(true);
     try {
-      await new Promise((resolve) => setTimeout(resolve, 500));
-
       const categoryMatch = checkCategoryMatch(term);
+      let finalResults = [];
+      
       if (categoryMatch) {
-        setSearchResults([categoryMatch]);
-        return;
+        finalResults.push(categoryMatch);
       }
 
-      // Thay thế bằng API call thực tế
-      const mockProducts = [
-        { id: 1, name: "Áo thun basic", price: "199.000đ", type: "product" },
-        {
-          id: 2,
-          name: "Quần jean slim fit",
-          price: "399.000đ",
-          type: "product",
-        },
-      ].filter((p) => p.name.toLowerCase().includes(term.toLowerCase()));
+      // Then fetch product results
+      const response = await fetch(`${API}/api/search?q=${term}`);
+      const data = await response.json();
 
-      if (mockProducts.length > 0) {
-        setSearchResults(mockProducts);
-      } else {
-        setSearchResults([
+      if (data.products && data.products.length > 0) {
+        const productResults = data.products.map((product) => ({
+          type: "product",
+          id: product.id,
+          name: product.name,
+          min_price: formatPrice(product.skus[0].price),
+          image: product.skus[0].image,
+        }));
+        
+        // Add product results after category results
+        finalResults = [...finalResults, ...productResults];
+      }
+
+      // If no results found at all
+      if (finalResults.length === 0) {
+        finalResults = [
           {
             type: "message",
             message: "Không tìm thấy sản phẩm phù hợp",
           },
-        ]);
+        ];
       }
+
+      setSearchResults(finalResults);
     } catch (error) {
       console.error("Search error:", error);
       setSearchResults([
@@ -163,13 +168,12 @@ const NavBar = () => {
     if (result.type === "category" || result.type === "subcategory") {
       navigate(result.path);
     } else if (result.type === "product") {
-      navigate(`/product/${result.id}`);
+      navigate(`/${result.id}`);
     }
     setShowResults(false);
     setSearchTerm("");
   };
 
-  // Close search results when clicking outside
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (!event.target.closest(".search-container")) {
@@ -318,7 +322,6 @@ const NavBar = () => {
             />
             <FaSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
 
-            {/* Search Results Dropdown */}
             {showResults && searchTerm.length >= 2 && (
               <div className="absolute z-50 w-full mt-2 bg-white rounded-lg shadow-lg max-h-96 overflow-y-auto">
                 {isSearching ? (
@@ -342,9 +345,20 @@ const NavBar = () => {
                             <p>{result.message}</p>
                           </div>
                         ) : (
-                          <div className="flex justify-between items-center">
-                            <p>{result.name}</p>
-                            <p className="text-gray-600">{result.price}</p>
+                          <div className="flex justify-between items-center p-4 border-b">
+                            <img
+                              src={result.image}
+                              alt={result.name}
+                              className="w-16 h-16 object-cover mr-4"
+                            />
+                            <div className="flex flex-col justify-center">
+                              <p className="text-sm font-semibold">
+                                {result.name}
+                              </p>
+                              <p className="text-gray-600">
+                                {result.min_price}
+                              </p>
+                            </div>
                           </div>
                         )}
                       </div>
