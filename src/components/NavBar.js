@@ -33,7 +33,7 @@ const NavBar = () => {
     // Tạo hàm lắng nghe sự kiện tùy chỉnh
     const handleCartUpdate = (event) => {
       console.log("Cart quantity updated:", event.detail);
-      
+
       const newQuantity = event.detail;
       setCartQuantity(newQuantity);
     };
@@ -136,17 +136,16 @@ const NavBar = () => {
               <FaChevronDown className="ml-1 text-xs" />
             </span>
             <ul className="absolute left-0 hidden group-hover:block bg-[#F8F8FF] shadow-lg w-48 transition-all ease-in-out opacity-0 group-hover:opacity-100">
+              <Link to="/sale-199k" className="hover:text-gray-600">
               <li className="p-4 hover:bg-gray-100">
-                <span>Đồng giá 199k</span>
-              </li>
-              <li className="p-4 hover:bg-gray-100">
-                <span>Giảm sốc đến 50%</span>
-              </li>
+              <span>Đồng giá 199k</span>
+                </li>
+              </Link>
             </ul>
           </li>
           <li className="group relative">
-            <span className="cursor-pointer py-2 hover:text-gray-600 flex items-center">
-              SẢN PHẨM MỚI
+              <span className="cursor-pointer py-2 hover:text-gray-600 flex items-center">
+                SẢN PHẨM MỚI
             </span>
           </li>
           <li className="group relative">

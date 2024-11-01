@@ -5,7 +5,6 @@ import App from './App';
 import reportWebVitals from './reportWebVitals';
 
 import { Provider } from 'react-redux';
-import store from './redux-state/CartState';
 import { ChakraProvider } from '@chakra-ui/react';
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
@@ -15,10 +14,8 @@ root.render(
           <script src="https://mediafiles.botpress.cloud/e13ff5e8-3b53-4e7b-8fa3-849f469e8de3/webchat/v2.1/config.js"></script>
     <ChakraProvider>
 
-      <Provider store={store}>
         <App />
 
-      </Provider>
 
     </ChakraProvider>
   </React.StrictMode>

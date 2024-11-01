@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { AiFillStar } from "react-icons/ai";
 import { useParams, useNavigate, useLocation } from "react-router-dom";
-import { useDispatch } from "react-redux";
 import { useToast } from "@chakra-ui/react";
 import BreadCrumb from "./BreadCrumb";
 import { useAuthWithCheck } from "../hooks/useAuth";
@@ -19,7 +18,6 @@ const colorMap = {
 
 const SinglePage = () => {
   const { id } = useParams();
-  const dispatch = useDispatch();
   const toast = useToast();
   const navigate = useNavigate();
   const location = useLocation();

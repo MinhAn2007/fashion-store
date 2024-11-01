@@ -24,6 +24,7 @@ import ResultVNPAYPage from "./components/VNPayResult";
 import OrderList from "./components/OrderList";
 import OrderHistory from "./components/OrderHistory";
 import ProductReview from "./components/ReviewOrder";
+import SaleProductsPage from "./components/SaleProduct";
 
 function App() {
   return (
@@ -186,6 +187,16 @@ function App() {
               <>
                 <NavBar />
                 <ProductReview/>
+                <SPFooter />
+              </>
+            }
+          />
+                     <Route 
+            path="/sale-199k" 
+            element={
+              <>
+                <NavBar />
+                <SaleProductsPage/>
                 <SPFooter />
               </>
             }

@@ -1,15 +1,12 @@
 import React from "react";
-import { store } from "../productsStore/Store";
 import "../styles/OurBestSellers.css";
 import { useDispatch } from "react-redux";
-import { cartActions } from "../redux-state/CartState";
 import { Link } from "react-router-dom";
 import { useToast } from "@chakra-ui/react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useAuthWithCheck } from "../hooks/useAuth";
 const OurBestSellers = (props) => {
   const { title, price, id, image } = props;
-  const dispatch = useDispatch();
   const toast = useToast();
   const navigate = useNavigate();
   const location = useLocation();
