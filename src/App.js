@@ -26,6 +26,8 @@ import OrderHistory from "./components/OrderHistory";
 import ProductReview from "./components/ReviewOrder";
 import SaleProductsPage from "./components/SaleProduct";
 import NewProductsPage from "./components/NewProducts";
+import MinimumStyle  from "./components/MinimumStyle";
+import SilverAccessories from "./components/SilverAccessories";
 
 function App() {
   return (
@@ -208,6 +210,26 @@ function App() {
               <>
                 <NavBar />
                 <NewProductsPage />
+                <SPFooter />
+              </>
+            }
+          />
+          <Route
+            path="/minimum-style"
+            element={
+              <>
+                <NavBar />
+                <MinimumStyle />
+                <SPFooter />
+              </>
+            }
+          />
+          <Route
+            path="/accessories"
+            element={
+              <>
+                <NavBar />
+                <SilverAccessories />
                 <SPFooter />
               </>
             }

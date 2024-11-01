@@ -156,11 +156,16 @@ const NavBar = () => {
               <FaChevronDown className="ml-1 text-xs" />
             </span>
             <ul className="absolute left-0 hidden group-hover:block bg-[#F8F8FF] shadow-lg w-48 transition-all ease-in-out opacity-0 group-hover:opacity-100">
+              <Link to="/minimum-style" className="hover:text-gray-600">
+                <li className="p-4 hover:bg-gray-100">
+                  <span className="font-bold">Minimalism</span>
+                </li>
+              </Link>
               <li className="p-4 hover:bg-gray-100">
+              <Link to="/accessories" className="hover:text-gray-600">
+
                 <span className="font-bold">Accessories Silver</span>
-              </li>
-              <li className="p-4 hover:bg-gray-100">
-                <span className="font-bold">Minimalism</span>
+              </Link>
               </li>
             </ul>
           </li>{" "}

@@ -148,7 +148,7 @@ const NewProductsPage = () => {
                 <h2 className="text-xl mb-2 font-semibold">{formatPrice(item.skus[0].price)}</h2>
                 <div className="card-actions">
                   <button
-                    className="btn btn-outline btn-black text-black hover:bg-black hover:text-white"
+                    className="btn btn-outline bg-black text-white hover:bg-opacity-30 hover:text-white"
                     onClick={() => addItemToCartHandler(item)}
                   >
                     Thêm Vào Giỏ
