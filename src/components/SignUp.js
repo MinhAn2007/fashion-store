@@ -65,7 +65,12 @@ const Register = () => {
         throw new Error(errorData.message || 'Đã xảy ra lỗi trong quá trình đăng ký. Vui lòng thử lại.');
       }
       const data = await response.json();
+      console.log('Registration response:', data.userId);
+      localStorage.setItem('userId', data.userId);
       localStorage.setItem('token', data.loginResponse.token);
+      const userId = data.loginResponse.userId;
+      console.log('User ID:', userId);
+      
       setSuccessMessage("Bạn đã đăng ký thành công! Vui lòng kiểm tra email để xác nhận tài khoản.");
       setTimeout(() => {
         const from = location.state?.from?.pathname || '/';

@@ -124,14 +124,17 @@ const SaleProductsPage = () => {
           </div>
         </div>
       </div>
-      <SaleCountdown /> 
+      <SaleCountdown />
       {/* Products Grid */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mt-6">
         {products.map((item) => (
           <div
             key={item.id}
-            className="mx-auto transform transition-transform duration-300 hover:scale-105 hover:shadow-lg"
+            className="mx-auto transform transition-transform duration-300 hover:scale-105 hover:shadow-lg bg-gradient-to-r from-gray-900 to-gray-800"
           >
+            <div className="absolute top-5 left-5 z-10 bg-red-500 text-white px-2 py-1 rounded-md text-xs font-bold">
+              Giảm giá
+            </div>
             <div className="card text-white shadow-xl py-10 border border-white">
               <Link to={`/${item.id}`}>
                 <figure className="pt-6">
@@ -143,8 +146,12 @@ const SaleProductsPage = () => {
                 </figure>
               </Link>
               <div className="card-body items-center text-center p-2">
-                <h2 className="card-title mb-1 font-bold text-xl">{item.name}</h2>
-                <h2 className="text-xl mb-2">{formatPrice(item.skus[0].price)}</h2>
+                <h2 className="card-title mb-1 font-bold text-xl">
+                  {item.name}
+                </h2>
+                <h2 className="text-xl mb-2">
+                  {formatPrice(item.skus[0].price)}
+                </h2>
                 <div className="card-actions">
                   <button
                     className="btn btn-outline btn-white text-white hover:bg-white hover:text-black"

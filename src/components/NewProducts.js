@@ -103,7 +103,7 @@ const NewProductsPage = () => {
   }
 
   return (
-    <div className="px-4 py-8 bg-white text-black">
+    <div className="px-4 py-8 bg-white text-black mx -20">
       <div className="bg-gradient-to-r from-gray-100 to-gray-50 text-black rounded-xl p-6 mb-8 shadow-lg border border-gray-200">
         <div className="flex items-center justify-between">
           <div>
@@ -118,7 +118,7 @@ const NewProductsPage = () => {
               Số lượng có hạn - Đừng bỏ lỡ!
             </p>
           </div>
-          <div className="bg-black/10 p-4 rounded-full border border-black">
+          <div className="bg-black/10 p-4 rounded-full  border-black">
             <h2 className="text-2xl font-extrabold text-black">Mới Nhất</h2>
           </div>
         </div>

@@ -68,6 +68,8 @@ export default function ShopPage(props) {
   const location = useLocation();
   const navigate = useNavigate();
   const toast = useToast();
+  const { checkApiResponse } = useAuthWithCheck();
+
   useEffect(() => {
     const fetchProducts = async () => {
       try {
@@ -229,6 +231,8 @@ export default function ShopPage(props) {
           }),
         });
 
+        checkApiResponse(response);
+
         if (!response.ok) {
           throw new Error("Failed to add item to cart");
         }
@@ -336,7 +340,7 @@ export default function ShopPage(props) {
               <div className="p-4 text-center">
                 <h2 className="text-lg font-semibold">{product.name}</h2>
                 <p className="text-gray-600 mt-1 mb-2">
-                {formatPrice(product.skus[0].price)}
+                  {formatPrice(product.skus[0].price)}
                 </p>
                 <button
                   onClick={() => addItemToCartHandler(product)}
