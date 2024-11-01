@@ -226,6 +226,26 @@ function App() {
               </>
             }
           />
+          <Route
+            path="/minimum-style"
+            element={
+              <>
+                <NavBar />
+                <MinimumStyle />
+                <SPFooter />
+              </>
+            }
+          />
+          <Route
+            path="/accessories"
+            element={
+              <>
+                <NavBar />
+                <SilverAccessories />
+                <SPFooter />
+              </>
+            }
+          />
         </Routes>
         <ScrollToTop />
       </BrowserRouter>
