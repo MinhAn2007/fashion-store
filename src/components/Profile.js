@@ -12,7 +12,7 @@ const Profile = () => {
   const { checkApiResponse } = useAuthWithCheck();
   // Get token from localStorage
   const token = localStorage.getItem("token");
-  
+
   useEffect(() => {
     const fetchUserProfile = async () => {
       try {
@@ -35,7 +35,7 @@ const Profile = () => {
         const data = await response.json();
         setUserInfo(data);
         console.log(data);
-        
+
       } catch (error) {
         setErrorMessage(error.message || "Đã xảy ra lỗi khi tải thông tin cá nhân.");
         setUserInfo(null);
@@ -51,7 +51,7 @@ const Profile = () => {
     }
   }, [API, token, navigate]);
   console.log(userInfo);
-  
+
   if (loading) {
     return (
       <div className="min-h-screen flex justify-center items-center mx-auto">
@@ -117,12 +117,21 @@ const Profile = () => {
           )}
 
           {/* Edit Profile Button */}
-          <button
+
+          {/* <button
             className="mt-6 w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-black hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-black"
             onClick={() => navigate("/edit-profile")}
           >
             Chỉnh sửa thông tin
+          </button> */}
+          <button
+            onClick={() => navigate("/edit-profile")}
+            className="mt-6 w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-black hover:bg-gray-800"
+          >
+            Chỉnh sửa thông tin
           </button>
+
+
         </div>
       </div>
     </div>

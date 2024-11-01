@@ -26,6 +26,7 @@ import OrderHistory from "./components/OrderHistory";
 import ProductReview from "./components/ReviewOrder";
 import SaleProductsPage from "./components/SaleProduct";
 import NewProductsPage from "./components/NewProducts";
+import EditProfile from "./components/EditProfile";
 
 function App() {
   return (
@@ -91,6 +92,19 @@ function App() {
               </>
             }
           />
+
+          {/* Route cho trang chỉnh sửa thông tin */}
+          <Route
+            path="/edit-profile"
+            element={
+              <>
+                <NavBar />
+                <EditProfile />
+                <SPFooter />
+              </>
+            }
+          />
+
           <Route
             path="/products"
             element={
