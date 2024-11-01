@@ -2,16 +2,14 @@ import React, { useEffect, useState } from "react";
 import {
   FiClock,
   FiCheck,
-  FiPackage,
   FiTruck,
   FiAlertCircle,
-  FiX,
-  FiPrinter,
   FiDownload,
 } from "react-icons/fi";
 import { formatPrice } from "../utils/utils";
 import { useAuthWithCheck } from "../hooks/useAuth";
-import { downloadPDF } from "../utils/utils";
+import jsPDF from "jspdf";
+import html2canvas from "html2canvas";
 
 const getStatusConfig = (status) => {
   const configs = {
@@ -178,6 +176,47 @@ const OrderDetailModal = ({ order, onClose }) => {
     Cancelled: order.cancelled_at,
   };
 
+  const downloadPDF = () => {
+    const input = document.getElementById("modal");
+  
+    // Tạo một div với kích thước A4
+    const a4Div = document.createElement('div');
+    a4Div.style.width = '210mm'; // Chiều rộng A4
+    a4Div.style.height = '297mm'; // Chiều cao A4
+    a4Div.style.position = 'absolute';
+    a4Div.style.left = '-9999px'; // Ẩn div ra khỏi màn hình
+    document.body.appendChild(a4Div);
+    
+    // Sao chép nội dung từ modal vào div A4
+    a4Div.innerHTML = input.innerHTML;
+  
+    html2canvas(a4Div, { scale: 2 }).then((canvas) => {
+      const imgData = canvas.toDataURL("image/png");
+      const pdf = new jsPDF('p', 'mm', 'a4');
+      const imgWidth = 210; // Chiều rộng của ảnh trong mm
+      const pageHeight = pdf.internal.pageSize.height; // Chiều cao trang
+      const imgHeight = (canvas.height * imgWidth) / canvas.width; // Tính chiều cao của ảnh
+      let heightLeft = imgHeight;
+  
+      let position = 0;
+  
+      if (heightLeft >= pageHeight) {
+        position = 0;
+        while (heightLeft >= 0) {
+          pdf.addImage(imgData, "PNG", 0, position, imgWidth, imgHeight);
+          heightLeft -= pageHeight;
+          position -= pageHeight;
+          if (heightLeft >= 0) pdf.addPage();
+        }
+      } else {
+        pdf.addImage(imgData, "PNG", 0, 0, imgWidth, imgHeight);
+      }
+  
+      pdf.save("download.pdf");
+      document.body.removeChild(a4Div); 
+    });
+  };
+
   return (
     <div
       className="fixed inset-0 overflow-y-auto z-[9999]"
@@ -190,149 +229,154 @@ const OrderDetailModal = ({ order, onClose }) => {
         <div className="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity"></div>
 
         <div className="inline-block align-bottom bg-white rounded-lg text-left shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-4xl sm:w-full">
-          <div className="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
-            <div className="flex items-center justify-between border-b pb-4">
-              <div>
-                <h3 className="text-lg font-medium leading-6 text-gray-900">
-                  Đơn hàng #{order.id}
-                </h3>
-                <p className="mt-1 text-sm text-gray-500">
-                  Ngày đặt:{" "}
-                  {new Date(order.created_at).toLocaleDateString("vi-VN")}
-                </p>
-              </div>
-              <div className="flex items-center gap-3">
-                <StatusBadge status={order.status} order={order} />
-                <button
-                  className="p-2 hover:bg-gray-100 rounded-full"
-                  title="Tải PDF"
-                  onClick={() => downloadPDF(order.id, "order.pdf")}
-                >
-                  <FiDownload className="h-5 w-5 text-gray-500" />
-                </button>
-              </div>
-            </div>
-
-            {order.status !== "Cancelled" && order.status !== "Completed" && (
-              <OrderTimeline
-                status={order.status}
-                returnedAt={order.returned_at}
-                statusTimestamps={statusTimestamps}
-              />
-            )}
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
-              <div className="space-y-4">
-                <h4 className="text-base font-semibold">
-                  Thông tin khách hàng
-                </h4>
-                <div className="space-y-2">
-                  <div className="flex items-center gap-2">
-                    <span className="text-gray-500">Tên:</span>
-                    <span>
-                      {user
-                        ? `${user.firstName} ${user.lastName}`
-                        : "Đang tải..."}
-                    </span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <span className="text-gray-500">Email:</span>
-                    <span>{user ? user.email : "Đang tải..."}</span>
-                  </div>
+          <div id="modal">
+            <div className="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+              <div className="flex items-center justify-between border-b pb-4">
+                <div>
+                  <h3 className="text-lg font-medium leading-6 text-gray-900">
+                    Đơn hàng #{order.id}
+                  </h3>
+                  <p className="mt-1 text-sm text-gray-500">
+                    Ngày đặt:{" "}
+                    {new Date(order.created_at).toLocaleDateString("vi-VN")}
+                  </p>
                 </div>
-              </div>
-
-              <div className="space-y-4">
-                <h4 className="text-base font-semibold">Thông tin giao hàng</h4>
-                <div className="space-y-2">
-                  <div className="flex gap-2">
-                    <span className="text-gray-500 min-w-28">Địa chỉ:</span>
-                    <span>{order.address}</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <span className="text-gray-500 min-w-28">Phương thức:</span>
-                    <span>
-                      {order.payment_id === 2
-                        ? "Thanh toán online ( được giảm 50.000d )"
-                        : "Thanh toán khi nhận hàng"}
-                    </span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <span className="text-gray-500 min-w-28">Ghi chú:</span>
-                    <span>{order.note || "Không có"}</span>
-                  </div>
-                  {order.status === "Cancelled" && (
-                    <div className="flex items-center gap-2">
-                      <span className="text-gray-500 min-w-28">
-                        Lý do hủy hàng:
-                      </span>
-                      <span>{order.cancel_reason || "Không có"}</span>
-                    </div>
-                  )}
-                  {(order.status === "Returned" ||
-                    order.return_reason ||
-                    order.returned_at) && (
-                    <div className="flex items-center gap-2">
-                      <span className="text-gray-500 min-w-28">
-                        Lý do trả hàng:
-                      </span>
-                      <span>{order.return_reason || "Không có"}</span>
-                    </div>
-                  )}
-                </div>
-              </div>
-            </div>
-
-            <div className="mt-8">
-              <h4 className="text-base font-semibold mb-4">
-                Chi tiết sản phẩm
-              </h4>
-              <div className="divide-y border rounded-lg">
-                {order.items.map((item) => (
-                  <div
-                    key={item.id}
-                    className="p-4 flex items-center justify-between"
+                <div className="flex items-center gap-3">
+                  <StatusBadge status={order.status} order={order} />
+                  <button
+                    className="p-2 hover:bg-gray-100 rounded-full"
+                    title="Tải PDF"
+                    onClick={() => downloadPDF()}
                   >
-                    <div className="flex items-center gap-4">
-                      <img
-                        src={item.image}
-                        alt={item.name}
-                        className="w-16 h-16 rounded-lg object-cover border"
-                      />
-                      <div>
-                        <p className="font-medium">{item.product_name}</p>
-                        <p className="text-sm text-gray-500">
-                          {formatPrice(item.price)} x {item.quantity}
-                        </p>
-                        <p className="text-sm text-gray-500">
-                          Size: {item.size} | Màu: {item.color}
-                        </p>
-                      </div>
-                    </div>
-                    <p className="font-medium">
-                      {formatPrice(item.price * item.quantity)}
-                    </p>
-                  </div>
-                ))}
+                    <FiDownload className="h-5 w-5 text-gray-500" />
+                  </button>
+                </div>
               </div>
-            </div>
 
-            <div className="mt-6 flex justify-between">
-              <div>
-                <p className="text-gray-500">Phí vận chuyển:</p>
-                <p className="text-gray-900 font-medium">
-                  {formatPrice(order.shipping_fee)}
-                </p>
+              {order.status !== "Cancelled" && order.status !== "Completed" && (
+                <OrderTimeline
+                  status={order.status}
+                  returnedAt={order.returned_at}
+                  statusTimestamps={statusTimestamps}
+                />
+              )}
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
+                <div className="space-y-4">
+                  <h4 className="text-base font-semibold">
+                    Thông tin khách hàng
+                  </h4>
+                  <div className="space-y-2">
+                    <div className="flex items-center gap-2">
+                      <span className="text-gray-500">Tên:</span>
+                      <span>
+                        {user
+                          ? `${user.firstName} ${user.lastName}`
+                          : "Đang tải..."}
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <span className="text-gray-500">Email:</span>
+                      <span>{user ? user.email : "Đang tải..."}</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="space-y-4">
+                  <h4 className="text-base font-semibold">
+                    Thông tin giao hàng
+                  </h4>
+                  <div className="space-y-2">
+                    <div className="flex gap-2">
+                      <span className="text-gray-500 min-w-28">Địa chỉ:</span>
+                      <span>{order.address}</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <span className="text-gray-500 min-w-28">
+                        Phương thức:
+                      </span>
+                      <span>
+                        {order.payment_id === 2
+                          ? "Thanh toán online ( được giảm 50.000d )"
+                          : "Thanh toán khi nhận hàng"}
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <span className="text-gray-500 min-w-28">Ghi chú:</span>
+                      <span>{order.note || "Không có"}</span>
+                    </div>
+                    {order.status === "Cancelled" && (
+                      <div className="flex items-center gap-2">
+                        <span className="text-gray-500 min-w-28">
+                          Lý do hủy hàng:
+                        </span>
+                        <span>{order.cancel_reason || "Không có"}</span>
+                      </div>
+                    )}
+                    {(order.status === "Returned" ||
+                      order.return_reason ||
+                      order.returned_at) && (
+                      <div className="flex items-center gap-2">
+                        <span className="text-gray-500 min-w-28">
+                          Lý do trả hàng:
+                        </span>
+                        <span>{order.return_reason || "Không có"}</span>
+                      </div>
+                    )}
+                  </div>
+                </div>
               </div>
-              <div>
-                <p className="text-gray-500">Tổng cộng:</p>
-                <p className="text-gray-900 font-medium">
-                  {formatPrice(order.total)}
-                </p>
+
+              <div className="mt-8">
+                <h4 className="text-base font-semibold mb-4">
+                  Chi tiết sản phẩm
+                </h4>
+                <div className="divide-y border rounded-lg">
+                  {order.items.map((item) => (
+                    <div
+                      key={item.id}
+                      className="p-4 flex items-center justify-between"
+                    >
+                      <div className="flex items-center gap-4">
+                        <img
+                          src={item.image}
+                          alt={item.name}
+                          className="w-16 h-16 rounded-lg object-cover border"
+                        />
+                        <div>
+                          <p className="font-medium">{item.product_name}</p>
+                          <p className="text-sm text-gray-500">
+                            {formatPrice(item.price)} x {item.quantity}
+                          </p>
+                          <p className="text-sm text-gray-500">
+                            Size: {item.size} | Màu: {item.color}
+                          </p>
+                        </div>
+                      </div>
+                      <p className="font-medium">
+                        {formatPrice(item.price * item.quantity)}
+                      </p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div className="mt-6 flex justify-between">
+                <div>
+                  <p className="text-gray-500">Phí vận chuyển:</p>
+                  <p className="text-gray-900 font-medium">
+                    {formatPrice(order.shipping_fee)}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-gray-500">Tổng cộng:</p>
+                  <p className="text-gray-900 font-medium">
+                    {formatPrice(order.total)}
+                  </p>
+                </div>
               </div>
             </div>
           </div>
-
           <div className="bg-gray-50 px-4 py-3 sm:px-6 flex justify-end">
             <button
               type="button"
