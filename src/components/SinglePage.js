@@ -31,6 +31,22 @@ const SinglePage = () => {
   const [selectedMedia, setSelectedMedia] = useState("");
 
   const { isAuthenticated, checkApiResponse } = useAuthWithCheck();
+
+  const [currentPage, setCurrentPage] = useState(1);
+  const reviewsPerPage = 3;
+
+  const indexOfLastReview = currentPage * reviewsPerPage;
+  const indexOfFirstReview = indexOfLastReview - reviewsPerPage;
+  const currentReviews = product?.reviews.slice(
+    indexOfFirstReview,
+    indexOfLastReview
+  );
+  const totalPages = Math.ceil((product?.reviews.length || 0) / reviewsPerPage);
+
+  const handlePageChange = (pageNumber) => {
+    setCurrentPage(pageNumber);
+  };
+
   const openOverlay = (media) => {
     setSelectedMedia(media);
     setIsOverlayOpen(true);
@@ -65,7 +81,7 @@ const SinglePage = () => {
   const addItemToCartHandler = async () => {
     if (!isAuthenticated) {
       localStorage.setItem("redirect", location.pathname);
-      navigate("/login", { state: { from: location } });  
+      navigate("/login", { state: { from: location } });
       return;
     }
 
@@ -346,54 +362,83 @@ const SinglePage = () => {
       <div className="p-4 mx-96">
         <h2 className="text-lg font-bold mb-4">Đánh giá của khách hàng:</h2>
         {product.reviews.length > 0 ? (
-          product.reviews.map((review, index) => (
-            <div key={index} className="border p-4 rounded mb-4">
-              <p className="font-semibold">{review.title}</p>
-              <div className="flex items-center">
-                {Array.from({ length: review.rating }, (_, idx) => (
-                  <AiFillStar key={idx} className="text-yellow-500" />
-                ))}
-              </div>
-              <p>{review.content}</p>
-              <div className="flex mt-2">
-                {/* Hiển thị hình ảnh */}
-                {review.images &&
-                  review.images.length > 0 &&
-                  review.images.map((image, imgIndex) => (
-                    <img
-                      key={imgIndex}
-                      src={image}
-                      alt={`Review image ${imgIndex + 1}`}
-                      className="w-16 h-16 object-cover mr-2 cursor-pointer transition-transform transform hover:scale-105"
-                      onClick={() => openOverlay(image)} // Mở overlay cho hình ảnh
-                    />
+          <>
+            {currentReviews.map((review, index) => (
+              <div key={index} className="border p-4 rounded mb-4">
+                <p className="font-semibold">{review.title}</p>
+                <div className="flex items-center">
+                  {Array.from({ length: review.rating }, (_, idx) => (
+                    <AiFillStar key={idx} className="text-yellow-500" />
                   ))}
+                </div>
+                <p>{review.content}</p>
+                <div className="flex mt-2">
+                  {review.images &&
+                    review.images.length > 0 &&
+                    review.images.map((image, imgIndex) => (
+                      <img
+                        key={imgIndex}
+                        src={image}
+                        alt={`Review image ${imgIndex + 1}`}
+                        className="w-16 h-16 object-cover mr-2 cursor-pointer transition-transform transform hover:scale-105"
+                        onClick={() => openOverlay(image)}
+                      />
+                    ))}
 
-                {/* Hiển thị video dưới dạng hình ảnh */}
-                {review.video &&
-                  review.video.length > 0 &&
-                  review.video.map((videoUrl, vidIndex) => (
-                    <img
-                      key={vidIndex}
-                      src="https://img.icons8.com/ios-filled/50/000000/video.png" // Hình ảnh biểu tượng video
-                      alt={`Review video ${vidIndex + 1}`}
-                      className="w-16 h-16 object-cover mr-2 cursor-pointer transition-transform transform hover:scale-105"
-                      onClick={() => openOverlay(videoUrl)} // Mở overlay cho video
-                    />
-                  ))}
+                  {review.video &&
+                    review.video.length > 0 &&
+                    review.video.map((videoUrl, vidIndex) => (
+                      <img
+                        key={vidIndex}
+                        src="https://img.icons8.com/ios-filled/50/000000/video.png"
+                        alt={`Review video ${vidIndex + 1}`}
+                        className="w-16 h-16 object-cover mr-2 cursor-pointer transition-transform transform hover:scale-105"
+                        onClick={() => openOverlay(videoUrl)}
+                      />
+                    ))}
+                </div>
               </div>
+            ))}
+
+            {/* Phân trang đã được cập nhật */}
+            <div className="flex justify-center items-center gap-4 mt-6">
+              <button
+                onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+                disabled={currentPage === 1}
+                className={`px-4 py-2 rounded-md ${
+                  currentPage === 1 ? "bg-gray-200" : "bg-black text-white"
+                }`}
+              >
+                Trang trước
+              </button>
+              <span className="text-gray-700 my-auto">
+                Trang {currentPage} / {totalPages}
+              </span>
+              <button
+                onClick={() =>
+                  setCurrentPage((prev) => Math.min(prev + 1, totalPages))
+                }
+                disabled={currentPage === totalPages}
+                className={`px-4 py-2 rounded-md ${
+                  currentPage === totalPages
+                    ? "bg-gray-200"
+                    : "bg-black text-white"
+                }`}
+              >
+                Trang sau
+              </button>
             </div>
-          ))
+          </>
         ) : (
           <p className="text-gray-500">
             Hiện tại chưa có đánh giá cho sản phẩm.
           </p>
         )}
 
-        {/* Overlay để hiển thị hình ảnh hoặc video */}
+        {/* Overlay */}
         {isOverlayOpen && (
           <div className="fixed inset-0 bg-black bg-opacity-70 flex justify-center items-center z-[99999]">
-            {selectedMedia.endsWith(".mp4") ? ( // Kiểm tra định dạng media
+            {selectedMedia.endsWith(".mp4") ? (
               <video
                 src={selectedMedia}
                 className="max-w-full max-h-full"
