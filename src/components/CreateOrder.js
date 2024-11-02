@@ -73,6 +73,10 @@ const CreateOrder = () => {
     fetchUserProfile();
   }, [token]);
 
+  const addNewAddress = () => {
+    navigate("/edit-profile", { state: { from: "/order" } });
+  }
+
   const handleCreateOrder = async () => {
     if (!selectedAddress || !paymentMethod) {
       alert("Vui lòng chọn địa chỉ và phương thức thanh toán.");
@@ -230,11 +234,9 @@ const CreateOrder = () => {
                   dropdownClassName="bg-white w-auto p-2"
                   optionClassName="py-2 hover:bg-gray-300 items-center my-auto"
                 />
-                <Link to="/account">
-                  <Button variant="outline" className="w-full mt-4">
+                  <Button variant="outline" className="w-full mt-4" onClick={() => addNewAddress()}>
                     + Thêm địa chỉ mới
                   </Button>
-                </Link>
               </div>
             </div>
 
