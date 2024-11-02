@@ -64,7 +64,8 @@ const SinglePage = () => {
 
   const addItemToCartHandler = async () => {
     if (!isAuthenticated) {
-      navigate("/login", { state: { from: location } });
+      localStorage.setItem("redirect", location.pathname);
+      navigate("/login", { state: { from: location } });  
       return;
     }
 

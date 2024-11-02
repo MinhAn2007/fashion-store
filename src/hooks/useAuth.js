@@ -32,6 +32,7 @@ export const useAuthWithCheck = () => {
 
   // Hàm kiểm tra phản hồi từ API
   const checkApiResponse = (apiResponse) => {
+    console.log(apiResponse);
     if (apiResponse && apiResponse.status === 401) {
       toast({
         title: "Phiên làm việc đã hết hạn",

@@ -37,8 +37,10 @@ const FashionAccessories = () => {
     fetchProduct();
   }, [API]);
 
-  const addItemToCartHandler = async (product) => {
+  const addItemToCartHandler = async (product) =>   {
     if (!isAuthenticated) {
+        localStorage.setItem("redirect", location.pathname);
+
       navigate("/login", { state: { from: location } });
       return;
     }

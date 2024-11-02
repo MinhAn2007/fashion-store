@@ -225,6 +225,7 @@ export default function ShopPage(props) {
 
   const addItemToCartHandler = async (product) => {
     if (!isAuthenticated) {
+      localStorage.setItem("redirect", location.pathname);
       navigate("/login", { state: { from: location } });
       return;
     }

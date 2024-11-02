@@ -33,6 +33,7 @@ const NewProductsPage = () => {
 
   const addItemToCartHandler = async (product) => {
     if (!isAuthenticated) {
+      localStorage.setItem("redirect", location.pathname);
       navigate("/login", { state: { from: location } });
       return;
     }
@@ -114,9 +115,7 @@ const NewProductsPage = () => {
             <p className="text-xl mb-4">
               Khám phá những xu hướng mới nhất với bộ sưu tập mới của chúng tôi!
             </p>
-            <p className="text-sm opacity-70">
-              Số lượng có hạn - Đừng bỏ lỡ!
-            </p>
+            <p className="text-sm opacity-70">Số lượng có hạn - Đừng bỏ lỡ!</p>
           </div>
           <div className="bg-black/10 p-4 rounded-full  border-black">
             <h2 className="text-2xl font-extrabold text-black">Mới Nhất</h2>
@@ -144,8 +143,12 @@ const NewProductsPage = () => {
                 </figure>
               </Link>
               <div className="card-body items-center text-center p-2">
-                <h2 className="card-title mb-1 font-bold text-xl">{item.name}</h2>
-                <h2 className="text-xl mb-2 font-semibold">{formatPrice(item.skus[0].price)}</h2>
+                <h2 className="card-title mb-1 font-bold text-xl">
+                  {item.name}
+                </h2>
+                <h2 className="text-xl mb-2 font-semibold">
+                  {formatPrice(item.skus[0].price)}
+                </h2>
                 <div className="card-actions">
                   <button
                     className="btn btn-outline bg-black text-white hover:bg-opacity-30 hover:text-white"

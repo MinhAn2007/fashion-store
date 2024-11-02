@@ -39,6 +39,7 @@ const MinimalFashion = () => {
 
   const addItemToCartHandler = async (product) => {
     if (!isAuthenticated) {
+      localStorage.setItem("redirect", location.pathname);
       navigate("/login", { state: { from: location } });
       return;
     }
@@ -103,8 +104,8 @@ const MinimalFashion = () => {
           <p className="text-lg md:text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
             Thời trang tối giản là xu hướng thời trang hiện đại, tập trung vào
             những thiết kế đơn giản nhưng tinh tế. Phong cách này đề cao sự
-            thanh lịch và bền vững, giúp bạn xây dựng tủ đồ capsule hoàn hảo
-            với những item basic dễ dàng mix & match.
+            thanh lịch và bền vững, giúp bạn xây dựng tủ đồ capsule hoàn hảo với
+            những item basic dễ dàng mix & match.
           </p>
         </div>
 
@@ -139,9 +140,9 @@ const MinimalFashion = () => {
             </h3>
             <p className="text-lg text-gray-600 leading-relaxed mb-6">
               Thời trang tối giản thường sử dụng các gam màu trung tính như đen,
-              trắng, be và xám. Chất liệu được chọn lọc kỹ càng như cotton organic,
-              linen, len merino với form dáng basic nhưng vẫn đảm bảo phom dáng
-              đẹp và thoải mái khi mặc.
+              trắng, be và xám. Chất liệu được chọn lọc kỹ càng như cotton
+              organic, linen, len merino với form dáng basic nhưng vẫn đảm bảo
+              phom dáng đẹp và thoải mái khi mặc.
             </p>
             <div className="flex space-x-2">
               <div className="w-10 h-10 rounded-full bg-gray-900"></div>
