@@ -10,6 +10,9 @@ const Register = () => {
     password: '',
     addresses: [{ addressLine: '', city: '', state: '', phoneNumber: '', type: '' }],
   });
+  const [formErrors, setFormErrors] = useState({
+    addresses: [{}]
+  });
   const [loading, setLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState(null);
   const [successMessage, setSuccessMessage] = useState(null);
@@ -17,15 +20,67 @@ const Register = () => {
   const location = useLocation();
   const API = process.env.REACT_APP_API_ENDPOINT;
 
+  const validPhonePrefixes = [
+    '032', '033', '034', '035', '036', '037', '038', '039',
+    '096', '097', '098', '086', '083', '084', '085', '081',
+    '082', '088', '091', '094', '070', '079', '077', '076',
+    '078', '090', '093', '089', '056', '058', '092', '059', '099'
+  ];
+
+  const validatePhoneNumber = (phoneNumber, index) => {
+    const newErrors = [...formErrors.addresses];
+
+    // Xóa tất cả ký tự không phải số
+    const cleanPhone = phoneNumber.replace(/\D/g, '');
+
+    // Kiểm tra độ dài
+    if (cleanPhone.length !== 10) {
+      newErrors[index] = {
+        ...newErrors[index],
+        phoneNumber: 'Số điện thoại phải có 10 chữ số'
+      };
+      setFormErrors({ ...formErrors, addresses: newErrors });
+      return false;
+    }
+
+    // Kiểm tra đầu số
+    const prefix = cleanPhone.substring(0, 3);
+    if (!validPhonePrefixes.includes(prefix)) {
+      newErrors[index] = {
+        ...newErrors[index],
+        phoneNumber: 'Đầu số không hợp lệ'
+      };
+      setFormErrors({ ...formErrors, addresses: newErrors });
+      return false;
+    }
+
+    // Xóa lỗi nếu hợp lệ
+    newErrors[index] = {
+      ...newErrors[index],
+      phoneNumber: ''
+    };
+    setFormErrors({ ...formErrors, addresses: newErrors });
+    return true;
+  };
+
   const handleChange = (e, index, field) => {
-    console.log(e.target.value);
-    console.log(index);
-    
-    
     if (index !== undefined) {
-      const newAddresses = formValues.addresses.map((address, i) =>
-        i === index ? { ...address, [field]: e.target.value } : address
-      );
+      const newAddresses = formValues.addresses.map((address, i) => {
+        if (i === index) {
+          const newValue = e.target.value;
+          if (field === 'phoneNumber') {
+            // Chỉ cho phép nhập số
+            const cleanPhone = newValue.replace(/\D/g, '');
+            if (cleanPhone.length <= 10) {
+              validatePhoneNumber(cleanPhone, index);
+              return { ...address, [field]: cleanPhone };
+            }
+            return address;
+          }
+          return { ...address, [field]: newValue };
+        }
+        return address;
+      });
       setFormValues({ ...formValues, addresses: newAddresses });
     } else {
       setFormValues({ ...formValues, [e.target.name]: e.target.value });
@@ -37,10 +92,25 @@ const Register = () => {
       ...formValues,
       addresses: [...formValues.addresses, { addressLine: '', city: '', state: '', phoneNumber: '', type: '' }],
     });
+    setFormErrors({
+      ...formErrors,
+      addresses: [...formErrors.addresses, {}],
+    });
   };
 
   const handleRegister = async (e) => {
     e.preventDefault();
+
+    // Kiểm tra tất cả số điện thoại trước khi submit
+    const isValidPhones = formValues.addresses.every((address, index) =>
+      validatePhoneNumber(address.phoneNumber, index)
+    );
+
+    if (!isValidPhones) {
+      setErrorMessage('Vui lòng kiểm tra lại các số điện thoại');
+      return;
+    }
+
     setLoading(true);
     setErrorMessage(null);
     setSuccessMessage(null);
@@ -65,12 +135,9 @@ const Register = () => {
         throw new Error(errorData.message || 'Đã xảy ra lỗi trong quá trình đăng ký. Vui lòng thử lại.');
       }
       const data = await response.json();
-      console.log('Registration response:', data.userId);
       localStorage.setItem('userId', data.userId);
       localStorage.setItem('token', data.loginResponse.token);
-      const userId = data.loginResponse.userId;
-      console.log('User ID:', userId);
-      
+
       setSuccessMessage("Bạn đã đăng ký thành công! Vui lòng kiểm tra email để xác nhận tài khoản.");
       setTimeout(() => {
         const from = location.state?.from?.pathname || '/';
@@ -87,7 +154,7 @@ const Register = () => {
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-4xl w-full bg-white p-8 rounded-lg shadow-xl">
-        <Link to="/" className=" text-black flex">
+        <Link to="/" className="text-black flex">
           <IoMdArrowBack className="my-auto mr-2" /> Quay về trang chủ
         </Link>
         <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">Tạo tài khoản mới</h2>
@@ -149,12 +216,12 @@ const Register = () => {
                 />
               </div>
             </div>
-            
+
             {formValues.addresses.map((address, index) => (
               <div key={index} className="space-y-4">
                 <div className="text-lg font-medium text-gray-700">Địa chỉ {index + 1}</div>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  
+
                   <div>
                     <label htmlFor={`type-${index}`} className="block text-sm font-medium text-gray-700">Loại địa chỉ</label>
                     <select
@@ -164,6 +231,7 @@ const Register = () => {
                       value={address.type}
                       onChange={(e) => handleChange(e, index, 'type')}
                     >
+                      <option value="">Chọn loại địa chỉ</option>
                       <option value="Nhà riêng">Nhà riêng</option>
                       <option value="Công ty">Công ty</option>
                       <option value="Khác">Khác</option>
@@ -207,12 +275,17 @@ const Register = () => {
                     <label htmlFor={`phoneNumber-${index}`} className="block text-sm font-medium text-gray-700">Số điện thoại</label>
                     <input
                       id={`phoneNumber-${index}`}
-                      type="text"
+                      type="tel"
                       required
-                      className="mt-1 block w-full h-10 shadow-sm sm:text-sm border-gray-300 rounded-lg focus:ring-black focus:border-black"
+                      className={`mt-1 block w-full h-10 shadow-sm sm:text-sm border-gray-300 rounded-lg focus:ring-black focus:border-black ${formErrors.addresses[index]?.phoneNumber ? 'border-red-500' : ''
+                        }`}
                       value={address.phoneNumber}
                       onChange={(e) => handleChange(e, index, 'phoneNumber')}
+                      placeholder="VD: 0321234567"
                     />
+                    {formErrors.addresses[index]?.phoneNumber && (
+                      <p className="mt-1 text-sm text-red-500">{formErrors.addresses[index].phoneNumber}</p>
+                    )}
                   </div>
                 </div>
               </div>
