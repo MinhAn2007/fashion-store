@@ -58,7 +58,8 @@ const CancelOrderModal = ({ order, onClose }) => {
 
   const handleCloseSuccessMessage = () => {
     setShowSuccessMessage(false);
-    onClose(); // Đóng modal chính khi thông báo được đóng
+    onClose(); 
+    window.location.reload();
   };
 
   return (
