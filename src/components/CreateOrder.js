@@ -139,7 +139,7 @@ const CreateOrder = () => {
       const result = await response.json();
       console.log("Đơn hàng đã được tạo:", result);
       alert("Đơn hàng của bạn đã được tạo thành công!");
-      navigate("/");
+      navigate("/order-list");
     } catch (error) {
       alert("Đã xảy ra lỗi khi tạo đơn hàng.");
       setErrorMessage(error.message || "Đã xảy ra lỗi khi tạo đơn hàng.");

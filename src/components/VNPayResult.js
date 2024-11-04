@@ -79,9 +79,7 @@ const ResultVNPAYPage = () => {
           </span>
         </p>{" "}
         <p className="mb-2">Mã tham chiếu giao dịch: {paymentInfo.txnRef}</p>
-        <p className="text-lg font-semibold text-blue-600">
-          {message ? "Đang tạo đơn hàng" : ""}
-        </p>
+        <p className="text-lg font-semibold text-blue-600">{{ message }}</p>
         {message && (
           <div className="flex justify-center mt-4">
             <a

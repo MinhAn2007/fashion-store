@@ -42,13 +42,13 @@ const CancelOrderModal = ({ order, onClose }) => {
         "Content-Type": "application/json",
       },
     });
-
+    const data = await response.json();
     if (!response.ok) {
-      alert("Đã xảy ra lỗi khi hủy đơn hàng. Vui lòng thử lại sau."); // Thông báo lỗi
+      alert(data.message || "Đã xảy ra lỗi khi hủy đơn hàng.");
       return;
     }
 
-    setShowSuccessMessage(true); // Hiển thị thông báo thành công
+    setShowSuccessMessage(true); 
     setShowConfirmation(false);
   };
 
