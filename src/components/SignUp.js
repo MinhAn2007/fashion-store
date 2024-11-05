@@ -11,7 +11,11 @@ const Register = () => {
     addresses: [{ addressLine: '', city: '', state: '', phoneNumber: '', type: '' }],
   });
   const [formErrors, setFormErrors] = useState({
-    addresses: [{}]
+    firstName: '',
+    lastName: '',
+    email: '',
+    password: '',
+    addresses: [{}],
   });
   const [loading, setLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState(null);
@@ -28,62 +32,115 @@ const Register = () => {
   ];
 
   const validatePhoneNumber = (phoneNumber, index) => {
-    const newErrors = [...formErrors.addresses];
+    if (!Array.isArray(formErrors.addresses)) {
+      setFormErrors(prev => ({
+        ...prev,
+        addresses: formValues.addresses.map(() => ({})),
+      }));
+    }
 
-    // Xóa tất cả ký tự không phải số
+    const newErrors = [...(formErrors.addresses || [])];
     const cleanPhone = phoneNumber.replace(/\D/g, '');
 
-    // Kiểm tra độ dài
+    if (!/^\d+$/.test(phoneNumber)) {
+      newErrors[index] = {
+        ...newErrors[index],
+        phoneNumber: 'Số điện thoại chỉ chứa ký tự số',
+      };
+      setFormErrors({ ...formErrors, addresses: newErrors });
+      return 'Số điện thoại chỉ chứa ký tự số';
+    }
+
     if (cleanPhone.length !== 10) {
       newErrors[index] = {
         ...newErrors[index],
-        phoneNumber: 'Số điện thoại phải có 10 chữ số'
+        phoneNumber: 'Số điện thoại phải có đúng 10 chữ số',
       };
       setFormErrors({ ...formErrors, addresses: newErrors });
-      return false;
+      return 'Số điện thoại phải có đúng 10 chữ số';
     }
 
-    // Kiểm tra đầu số
     const prefix = cleanPhone.substring(0, 3);
     if (!validPhonePrefixes.includes(prefix)) {
       newErrors[index] = {
         ...newErrors[index],
-        phoneNumber: 'Đầu số không hợp lệ'
+        phoneNumber: 'Đầu số không hợp lệ',
       };
       setFormErrors({ ...formErrors, addresses: newErrors });
-      return false;
+      return 'Đầu số không hợp lệ';
     }
 
-    // Xóa lỗi nếu hợp lệ
     newErrors[index] = {
       ...newErrors[index],
-      phoneNumber: ''
+      phoneNumber: '',
     };
     setFormErrors({ ...formErrors, addresses: newErrors });
-    return true;
+    return '';
+  };
+
+  const validateField = (name, value) => {
+    let error = '';
+    if (name === 'firstName' || name === 'lastName') {
+      if (!/^[\p{L}\s'-]+$/u.test(value)) {
+        error = 'Trường này chỉ chứa các chữ cái, khoảng trắng, dấu gạch ngang và dấu nháy đơn';
+      } else if (value.length < 2 || value.length > 50) {
+        error = 'Trường này phải có từ 2 đến 50 ký tự';
+      }
+    } else if (name === 'email') {
+      if (!/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(value)) {
+        error = 'Email không đúng định dạng';
+      }
+    } else if (name === 'password') {
+      if (value.length < 8) {
+        error = 'Mật khẩu phải có ít nhất 8 ký tự';
+      } else if (!/(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])/.test(value)) {
+        error = 'Mật khẩu phải chứa ít nhất một chữ hoa, một chữ thường, một số và một ký tự đặc biệt';
+      }
+    } else if (name === 'addressLine') {
+      if (value.length < 5 || value.length > 100) {
+        error = 'Địa chỉ phải có từ 5 đến 100 ký tự';
+      }
+    } else if (name === 'city' || name === 'state') {
+      if (!/^[\p{L}\s'-]+$/u.test(value)) {
+        error = 'Trường này chỉ chứa các chữ cái, khoảng trắng, dấu gạch ngang và dấu nháy đơn';
+      } else if (value.length > 50) {
+        error = 'Trường này phải có không quá 50 ký tự';
+      }
+    }
+    return error;
   };
 
   const handleChange = (e, index, field) => {
+    const { name, value } = e.target;
+
     if (index !== undefined) {
+      if (!Array.isArray(formErrors.addresses)) {
+        setFormErrors(prev => ({
+          ...prev,
+          addresses: formValues.addresses.map(() => ({})),
+        }));
+      }
+
       const newAddresses = formValues.addresses.map((address, i) => {
         if (i === index) {
-          const newValue = e.target.value;
-          if (field === 'phoneNumber') {
-            // Chỉ cho phép nhập số
-            const cleanPhone = newValue.replace(/\D/g, '');
-            if (cleanPhone.length <= 10) {
-              validatePhoneNumber(cleanPhone, index);
-              return { ...address, [field]: cleanPhone };
+          const error = field === 'phoneNumber' ? validatePhoneNumber(value, index) : validateField(field, value);
+          setFormErrors(prev => {
+            const newErrors = [...(prev.addresses || [])];
+            while (newErrors.length <= index) {
+              newErrors.push({});
             }
-            return address;
-          }
-          return { ...address, [field]: newValue };
+            newErrors[index] = { ...newErrors[index], [field]: error };
+            return { ...prev, addresses: newErrors };
+          });
+          return { ...address, [field]: value };
         }
         return address;
       });
       setFormValues({ ...formValues, addresses: newAddresses });
     } else {
-      setFormValues({ ...formValues, [e.target.name]: e.target.value });
+      const error = validateField(name, value);
+      setFormErrors(prev => ({ ...prev, [name]: error }));
+      setFormValues({ ...formValues, [name]: value });
     }
   };
 
@@ -92,22 +149,47 @@ const Register = () => {
       ...formValues,
       addresses: [...formValues.addresses, { addressLine: '', city: '', state: '', phoneNumber: '', type: '' }],
     });
-    setFormErrors({
-      ...formErrors,
-      addresses: [...formErrors.addresses, {}],
-    });
+    setFormErrors(prev => ({
+      ...prev,
+      addresses: [...(prev.addresses || []), {}],
+    }));
   };
 
   const handleRegister = async (e) => {
     e.preventDefault();
 
-    // Kiểm tra tất cả số điện thoại trước khi submit
-    const isValidPhones = formValues.addresses.every((address, index) =>
-      validatePhoneNumber(address.phoneNumber, index)
-    );
+    if (!Array.isArray(formErrors.addresses)) {
+      setFormErrors(prev => ({
+        ...prev,
+        addresses: formValues.addresses.map(() => ({})),
+      }));
+    }
 
-    if (!isValidPhones) {
-      setErrorMessage('Vui lòng kiểm tra lại các số điện thoại');
+    const errors = {};
+    ['firstName', 'lastName', 'email', 'password'].forEach(field => {
+      const error = validateField(field, formValues[field]);
+      if (error) errors[field] = error;
+    });
+
+    formValues.addresses.forEach((address, index) => {
+      ['addressLine', 'city', 'state', 'phoneNumber'].forEach(field => {
+        const error = field === 'phoneNumber'
+          ? validatePhoneNumber(address[field], index)
+          : validateField(field, address[field]);
+        if (error) {
+          if (!errors.addresses) errors.addresses = [];
+          while (errors.addresses.length <= index) {
+            errors.addresses.push({});
+          }
+          errors.addresses[index] = { ...errors.addresses[index], [field]: error };
+        }
+      });
+    });
+
+    setFormErrors(errors);
+
+    if (Object.keys(errors).some(key => errors[key] || (Array.isArray(errors.addresses) && errors.addresses.some(err => Object.keys(err).length > 0)))) {
+      setErrorMessage('Vui lòng kiểm tra lại các thông tin đã nhập');
       return;
     }
 
@@ -121,19 +203,14 @@ const Register = () => {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({
-          firstName: formValues.firstName,
-          lastName: formValues.lastName,
-          email: formValues.email,
-          password: formValues.password,
-          addresses: formValues.addresses,
-        }),
+        body: JSON.stringify(formValues),
       });
 
       if (!response.ok) {
         const errorData = await response.json();
         throw new Error(errorData.message || 'Đã xảy ra lỗi trong quá trình đăng ký. Vui lòng thử lại.');
       }
+
       const data = await response.json();
       localStorage.setItem('userId', data.userId);
       localStorage.setItem('token', data.loginResponse.token);
@@ -176,8 +253,11 @@ const Register = () => {
                   required
                   className="mt-1 block w-full h-10 shadow-sm sm:text-sm border-gray-300 rounded-lg focus:ring-black focus:border-black"
                   value={formValues.firstName}
-                  onChange={(e) => handleChange(e)}
+                  onChange={handleChange}
                 />
+                {formErrors.firstName && (
+                  <p className="mt-1 text-sm text-red-500">{formErrors.firstName}</p>
+                )}
               </div>
               <div>
                 <label htmlFor="lastName" className="block text-sm font-medium text-gray-700">Tên</label>
@@ -188,8 +268,11 @@ const Register = () => {
                   required
                   className="mt-1 block w-full h-10 shadow-sm sm:text-sm border-gray-300 rounded-lg focus:ring-black focus:border-black"
                   value={formValues.lastName}
-                  onChange={(e) => handleChange(e)}
+                  onChange={handleChange}
                 />
+                {formErrors.lastName && (
+                  <p className="mt-1 text-sm text-red-500">{formErrors.lastName}</p>
+                )}
               </div>
               <div>
                 <label htmlFor="email" className="block text-sm font-medium text-gray-700">Email</label>
@@ -200,8 +283,11 @@ const Register = () => {
                   required
                   className="mt-1 block w-full h-10 shadow-sm sm:text-sm border-gray-300 rounded-lg focus:ring-black focus:border-black"
                   value={formValues.email}
-                  onChange={(e) => handleChange(e)}
+                  onChange={handleChange}
                 />
+                {formErrors.email && (
+                  <p className="mt-1 text-sm text-red-500">{formErrors.email}</p>
+                )}
               </div>
               <div>
                 <label htmlFor="password" className="block text-sm font-medium text-gray-700">Mật khẩu</label>
@@ -212,8 +298,11 @@ const Register = () => {
                   required
                   className="mt-1 block w-full h-10 shadow-sm sm:text-sm border-gray-300 rounded-lg focus:ring-black focus:border-black"
                   value={formValues.password}
-                  onChange={(e) => handleChange(e)}
+                  onChange={handleChange}
                 />
+                {formErrors.password && (
+                  <p className="mt-1 text-sm text-red-500">{formErrors.password}</p>
+                )}
               </div>
             </div>
 
@@ -221,7 +310,6 @@ const Register = () => {
               <div key={index} className="space-y-4">
                 <div className="text-lg font-medium text-gray-700">Địa chỉ {index + 1}</div>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-
                   <div>
                     <label htmlFor={`type-${index}`} className="block text-sm font-medium text-gray-700">Loại địa chỉ</label>
                     <select
@@ -248,6 +336,9 @@ const Register = () => {
                       value={address.addressLine}
                       onChange={(e) => handleChange(e, index, 'addressLine')}
                     />
+                    {formErrors.addresses?.[index]?.addressLine && (
+                      <p className="mt-1 text-sm text-red-500">{formErrors.addresses[index].addressLine}</p>
+                    )}
                   </div>
                   <div>
                     <label htmlFor={`city-${index}`} className="block text-sm font-medium text-gray-700">Thành phố</label>
@@ -259,6 +350,9 @@ const Register = () => {
                       value={address.city}
                       onChange={(e) => handleChange(e, index, 'city')}
                     />
+                    {formErrors.addresses?.[index]?.city && (
+                      <p className="mt-1 text-sm text-red-500">{formErrors.addresses[index].city}</p>
+                    )}
                   </div>
                   <div>
                     <label htmlFor={`state-${index}`} className="block text-sm font-medium text-gray-700">Tỉnh/Thành phố</label>
@@ -270,6 +364,9 @@ const Register = () => {
                       value={address.state}
                       onChange={(e) => handleChange(e, index, 'state')}
                     />
+                    {formErrors.addresses?.[index]?.state && (
+                      <p className="mt-1 text-sm text-red-500">{formErrors.addresses[index].state}</p>
+                    )}
                   </div>
                   <div>
                     <label htmlFor={`phoneNumber-${index}`} className="block text-sm font-medium text-gray-700">Số điện thoại</label>
@@ -277,13 +374,13 @@ const Register = () => {
                       id={`phoneNumber-${index}`}
                       type="tel"
                       required
-                      className={`mt-1 block w-full h-10 shadow-sm sm:text-sm border-gray-300 rounded-lg focus:ring-black focus:border-black ${formErrors.addresses[index]?.phoneNumber ? 'border-red-500' : ''
+                      className={`mt-1 block w-full h-10 shadow-sm sm:text-sm border-gray-300 rounded-lg focus:ring-black focus:border-black ${formErrors.addresses?.[index]?.phoneNumber ? 'border-red-500' : ''
                         }`}
                       value={address.phoneNumber}
                       onChange={(e) => handleChange(e, index, 'phoneNumber')}
                       placeholder="VD: 0321234567"
                     />
-                    {formErrors.addresses[index]?.phoneNumber && (
+                    {formErrors.addresses?.[index]?.phoneNumber && (
                       <p className="mt-1 text-sm text-red-500">{formErrors.addresses[index].phoneNumber}</p>
                     )}
                   </div>
