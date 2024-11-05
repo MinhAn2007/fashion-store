@@ -9,16 +9,21 @@ const EditProfile = () => {
     email: "",
     addresses: [],
   });
+  const [fieldErrors, setFieldErrors] = useState({});
   const [loading, setLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState(null);
   const navigate = useNavigate();
   const API = process.env.REACT_APP_API_ENDPOINT;
   const token = localStorage.getItem("token");
   const { state } = useLocation();
-  console.log(state?.from);
 
   useEffect(() => {
     const fetchUserProfile = async () => {
+      if (!token) {
+        navigate("/login");
+        return;
+      }
+
       try {
         const decodedToken = jwtDecode(token);
         const userId = decodedToken.userId;
@@ -32,9 +37,7 @@ const EditProfile = () => {
         });
 
         if (!response.ok) {
-          throw new Error(
-            "Không thể lấy thông tin người dùng. Vui lòng đăng nhập lại."
-          );
+          throw new Error("Không thể lấy thông tin người dùng. Vui lòng đăng nhập lại.");
         }
 
         const data = await response.json();
@@ -43,29 +46,90 @@ const EditProfile = () => {
           addresses: data.addresses || [],
         });
       } catch (error) {
-        setErrorMessage(
-          error.message || "Đã xảy ra lỗi khi tải thông tin cá nhân."
-        );
-        setUserInfo(null);
+        setErrorMessage(error.message || "Đã xảy ra lỗi khi tải thông tin cá nhân.");
       } finally {
         setLoading(false);
       }
     };
 
-    if (token) {
-      fetchUserProfile();
-    } else {
-      navigate("/login");
-    }
+    fetchUserProfile();
   }, [API, token, navigate]);
+
+  const validateField = (name, value) => {
+    let error = '';
+    if (name === 'firstName' || name === 'lastName') {
+      if (!/^[\p{L}\s'-]+$/u.test(value)) {
+        error = 'Trường này chỉ chứa các chữ cái, khoảng trắng, dấu gạch ngang và dấu nháy đơn';
+      } else if (value.length < 2 || value.length > 50) {
+        error = 'Trường này phải có từ 2 đến 50 ký tự';
+      }
+    } else if (name === 'email') {
+      if (!/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(value)) {
+        error = 'Email không đúng định dạng';
+      }
+    }
+    return error;
+  };
+
+  const validatePhoneNumber = (phoneNumber) => {
+    const validPhonePrefixes = [
+      '032', '033', '034', '035', '036', '037', '038', '039',
+      '096', '097', '098', '086', '083', '084', '085', '081',
+      '082', '088', '091', '094', '070', '079', '077', '076',
+      '078', '090', '093', '089', '056', '058', '092', '059', '099'
+    ];
+    const cleanPhone = phoneNumber.replace(/\D/g, '');
+
+    if (!/^\d+$/.test(phoneNumber)) {
+      return 'Số điện thoại chỉ chứa ký tự số';
+    }
+
+    if (cleanPhone.length !== 10) {
+      return 'Số điện thoại phải có đúng 10 chữ số';
+    }
+
+    const prefix = cleanPhone.substring(0, 3);
+    if (!validPhonePrefixes.includes(prefix)) {
+      return 'Đầu số không hợp lệ';
+    }
+
+    return '';
+  };
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
+    const error = validateField(name, value);
+    setFieldErrors(prevErrors => ({
+      ...prevErrors,
+      [name]: error,
+    }));
     setUserInfo({ ...userInfo, [name]: value });
   };
 
   const handleAddressChange = (index, field, value) => {
     const newAddresses = [...userInfo.addresses];
+    let error = '';
+
+    if (field === 'phoneNumber') {
+      error = validatePhoneNumber(value);
+    } else {
+      error = validateField(field, value);
+    }
+
+    const addressErrors = fieldErrors.addresses ? [...fieldErrors.addresses] : [];
+    while (addressErrors.length <= index) {
+      addressErrors.push({});
+    }
+    addressErrors[index] = {
+      ...addressErrors[index],
+      [field]: error,
+    };
+
+    setFieldErrors({
+      ...fieldErrors,
+      addresses: addressErrors,
+    });
+
     newAddresses[index] = {
       ...newAddresses[index],
       [field]: value,
@@ -73,29 +137,17 @@ const EditProfile = () => {
     setUserInfo({ ...userInfo, addresses: newAddresses });
   };
 
-  const addNewAddress = () => {
-    const newAddress = {
-      addressLine: "",
-      city: "",
-      state: "",
-      country: "",
-      postalCode: "",
-      phoneNumber: "",
-      type: "home",
-    };
-    setUserInfo({
-      ...userInfo,
-      addresses: [...userInfo.addresses, newAddress],
-    });
-  };
-
-  const removeAddress = (index) => {
-    const newAddresses = userInfo.addresses.filter((_, idx) => idx !== index);
-    setUserInfo({ ...userInfo, addresses: newAddresses });
-  };
-
   const handleSubmit = async (e) => {
     e.preventDefault();
+    const hasErrors = Object.values(fieldErrors).some(
+      (error) => typeof error === 'string' ? error : Object.values(error).some(err => err)
+    );
+
+    if (hasErrors) {
+      alert("Vui lòng kiểm tra lại các thông tin trước khi lưu.");
+      return;
+    }
+
     try {
       const response = await fetch(`${API}/api/users/me`, {
         method: "PUT",
@@ -109,11 +161,8 @@ const EditProfile = () => {
       if (!response.ok) {
         throw new Error("Cập nhật thông tin không thành công");
       }
-      if (state?.from) {
-        navigate(state.from);
-      } else {
-        navigate("/account");
-      }
+
+      navigate(state?.from || "/account");
     } catch (error) {
       setErrorMessage(error.message || "Có lỗi xảy ra khi cập nhật thông tin.");
     }
@@ -146,9 +195,7 @@ const EditProfile = () => {
         <form onSubmit={handleSubmit}>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700">
-                Họ
-              </label>
+              <label className="block text-sm font-medium text-gray-700">Họ</label>
               <input
                 type="text"
                 name="firstName"
@@ -156,11 +203,12 @@ const EditProfile = () => {
                 onChange={handleInputChange}
                 className="mt-1 block w-full h-10 bg-gray-50 text-gray-900 border border-gray-300 rounded-lg px-4"
               />
+              {fieldErrors.firstName && (
+                <p className="mt-1 text-sm text-red-500">{fieldErrors.firstName}</p>
+              )}
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700">
-                Tên
-              </label>
+              <label className="block text-sm font-medium text-gray-700">Tên</label>
               <input
                 type="text"
                 name="lastName"
@@ -168,11 +216,12 @@ const EditProfile = () => {
                 onChange={handleInputChange}
                 className="mt-1 block w-full h-10 bg-gray-50 text-gray-900 border border-gray-300 rounded-lg px-4"
               />
+              {fieldErrors.lastName && (
+                <p className="mt-1 text-sm text-red-500">{fieldErrors.lastName}</p>
+              )}
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700">
-                Email
-              </label>
+              <label className="block text-sm font-medium text-gray-700">Email</label>
               <input
                 type="email"
                 name="email"
@@ -180,6 +229,9 @@ const EditProfile = () => {
                 onChange={handleInputChange}
                 className="mt-1 block w-full h-10 bg-gray-50 text-gray-900 border border-gray-300 rounded-lg px-4"
               />
+              {fieldErrors.email && (
+                <p className="mt-1 text-sm text-red-500">{fieldErrors.email}</p>
+              )}
             </div>
           </div>
 
@@ -187,8 +239,22 @@ const EditProfile = () => {
             <h3 className="text-xl font-bold">Địa chỉ của bạn</h3>
             <button
               type="button"
-              onClick={addNewAddress}
-              className="py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-black hover:bg-opacity-30 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
+              onClick={() =>
+                setUserInfo({
+                  ...userInfo,
+                  addresses: [
+                    ...userInfo.addresses,
+                    {
+                      addressLine: "",
+                      city: "",
+                      state: "",
+                      phoneNumber: "",
+                      type: "home",
+                    },
+                  ],
+                })
+              }
+              className="py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-black hover:bg-opacity-30"
             >
               + Thêm địa chỉ mới
             </button>
@@ -199,17 +265,6 @@ const EditProfile = () => {
               key={index}
               className="p-4 mt-4 bg-gray-100 rounded-lg shadow-md border border-gray-200"
             >
-              <div className="flex justify-between items-center mb-4">
-                <h4 className="text-lg font-semibold">Địa chỉ {index + 1}</h4>
-                <button
-                  type="button"
-                  onClick={() => removeAddress(index)}
-                  className="text-red-600 hover:text-red-800"
-                >
-                  Xóa
-                </button>
-              </div>
-
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-gray-700">
@@ -223,6 +278,11 @@ const EditProfile = () => {
                     }
                     className="mt-1 block w-full h-10 bg-gray-50 text-gray-900 border border-gray-300 rounded-lg px-4"
                   />
+                  {fieldErrors.addresses?.[index]?.addressLine && (
+                    <p className="mt-1 text-sm text-red-500">
+                      {fieldErrors.addresses[index].addressLine}
+                    </p>
+                  )}
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700">
@@ -236,6 +296,11 @@ const EditProfile = () => {
                     }
                     className="mt-1 block w-full h-10 bg-gray-50 text-gray-900 border border-gray-300 rounded-lg px-4"
                   />
+                  {fieldErrors.addresses?.[index]?.city && (
+                    <p className="mt-1 text-sm text-red-500">
+                      {fieldErrors.addresses[index].city}
+                    </p>
+                  )}
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700">
@@ -249,32 +314,11 @@ const EditProfile = () => {
                     }
                     className="mt-1 block w-full h-10 bg-gray-50 text-gray-900 border border-gray-300 rounded-lg px-4"
                   />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700">
-                    Quốc gia:
-                  </label>
-                  <input
-                    type="text"
-                    value={address.country || ""}
-                    onChange={(e) =>
-                      handleAddressChange(index, "country", e.target.value)
-                    }
-                    className="mt-1 block w-full h-10 bg-gray-50 text-gray-900 border border-gray-300 rounded-lg px-4"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700">
-                    Mã bưu điện:
-                  </label>
-                  <input
-                    type="text"
-                    value={address.postalCode || ""}
-                    onChange={(e) =>
-                      handleAddressChange(index, "postalCode", e.target.value)
-                    }
-                    className="mt-1 block w-full h-10 bg-gray-50 text-gray-900 border border-gray-300 rounded-lg px-4"
-                  />
+                  {fieldErrors.addresses?.[index]?.state && (
+                    <p className="mt-1 text-sm text-red-500">
+                      {fieldErrors.addresses[index].state}
+                    </p>
+                  )}
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700">
@@ -288,22 +332,11 @@ const EditProfile = () => {
                     }
                     className="mt-1 block w-full h-10 bg-gray-50 text-gray-900 border border-gray-300 rounded-lg px-4"
                   />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700">
-                    Loại địa chỉ:
-                  </label>
-                  <select
-                    value={address.type || "home"}
-                    onChange={(e) =>
-                      handleAddressChange(index, "type", e.target.value)
-                    }
-                    className="mt-1 block w-full h-10 bg-gray-50 text-gray-900 border border-gray-300 rounded-lg px-4"
-                  >
-                    <option value="Nhà riêng">Nhà riêng</option>
-                    <option value="Công ty">Công ty</option>
-                    <option value="Khác">Khác</option>
-                  </select>
+                  {fieldErrors.addresses?.[index]?.phoneNumber && (
+                    <p className="mt-1 text-sm text-red-500">
+                      {fieldErrors.addresses[index].phoneNumber}
+                    </p>
+                  )}
                 </div>
               </div>
             </div>
@@ -311,7 +344,7 @@ const EditProfile = () => {
 
           <button
             type="submit"
-            className="mt-6 w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-black hover:bg-gray-800 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-black"
+            className="mt-6 w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-black hover:bg-gray-800"
           >
             Lưu thay đổi
           </button>
