@@ -9,7 +9,12 @@ const EditProfile = () => {
     email: "",
     addresses: [],
   });
-  const [fieldErrors, setFieldErrors] = useState({});
+  const [fieldErrors, setFieldErrors] = useState({
+    firstName: '',
+    lastName: '',
+    email: '',
+    addresses: [],
+  });
   const [loading, setLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState(null);
   const navigate = useNavigate();
@@ -55,29 +60,14 @@ const EditProfile = () => {
     fetchUserProfile();
   }, [API, token, navigate]);
 
-  const validateField = (name, value) => {
-    let error = '';
-    if (name === 'firstName' || name === 'lastName') {
-      if (!/^[\p{L}\s'-]+$/u.test(value)) {
-        error = 'Trường này chỉ chứa các chữ cái, khoảng trắng, dấu gạch ngang và dấu nháy đơn';
-      } else if (value.length < 2 || value.length > 50) {
-        error = 'Trường này phải có từ 2 đến 50 ký tự';
-      }
-    } else if (name === 'email') {
-      if (!/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(value)) {
-        error = 'Email không đúng định dạng';
-      }
-    }
-    return error;
-  };
+  const validPhonePrefixes = [
+    '032', '033', '034', '035', '036', '037', '038', '039',
+    '096', '097', '098', '086', '083', '084', '085', '081',
+    '082', '088', '091', '094', '070', '079', '077', '076',
+    '078', '090', '093', '089', '056', '058', '092', '059', '099'
+  ];
 
   const validatePhoneNumber = (phoneNumber) => {
-    const validPhonePrefixes = [
-      '032', '033', '034', '035', '036', '037', '038', '039',
-      '096', '097', '098', '086', '083', '084', '085', '081',
-      '082', '088', '091', '094', '070', '079', '077', '076',
-      '078', '090', '093', '089', '056', '058', '092', '059', '099'
-    ];
     const cleanPhone = phoneNumber.replace(/\D/g, '');
 
     if (!/^\d+$/.test(phoneNumber)) {
@@ -94,6 +84,26 @@ const EditProfile = () => {
     }
 
     return '';
+  };
+
+  const validateField = (name, value) => {
+    let error = '';
+    if (name === 'firstName' || name === 'lastName' || name === 'city' || name === 'state') {
+      if (!/^[\p{L}\s'-]+$/u.test(value)) {
+        error = 'Trường này chỉ chứa các chữ cái, khoảng trắng, dấu gạch ngang và dấu nháy đơn';
+      } else if (value.length < 2 || value.length > 50) {
+        error = 'Trường này phải có từ 2 đến 50 ký tự';
+      }
+    } else if (name === 'email') {
+      if (!/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(value)) {
+        error = 'Email không đúng định dạng';
+      }
+    } else if (name === 'addressLine') {
+      if (value.length < 5 || value.length > 100) {
+        error = 'Địa chỉ phải có từ 5 đến 100 ký tự';
+      }
+    }
+    return error;
   };
 
   const handleInputChange = (e) => {
@@ -137,13 +147,57 @@ const EditProfile = () => {
     setUserInfo({ ...userInfo, addresses: newAddresses });
   };
 
+  const handleDeleteAddress = async (index) => {
+    const addressId = userInfo.addresses[index].id;
+
+    if (!addressId) {
+      // Xóa địa chỉ chưa được lưu vào cơ sở dữ liệu
+      setUserInfo((prevUserInfo) => {
+        const newAddresses = [...prevUserInfo.addresses];
+        newAddresses.splice(index, 1);
+        return { ...prevUserInfo, addresses: newAddresses };
+      });
+      return;
+    }
+
+    try {
+      const response = await fetch(`${API}/api/users/me/addresses/${addressId}`, {
+        method: "DELETE",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error("Xóa địa chỉ không thành công");
+      }
+
+      // Cập nhật lại danh sách địa chỉ sau khi xóa thành công
+      setUserInfo((prevUserInfo) => {
+        const newAddresses = prevUserInfo.addresses.filter((_, i) => i !== index);
+        return { ...prevUserInfo, addresses: newAddresses };
+      });
+
+      alert("Xóa địa chỉ thành công!");
+    } catch (error) {
+      console.error("Error deleting address:", error);
+      alert("Có lỗi xảy ra khi xóa địa chỉ.");
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
-    const hasErrors = Object.values(fieldErrors).some(
-      (error) => typeof error === 'string' ? error : Object.values(error).some(err => err)
+
+    const hasGeneralErrors = Object.values(fieldErrors).some(
+      (error) => typeof error === 'string' && error !== ''
     );
 
-    if (hasErrors) {
+    const hasAddressErrors = fieldErrors.addresses.some(addressError =>
+      addressError && Object.values(addressError).some(err => err && err !== '')
+    );
+
+    if (hasGeneralErrors || hasAddressErrors) {
       alert("Vui lòng kiểm tra lại các thông tin trước khi lưu.");
       return;
     }
@@ -162,8 +216,10 @@ const EditProfile = () => {
         throw new Error("Cập nhật thông tin không thành công");
       }
 
+      alert("Cập nhật thông tin thành công!");
       navigate(state?.from || "/account");
     } catch (error) {
+      console.error("Lỗi cập nhật:", error);
       setErrorMessage(error.message || "Có lỗi xảy ra khi cập nhật thông tin.");
     }
   };
@@ -285,9 +341,7 @@ const EditProfile = () => {
                   )}
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">
-                    Thành phố:
-                  </label>
+                  <label className="block text-sm font-medium text-gray-700">Thành phố:</label>
                   <input
                     type="text"
                     value={address.city || ""}
@@ -303,9 +357,7 @@ const EditProfile = () => {
                   )}
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">
-                    Tỉnh:
-                  </label>
+                  <label className="block text-sm font-medium text-gray-700">Tỉnh/Thành phố:</label>
                   <input
                     type="text"
                     value={address.state || ""}
@@ -321,9 +373,7 @@ const EditProfile = () => {
                   )}
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700">
-                    Số điện thoại:
-                  </label>
+                  <label className="block text-sm font-medium text-gray-700">Số điện thoại:</label>
                   <input
                     type="tel"
                     value={address.phoneNumber || ""}
@@ -338,7 +388,28 @@ const EditProfile = () => {
                     </p>
                   )}
                 </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">Loại địa chỉ:</label>
+                  <select
+                    value={address.type || "home"}
+                    onChange={(e) =>
+                      handleAddressChange(index, "type", e.target.value)
+                    }
+                    className="mt-1 block w-full h-10 bg-gray-50 text-gray-900 border border-gray-300 rounded-lg px-4"
+                  >
+                    <option value="Nhà riêng">Nhà riêng</option>
+                    <option value="Công ty">Công ty</option>
+                    <option value="Khác">Khác</option>
+                  </select>
+                </div>
               </div>
+              <button
+                type="button"
+                onClick={() => handleDeleteAddress(index)}
+                className="mt-2 py-1 px-3 border border-red-600 text-red-600 rounded-md hover:bg-red-100"
+              >
+                Xóa
+              </button>
             </div>
           ))}
 
@@ -355,3 +426,4 @@ const EditProfile = () => {
 };
 
 export default EditProfile;
+
