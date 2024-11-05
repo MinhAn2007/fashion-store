@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 const CancelOrderModal = ({ order, onClose }) => {
   const [selectedReasons, setSelectedReasons] = useState([]);
@@ -6,6 +7,8 @@ const CancelOrderModal = ({ order, onClose }) => {
   const [showConfirmation, setShowConfirmation] = useState(false);
   const [showSuccessMessage, setShowSuccessMessage] = useState(false); // Trạng thái để hiển thị thông báo thành công
   const API = process.env.REACT_APP_API_ENDPOINT;
+  const navigate = useNavigate();
+
   const reasons = [
     { id: "Sản phẩm không đúng", label: "Sản phẩm không đúng" },
     { id: "Không cần thiết nữa", label: "Không cần thiết nữa" },
@@ -59,7 +62,7 @@ const CancelOrderModal = ({ order, onClose }) => {
   const handleCloseSuccessMessage = () => {
     setShowSuccessMessage(false);
     onClose(); 
-    window.location.reload();
+    navigate("/history");
   };
 
   return (
