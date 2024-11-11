@@ -14,6 +14,7 @@ const Register = () => {
     firstName: '',
     lastName: '',
     email: '',
+    password: '',
     addresses: [{}]
   });
   const [loading, setLoading] = useState(false);
@@ -69,6 +70,10 @@ const Register = () => {
     } else if (name === 'email') {
       if (!/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(value)) {
         error = 'Email không đúng định dạng';
+      }
+    } else if (name === 'password') {
+      if (value.length < 8 || !/[a-zA-Z]/.test(value) || !/[0-9]/.test(value)) {
+        error = 'Mật khẩu phải có ít nhất 8 ký tự, bao gồm cả chữ cái và số';
       }
     } else if (name === 'addressLine') {
       if (value.length < 5 || value.length > 100) {
@@ -233,6 +238,7 @@ const Register = () => {
                   value={formValues.password}
                   onChange={(e) => handleChange(e)}
                 />
+                {formErrors.password && <p className="mt-1 text-sm text-red-500">{formErrors.password}</p>}
               </div>
             </div>
 
