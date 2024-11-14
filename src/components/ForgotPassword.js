@@ -1,37 +1,13 @@
 import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 
 const ForgotPassword = () => {
     const [email, setEmail] = useState("");
     const [message, setMessage] = useState(null);
-    const [error, setError] = useState(null);
-    const API = process.env.REACT_APP_API_ENDPOINT;
-    const navigate = useNavigate();
 
-    const handleForgotPassword = async (e) => {
+    const handleForgotPassword = (e) => {
         e.preventDefault();
-
-        try {
-            const response = await fetch(`${API}/api/forgot-password`, {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify({ email }),
-            });
-
-            if (!response.ok) {
-                const errorData = await response.json();
-                throw new Error(errorData.message || "Failed to send reset email.");
-            }
-
-            setMessage("Email đặt lại mật khẩu đã được gửi!");
-            setTimeout(() => {
-                navigate("/login");
-            }, 3000);
-        } catch (err) {
-            setError(err.message || "Có lỗi xảy ra, vui lòng thử lại.");
-        }
+        setMessage("Tính năng quên mật khẩu hiện đang được phát triển. Vui lòng thử lại sau.");
     };
 
     return (
@@ -40,8 +16,13 @@ const ForgotPassword = () => {
                 <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
                     Quên mật khẩu
                 </h2>
+
+                <p className="text-gray-600 text-sm text-center mb-4">
+                    Nhập email bạn đã dùng để đăng ký tài khoản. Chúng tôi sẽ gửi liên kết đặt lại mật khẩu đến email của bạn.
+                </p>
+
                 {message && <p className="text-green-600 text-center">{message}</p>}
-                {error && <p className="text-red-600 text-center">{error}</p>}
+
                 <form className="mt-8 space-y-6" onSubmit={handleForgotPassword}>
                     <div>
                         <label htmlFor="email" className="sr-only">Email</label>
@@ -63,6 +44,20 @@ const ForgotPassword = () => {
                         Gửi yêu cầu
                     </button>
                 </form>
+
+                <div className="text-center mt-4">
+                    <p className="text-sm text-gray-600">
+                        <Link to="/" className="text-indigo-600 hover:text-indigo-500">
+                            Quay về trang chủ
+                        </Link>
+                    </p>
+                    <p className="text-sm text-gray-600 mt-2">
+                        Bạn chưa có tài khoản?{" "}
+                        <Link to="/signup" className="text-indigo-600 hover:text-indigo-500">
+                            Đăng ký ngay
+                        </Link>
+                    </p>
+                </div>
             </div>
         </div>
     );
