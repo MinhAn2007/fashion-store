@@ -66,7 +66,7 @@ const Login = () => {
       const totalCartQuantity = data.user.totalCartQuantity; // Assuming your API returns this
       const userId = data.user.userId;
 
-      localStorage.setItem("userId", userId);      
+      localStorage.setItem("userId", userId);
       localStorage.setItem("name", data.user.firstName + " " + data.user.lastName);
 
       localStorage.setItem("token", token);
@@ -165,6 +165,13 @@ const Login = () => {
             </Link>
           </p>
         </div>
+
+        <div className="text-center mt-4">
+          <Link to="/forgot-password" className="text-sm text-indigo-600 hover:text-indigo-500">
+            Quên mật khẩu?
+          </Link>
+        </div>
+
       </div>
 
       {/* Loading Modal */}
