@@ -57,7 +57,7 @@ const ResultVNPAYPage = () => {
 
   return (
     <div className="min-h-[600px] flex justify-center bg-gray-100 p-4">
-      <div className="bg-white p-6 rounded-lg shadow-lg max-w-md w-full h-fit mt-20 ">
+      <div className="bg-white p-6 rounded-lg shadow-lg max-w-md w-full h-fit mt-20">
         <h2 className="text-2xl font-semibold mb-4">Kết quả giao dịch</h2>
         <p className="mb-2">Mã giao dịch: {paymentInfo.transactionId}</p>
         <p className="mb-2">
@@ -77,9 +77,9 @@ const ResultVNPAYPage = () => {
               ? "Thành công"
               : "Không thành công"}
           </span>
-        </p>{" "}
+        </p>
         <p className="mb-2">Mã tham chiếu giao dịch: {paymentInfo.txnRef}</p>
-        <p className="text-lg font-semibold text-blue-600">{{ message }}</p>
+        <p className="text-lg font-semibold text-blue-600">{message}</p>
         {message && (
           <div className="flex justify-center mt-4">
             <a
