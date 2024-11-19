@@ -143,6 +143,29 @@ const OrderDetailModal = ({ order, onClose }) => {
   const token = localStorage.getItem("token");
   const { checkApiResponse } = useAuthWithCheck();
 
+  // Function to calculate estimated shipping date
+  const calculateEstimatedShippingDate = () => {
+    if (!order) return null;
+    
+    // Use either the created_at or returned_at timestamp as the starting point
+    const baseTimestamp = order.returned_at || order.created_at;
+    const baseDate = new Date(baseTimestamp);
+    
+    // Add 3-5 days to the base date
+    const minEstimatedDate = new Date(baseDate);
+    minEstimatedDate.setDate(baseDate.getDate() + 3);
+    
+    const maxEstimatedDate = new Date(baseDate);
+    maxEstimatedDate.setDate(baseDate.getDate() + 5);
+    
+    return {
+      min: minEstimatedDate.toLocaleDateString("vi-VN"),
+      max: maxEstimatedDate.toLocaleDateString("vi-VN")
+    };
+  };
+
+  const estimatedShippingDate = calculateEstimatedShippingDate();
+
   useEffect(() => {
     const fetchUserInfo = async () => {
       try {
@@ -305,6 +328,16 @@ const OrderDetailModal = ({ order, onClose }) => {
                       <span className="text-gray-500 min-w-28">Ghi chú:</span>
                       <span>{order.note || "Không có"}</span>
                     </div>
+                    {estimatedShippingDate && (
+                      <div className="flex items-center gap-2">
+                        <span className="text-gray-500 min-w-28">
+                          Ngày giao dự kiến:
+                        </span>
+                        <span>
+                          {`Từ ${estimatedShippingDate.min} đến ${estimatedShippingDate.max}`}
+                        </span>
+                      </div>
+                    )}
                     {order.status === "Cancelled" && (
                       <div className="flex items-center gap-2">
                         <span className="text-gray-500 min-w-28">
