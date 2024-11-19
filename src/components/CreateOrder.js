@@ -19,8 +19,8 @@ const CreateOrder = () => {
   const location = useLocation();
   const { cartItems } = location.state || { cartItems: [], totalPrice: 0 };
 
-  console.log("Cart Items:", cartItems);
-  
+  console.log("Cart Items 123:", cartItems);
+
   const navigate = useNavigate();
 
   const [userInfo, setUserInfo] = useState(null);
@@ -74,8 +74,10 @@ const CreateOrder = () => {
   }, [token]);
 
   const addNewAddress = () => {
-    navigate("/edit-profile", { state: { from: "/order" } });
-  }
+    navigate("/edit-profile", { state: { from: "/order", 
+      cartItems: cartItems,
+     } });
+  };
 
   const handleCreateOrder = async () => {
     if (!selectedAddress || !paymentMethod) {
@@ -92,7 +94,7 @@ const CreateOrder = () => {
       total: totalAmount,
     };
 
-    setLoading(true);    
+    setLoading(true);
     if (orderData.paymentId === 2) {
       try {
         localStorage.setItem("orderData", JSON.stringify(orderData));
@@ -161,7 +163,7 @@ const CreateOrder = () => {
   ];
 
   const handlePaymentMethodChange = (value) => {
-    setPaymentMethod(value);    
+    setPaymentMethod(value);
     if (value.value === 2) {
       setTotalAmount(baseTotal - 50000);
     } else {
@@ -234,9 +236,13 @@ const CreateOrder = () => {
                   dropdownClassName="bg-white w-auto p-2"
                   optionClassName="py-2 hover:bg-gray-300 items-center my-auto"
                 />
-                  <Button variant="outline" className="w-full mt-4" onClick={() => addNewAddress()}>
-                    + Thêm địa chỉ mới
-                  </Button>
+                <Button
+                  variant="outline"
+                  className="w-full mt-4"
+                  onClick={() => addNewAddress()}
+                >
+                  + Thêm địa chỉ mới
+                </Button>
               </div>
             </div>
 
