@@ -1,9 +1,11 @@
 import React, { useEffect, useState } from "react";
 import { formatPrice } from "../utils/utils.js";
+import { Loader2 } from "lucide-react";
 
 const ResultVNPAYPage = () => {
   const [paymentInfo, setPaymentInfo] = useState({});
   const [message, setMessage] = useState("");
+  const [isLoading, setIsLoading] = useState(true);
   const API = process.env.REACT_APP_API_ENDPOINT;
 
   useEffect(() => {
@@ -29,6 +31,7 @@ const ResultVNPAYPage = () => {
       createOrder(transactionId, amount, orderInfo);
     } else {
       setMessage("Giao dịch không thành công. Vui lòng thử lại.");
+      setIsLoading(false);
     }
   }, []);
 
@@ -52,8 +55,21 @@ const ResultVNPAYPage = () => {
     } catch (error) {
       console.error("Lỗi khi gọi API tạo đơn hàng:", error);
       setMessage("Đã xảy ra lỗi khi tạo đơn hàng.");
+    } finally {
+      setIsLoading(false);
     }
   };
+
+  if (isLoading) {
+    return (
+      <div className="min-h-[600px] flex justify-center items-center bg-gray-100">
+        <div className="bg-white p-8 rounded-lg shadow-lg flex flex-col items-center">
+          <Loader2 className="h-8 w-8 animate-spin text-blue-500 mb-4" />
+          <p className="text-gray-600">Đang xử lý giao dịch...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-[600px] flex justify-center bg-gray-100 p-4">
