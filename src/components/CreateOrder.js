@@ -26,7 +26,6 @@ const CreateOrder = () => {
   const [userInfo, setUserInfo] = useState(null);
   const [addresses, setAddresses] = useState([]);
   const [selectedAddress, setSelectedAddress] = useState("");
-  const [couponCode, setCouponCode] = useState("");
   const [paymentMethod, setPaymentMethod] = useState("");
   const [loading, setLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState("");
@@ -34,7 +33,128 @@ const CreateOrder = () => {
   const [totalAmount, setTotalAmount] = useState(0);
   const token = localStorage.getItem("token");
   const API = process.env.REACT_APP_API_ENDPOINT;
-  const [baseTotal, setBaseTotal] = useState(0);
+  const [couponCode, setCouponCode] = useState("");
+  const [couponError, setCouponError] = useState("");
+  const [couponSuccess, setCouponSuccess] = useState("");
+  const [appliedCoupon, setAppliedCoupon] = useState(null);
+  const [isCheckingCoupon, setIsCheckingCoupon] = useState(false);
+  const [subtotal, setSubtotal] = useState(0);
+  const SHIPPING_FEE = 30000;
+  const ONLINE_PAYMENT_DISCOUNT = 50000;
+
+  const calculateSubtotal = () => {
+    return cartItems.reduce(
+      (sum, item) => sum + item.quantity * parseFloat(item.skuPrice),
+      0
+    );
+  };
+
+  useEffect(() => {
+    const calculatedSubtotal = cartItems.reduce(
+      (sum, item) => sum + item.quantity * parseFloat(item.skuPrice || 0),
+      0
+    );
+    setSubtotal(calculatedSubtotal);
+  }, [cartItems]);
+  
+  
+
+  const updateTotal = () => {
+    let total = subtotal + SHIPPING_FEE;
+  
+    // Áp dụng mã giảm giá
+    if (appliedCoupon) {
+      const discount =
+        appliedCoupon.coupon_type === "percent"
+          ? (subtotal * parseFloat(appliedCoupon.coupon_value)) / 100
+          : parseFloat(appliedCoupon.coupon_value);
+      total -= discount;
+    }
+  
+    // Áp dụng giảm giá cho thanh toán online
+    if (paymentMethod?.value === 2) {
+      total -= ONLINE_PAYMENT_DISCOUNT;
+    }
+  
+    setTotalAmount(total > 0 ? total : 0); // Đảm bảo tổng >= 0
+  };
+  
+  useEffect(() => {
+    updateTotal();
+  }, [subtotal, appliedCoupon, paymentMethod]);
+  
+
+  const calculateTotal = () => {
+    const subtotal = calculateSubtotal();
+    const shippingFee = 30000;
+    const couponDiscount = calculateCouponDiscount();
+    console.log("couponDiscount:", couponDiscount);
+
+    const onlinePaymentDiscount = paymentMethod?.value === 2 ? 50000 : 0;
+
+    return subtotal + shippingFee - couponDiscount - onlinePaymentDiscount;
+  };
+
+  const handleCheckCoupon = async () => {
+    if (!couponCode) {
+      setCouponError("Vui lòng nhập mã giảm giá");
+      setCouponSuccess("");
+      setAppliedCoupon(null);
+      return;
+    }
+
+    setIsCheckingCoupon(true);
+    setCouponError("");
+    setCouponSuccess("");
+
+    try {
+      const response = await fetch(`${API}/api/voucher/check`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          code: couponCode,
+          totalAmount: subtotal,
+        }),
+      });
+
+      const data = await response.json();
+      
+      if (data.valid) {
+        setAppliedCoupon(data.voucher);
+        setCouponSuccess("Áp dụng mã giảm giá thành công!");
+        updateTotal(subtotal);
+      } else {
+        setCouponError(data.message || "Mã giảm giá không hợp lệ");
+        setAppliedCoupon(null);
+        updateTotal(subtotal);
+      }
+    } catch (error) {
+      setCouponError("Đã có lỗi xảy ra khi kiểm tra mã giảm giá");
+      setAppliedCoupon(null);
+      updateTotal(subtotal);
+    } finally {
+      setIsCheckingCoupon(false);
+    }
+  };
+
+  // Handle payment method change
+  const handlePaymentMethodChange = (value) => {
+    setPaymentMethod(value);
+    updateTotal(subtotal);
+  };
+
+  const calculateCouponDiscount = () => {
+    if (!appliedCoupon) return 0;
+    
+    if (appliedCoupon.coupon_type === "percent") {
+      return (subtotal * parseFloat(appliedCoupon.coupon_value)) / 100;
+    }
+    return parseFloat(appliedCoupon.coupon_value);
+  };
+
   useEffect(() => {
     const fetchUserProfile = async () => {
       try {
@@ -42,7 +162,6 @@ const CreateOrder = () => {
         const userId = decodedToken.userId;
 
         const response = await fetch(`${API}/api/users/${userId}`, {
-          method: "GET",
           headers: {
             Authorization: `Bearer ${token}`,
             "Content-Type": "application/json",
@@ -58,9 +177,7 @@ const CreateOrder = () => {
         const data = await response.json();
         setUserInfo(data.user);
         setAddresses(data.addresses);
-        const subtotal = calculateTotal();
-        setBaseTotal(subtotal + 30000);
-        setTotalAmount(subtotal + 30000);
+        setTotalAmount(calculateSubtotal() + 30000);
       } catch (error) {
         setErrorMessage(
           error.message || "Đã xảy ra lỗi khi tải thông tin cá nhân."
@@ -74,9 +191,9 @@ const CreateOrder = () => {
   }, [token]);
 
   const addNewAddress = () => {
-    navigate("/edit-profile", { state: { from: "/order", 
-      cartItems: cartItems,
-     } });
+    navigate("/edit-profile", {
+      state: { from: "/order", cartItems: cartItems },
+    });
   };
 
   const handleCreateOrder = async () => {
@@ -84,13 +201,14 @@ const CreateOrder = () => {
       alert("Vui lòng chọn địa chỉ và phương thức thanh toán.");
       return;
     }
-
+    console.log(totalAmount);
+    
     const orderData = {
       userId: jwtDecode(token).userId,
       cartItems,
       selectedAddress: selectedAddress.label,
       paymentId: paymentMethod.value,
-      couponId: couponCode,
+      couponId: appliedCoupon?.id || null,
       total: totalAmount,
     };
 
@@ -150,26 +268,10 @@ const CreateOrder = () => {
     }
   };
 
-  const calculateTotal = () => {
-    return cartItems.reduce(
-      (sum, item) => sum + item.quantity * parseFloat(item.skuPrice),
-      0
-    );
-  };
-
   const paymentMethods = [
     { value: 1, label: "Thanh toán khi nhận hàng ( COD )" },
     { value: 2, label: "Thanh toán online ( Chuyển khoản )" },
   ];
-
-  const handlePaymentMethodChange = (value) => {
-    setPaymentMethod(value);
-    if (value.value === 2) {
-      setTotalAmount(baseTotal - 50000);
-    } else {
-      setTotalAmount(baseTotal);
-    }
-  };
 
   if (loading)
     return (
@@ -342,42 +444,69 @@ const CreateOrder = () => {
                     Mã giảm giá
                   </Title>
                 </div>
-                <Input
-                  placeholder="Nhập mã giảm giá"
-                  value={couponCode}
-                  onChange={(e) => setCouponCode(e.target.value)}
-                  className="flex-1"
-                  inputClassName="pl-3"
-                />
+                <div className="flex gap-2">
+                  <Input
+                    placeholder="Nhập mã giảm giá"
+                    value={couponCode}
+                    onChange={(e) => setCouponCode(e.target.value)}
+                    className="flex-1"
+                    inputClassName="pl-3"
+                  />
+                  <Button
+                    variant="outline"
+                    onClick={handleCheckCoupon}
+                    disabled={isCheckingCoupon}
+                  >
+                    {isCheckingCoupon ? "Đang kiểm tra..." : "Áp dụng"}
+                  </Button>
+                </div>
+                {couponError && (
+                  <Text className="text-red-500 text-sm mt-2">
+                    {couponError}
+                  </Text>
+                )}
+                {couponSuccess && (
+                  <Text className="text-green-500 text-sm mt-2">
+                    {couponSuccess}
+                  </Text>
+                )}
               </div>
 
-              <div className=" border-gray-300 pt-4 mb-6">
+              <div className="border-gray-300 pt-4 mb-6">
                 <div className="flex justify-between">
-                  <Text className="text-gray-700">Subtotal</Text>
+                  <Text className="text-gray-700">Tạm tính</Text>
                   <Text className="font-semibold">
-                    {formatPrice(calculateTotal())}
+                    {formatPrice(calculateSubtotal())}
                   </Text>
                 </div>
                 <div className="flex justify-between items-center">
                   <Text>Phí vận chuyển</Text>
                   <Text className="font-medium">30,000đ</Text>
                 </div>
-                {couponCode && (
+                {appliedCoupon && (
                   <div className="flex justify-between items-center text-green-600">
-                    <Text>Giảm giá</Text>
-                    <Text className="font-medium">-50,000đ</Text>
+                    <Text>
+                      Giảm giá (
+                      {appliedCoupon.coupon_type === "percent"
+                        ? `${appliedCoupon.coupon_value}%`
+                        : formatPrice(appliedCoupon.coupon_value)}
+                      )
+                    </Text>
+                    <Text className="font-medium">
+                      -{formatPrice(calculateCouponDiscount())}
+                    </Text>
                   </div>
                 )}
-                {paymentMethod.value === 2 && (
+                {paymentMethod?.value === 2 && (
                   <div className="flex justify-between items-center text-green-600">
                     <Text>Giảm giá thanh toán online</Text>
                     <Text className="font-medium">-50,000đ</Text>
                   </div>
                 )}
-                <div className="flex justify-between items-center font-semibold">
+                <div className="flex justify-between items-center font-semibold mt-4">
                   <Text>Tổng cộng</Text>
                   <Text className="text-lg font-bold text-red-600">
-                    {formatPrice(totalAmount)}
+                    {formatPrice(calculateTotal())}
                   </Text>
                 </div>
               </div>
