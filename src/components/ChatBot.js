@@ -8,7 +8,7 @@ const Chatbot = () => {
     
           injectScript.onload = () => {
             const configScript = document.createElement('script');
-            configScript.src = 'https://mediafiles.botpress.cloud/5dc09bcc-5e44-40da-bd94-0f15200d0421/webchat/v2.2/config.js';
+            configScript.src = 'https://files.bpcontent.cloud/2024/11/02/08/20241102085535-UKQL8YT2.js';
             configScript.async = true;
             document.body.appendChild(configScript);
           };
