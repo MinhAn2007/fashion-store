@@ -14,7 +14,6 @@ const Chatbot = () => {
           };
     
           document.body.appendChild(injectScript);
- 
     }, []);
 
   return <div id="webchat" />
