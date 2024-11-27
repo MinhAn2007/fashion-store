@@ -35,39 +35,8 @@ const filters = [
     options: ["1 sao", "2 sao", "3 sao", "4 sao", "5 sao"],
     type: "checkbox",
   },
-  {
-    name: "Danh mục",
-    value: "category",
-    options: ["Áo", "Quần", "Phụ kiện", "Giày"],
-    type: "checkbox",
-  },
 ];
-const mapProductType = (id) => {
-  const productTypes = {
-    1: "Áo",
-    2: "Quần",
-    3: "Phụ kiện",
-    4: "Giày dép",
-    5: "Áo khoác",
-    6: "Giày sneaker",
-    7: "Áo thun",
-    8: "Quần jean",
-    9: "Túi xách",
-    10: "Nón",
-    11: "Áo sơ mi",
-    12: "Polo",
-    13: "Quần vải",
-    14: "Quần tây",
-    15: "Chân váy",
-    16: "Vòng cổ",
-    17: "Lắc tay",
-    18: "Khuyên tai",
-    19: "Giày cao gót",
-    20: "Giày thể thao",
-  };
-  return productTypes[id] || "Tất cả sản phẩm";
-};
-let nameBreadCrumb = "Tất cả sản phẩm";
+
 export default function ShopPage(props) {
   const [selectedFilters, setSelectedFilters] = useState({
     price: [],
@@ -88,6 +57,7 @@ export default function ShopPage(props) {
   const navigate = useNavigate();
   const toast = useToast();
   const { checkApiResponse } = useAuthWithCheck();
+  const [nameBreadCrumb, setNameBreadCrumb] = useState("Tất cả sản phẩm");
 
   useEffect(() => {
     const fetchProducts = async () => {
@@ -95,15 +65,22 @@ export default function ShopPage(props) {
         let response;
         if (categoryId) {
           response = await fetch(`${API}/api/category/${categoryId}`);
-          nameBreadCrumb = mapProductType(props.id);
         } else {
           response = await fetch(`${API}/api/products`);
-          nameBreadCrumb = "Tất cả sản phẩm";
         }
-
+     
         const data = await response.json();
+        if (data.products && data.products.length > 0) {
+          setNameBreadCrumb(data.products[0].category_name || "Tất cả sản phẩm");
+        }
         setAllProducts(data.products || []);
         setSortedProducts(data.products || []);
+        if(data.products[0].id === null){
+          console.log("123");
+          
+          setAllProducts([]);
+          setSortedProducts([]);
+        }
       } catch (error) {
         console.error("Error fetching products:", error);
       }
