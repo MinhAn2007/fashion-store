@@ -110,7 +110,7 @@ function App() {
           />
 
           <Route
-            path="/products"
+            path="/products/:categoryId?"
             element={
               <>
                 <NavBar />

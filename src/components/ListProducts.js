@@ -8,6 +8,7 @@ import { useToast } from "@chakra-ui/react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useAuthWithCheck } from "../hooks/useAuth";
 import { formatPrice } from "../utils/utils";
+import { useParams } from "react-router-dom";
 
 const filters = [
   {
@@ -75,6 +76,8 @@ export default function ShopPage(props) {
     category: [],
     rating: [],
   });
+  const { categoryId } = useParams();
+
   const [currentPage, setCurrentPage] = useState(1);
   const productsPerPage = 12;
   const [allProducts, setAllProducts] = useState([]);
@@ -90,8 +93,8 @@ export default function ShopPage(props) {
     const fetchProducts = async () => {
       try {
         let response;
-        if (props.id) {
-          response = await fetch(`${API}/api/category/${props.id}`);
+        if (categoryId) {
+          response = await fetch(`${API}/api/category/${categoryId}`);
           nameBreadCrumb = mapProductType(props.id);
         } else {
           response = await fetch(`${API}/api/products`);
@@ -107,7 +110,7 @@ export default function ShopPage(props) {
     };
 
     fetchProducts();
-  }, [API, props.id]);
+  }, [API, categoryId]);
 
   useEffect(() => {
     filterProducts();

@@ -44,6 +44,33 @@ const NavBar = () => {
   const [isSearching, setIsSearching] = useState(false);
   const API = process.env.REACT_APP_API_ENDPOINT;
 
+  const [categories, setCategories] = useState([]);
+
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const response = await fetch(`${API}/api/categories`);
+        const data = await response.json();
+        if (data.success && data.categories) {
+          setCategories(data.categories);
+        }
+      } catch (error) {
+        console.error("Error fetching categories:", error);
+      }
+    };
+
+    fetchCategories();
+  }, []);
+
+  const groupCategories = (categories) => {
+    const rootCategories = categories.filter((cat) => cat.parent_id === null);
+    const groupedCategories = rootCategories.map((root) => ({
+      ...root,
+      subcategories: categories.filter((cat) => cat.parent_id === root.id),
+    }));
+    return groupedCategories;
+  };
+
   const handleLogout = () => {
     setIsLoading(true);
     setTimeout(() => {
@@ -72,29 +99,35 @@ const NavBar = () => {
     };
   }, []);
 
-  // Hàm kiểm tra category matching
   const checkCategoryMatch = (term) => {
     term = term.toLowerCase();
 
-    for (const [key, category] of Object.entries(categories)) {
+    const rootCategories = categories.filter((cat) => cat.parent_id === null);
+    const subcategories = categories.filter((cat) => cat.parent_id !== null);
+
+    for (const category of rootCategories) {
       if (category.name.toLowerCase().includes(term)) {
         return {
           type: "category",
           message: `Tìm kiếm sản phẩm trong: ${category.name}`,
-          path: `/${key}`,
+          path: `/products/${category.id}`,
         };
       }
+    }
 
-      for (const subcat of category.subcategories) {
-        if (subcat.toLowerCase().includes(term)) {
-          return {
-            type: "subcategory",
-            message: `Tìm kiếm ${subcat} trong ${category.name}`,
-            path: `/${key}?subcategory=${subcat}`,
-          };
-        }
+    for (const subcat of subcategories) {
+      const parentCategory = categories.find(
+        (cat) => cat.id === subcat.parent_id
+      );
+      if (subcat.name.toLowerCase().includes(term)) {
+        return {
+          type: "subcategory",
+          message: `Tìm kiếm ${subcat.name} trong ${parentCategory.name}`,
+          path: `/products/${subcat.id}`,
+        };
       }
     }
+
     return null;
   };
 
@@ -211,113 +244,38 @@ const NavBar = () => {
               <FaChevronDown className="ml-1 text-xs" />
             </Link>
             <ul className="absolute left-0 hidden group-hover:block bg-[#F8F8FF] shadow-lg w-48 transition-all ease-in-out opacity-0 group-hover:opacity-100">
-              <li className="group/nested relative p-4 hover:bg-gray-100">
-                <Link to="/ao">
-                  <span className="font-bold cursor-pointer flex items-center justify-between">
-                    Áo
-                    <FaChevronRight className="ml-1 text-xs" />
-                  </span>
-                </Link>
-                <ul className="absolute left-full top-0 hidden group-hover/nested:block bg-[#F8F8FF] shadow-lg w-48 transition-all ease-in-out opacity-0 group-hover/nested:opacity-100">
-                  <Link to="/ao-khoac" className="hover:text-gray-600">
-                    <li className="p-4 hover:bg-gray-100">
-                      <p className="font-bold">Áo khoác</p>
-                    </li>
+              {groupCategories(categories).map((category) => (
+                <li
+                  key={category.id}
+                  className="group/nested relative p-4 hover:bg-gray-100"
+                >
+                  <Link
+                    to={`/products/${category.id}`}
+                  >
+                    <span className="font-bold cursor-pointer flex items-center justify-between">
+                      {category.name}
+                      {category.subcategories.length > 0 && (
+                        <FaChevronRight className="ml-1 text-xs" />
+                      )}
+                    </span>
                   </Link>
-
-                  <Link to="/ao-thun" className="hover:text-gray-600">
-                    <li className="p-4 hover:bg-gray-100">
-                      <p className="font-bold">Áo thun</p>
-                    </li>
-                  </Link>
-                  <Link to="/ao-somi" className="hover:text-gray-600">
-                    <li className="p-4 hover:bg-gray-100">
-                      <p className="font-bold">Áo Sơ mi</p>
-                    </li>
-                  </Link>
-                  <Link to="/polo" className="hover:text-gray-600">
-                    <li className="p-4 hover:bg-gray-100">
-                      <p className="font-bold">Polo</p>
-                    </li>
-                  </Link>
-                </ul>
-              </li>
-              <li className="group/nested relative p-4 hover:bg-gray-100">
-                <Link to="/quan">
-                  <span className="font-bold cursor-pointer flex items-center justify-between">
-                    Quần
-                    <FaChevronRight className="ml-1 text-xs" />
-                  </span>
-                </Link>
-                <ul className="absolute left-full top-0 hidden group-hover/nested:block bg-[#F8F8FF] shadow-lg w-48 transition-all ease-in-out opacity-0 group-hover/nested:opacity-100">
-                  <Link to="/quan-vai" className="hover:text-gray-600">
-                    <li className="p-4 hover:bg-gray-100">
-                      <p className="font-bold">Quần Vải</p>
-                    </li>
-                  </Link>
-                  <Link to="/quan-tay" className="hover:text-gray-600">
-                    <li className="p-4 hover:bg-gray-100">
-                      <p className="font-bold">Quần Tây</p>
-                    </li>
-                  </Link>
-                  <Link to="/quan-jean" className="hover:text-gray-600">
-                    <li className="p-4 hover:bg-gray-100">
-                      <p className="font-bold">Quần Jean</p>
-                    </li>
-                  </Link>
-                  <Link to="/chan-vay" className="hover:text-gray-600">
-                    <li className="p-4 hover:bg-gray-100">
-                      <p className="font-bold">Chân Váy</p>
-                    </li>
-                  </Link>
-                </ul>
-              </li>
-              <li className="group/nested relative p-4 hover:bg-gray-100">
-                <Link to="/phukien">
-                  <span className="font-bold cursor-pointer flex items-center justify-between">
-                    Phụ Kiện
-                    <FaChevronRight className="ml-1 text-xs" />
-                  </span>
-                </Link>
-                <ul className="absolute left-full top-0 hidden group-hover/nested:block bg-[#F8F8FF] shadow-lg w-48 transition-all ease-in-out opacity-0 group-hover/nested:opacity-100">
-                  <Link to="/vong-co" className="hover:text-gray-600">
-                    <li className="p-4 hover:bg-gray-100">
-                      <p className="font-bold">Vòng Cổ</p>
-                    </li>
-                  </Link>
-                  <Link to="/lac-tay" className="hover:text-gray-600">
-                    <li className="p-4 hover:bg-gray-100">
-                      <p className="font-bold">Lắc Tay</p>
-                    </li>
-                  </Link>
-                  <Link to="/khuyen-tai" className="hover:text-gray-600">
-                    <li className="p-4 hover:bg-gray-100">
-                      <p className="font-bold">Khuyên Tai</p>
-                    </li>
-                  </Link>
-                </ul>
-              </li>
-
-              <li className="group/nested relative p-4 hover:bg-gray-100">
-                <Link to="/giay">
-                  <span className="font-bold cursor-pointer flex items-center justify-between">
-                    Giày Dép
-                    <FaChevronRight className="ml-1 text-xs" />
-                  </span>
-                </Link>
-                <ul className="absolute left-full top-0 hidden group-hover/nested:block bg-[#F8F8FF] shadow-lg w-48 transition-all ease-in-out opacity-0 group-hover/nested:opacity-100">
-                  <Link to="/giay-the-thao" className="hover:text-gray-600">
-                    <li className="p-4 hover:bg-gray-100">
-                      <p className="font-bold">Giày thể thao</p>
-                    </li>
-                  </Link>
-                  <Link to="/giay-cao-got" className="hover:text-gray-600">
-                    <li className="p-4 hover:bg-gray-100">
-                      <p className="font-bold">Giày cao gót</p>
-                    </li>
-                  </Link>
-                </ul>
-              </li>
+                  {category.subcategories.length > 0 && (
+                    <ul className="absolute left-full top-0 hidden group-hover/nested:block bg-[#F8F8FF] shadow-lg w-48 transition-all ease-in-out opacity-0 group-hover/nested:opacity-100">
+                      {category.subcategories.map((subcat) => (
+                        <Link
+                          key={subcat.id}
+                          to={`/products/${subcat.id}`}
+                          className="hover:text-gray-600"
+                        >
+                          <li className="p-4 hover:bg-gray-100">
+                            <p className="font-bold">{subcat.name}</p>
+                          </li>
+                        </Link>
+                      ))}
+                    </ul>
+                  )}
+                </li>
+              ))}
             </ul>
           </li>
           <li className="group relative">
@@ -348,12 +306,12 @@ const NavBar = () => {
             <ul className="absolute left-0 hidden group-hover:block bg-[#F8F8FF] shadow-lg w-48 transition-all ease-in-out opacity-0 group-hover:opacity-100">
               <Link to="/minimum-style" className="hover:text-gray-600">
                 <li className="p-4 hover:bg-gray-100">
-                  <span className="font-bold">Minimalism</span>
+                  <span className="font-bold">Thời Trang Tối Giản</span>
                 </li>
               </Link>
               <li className="p-4 hover:bg-gray-100">
                 <Link to="/accessories" className="hover:text-gray-600">
-                  <span className="font-bold">Accessories Silver</span>
+                  <span className="font-bold">Phụ Kiện Thời Trang</span>
                 </Link>
               </li>
             </ul>

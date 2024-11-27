@@ -65,9 +65,9 @@ const CreateOrder = () => {
     // Áp dụng mã giảm giá
     if (appliedCoupon) {
       const discount =
-        appliedCoupon.coupon_type === "percent"
-          ? (subtotal * parseFloat(appliedCoupon.coupon_value)) / 100
-          : parseFloat(appliedCoupon.coupon_value);
+      appliedCoupon.coupon_type === "percent"
+      ? roundToNearestThousand((subtotal * parseFloat(appliedCoupon.coupon_value)) / 100)
+      : roundToNearestThousand(parseFloat(appliedCoupon.coupon_value));
       total -= discount;
     }
   
@@ -87,13 +87,16 @@ const CreateOrder = () => {
   const calculateTotal = () => {
     const subtotal = calculateSubtotal();
     const shippingFee = 30000;
+    
+    // Round coupon discount to nearest thousand
     const couponDiscount = calculateCouponDiscount();
-    console.log("couponDiscount:", couponDiscount);
+    const roundedCouponDiscount = roundToNearestThousand(couponDiscount);
 
     const onlinePaymentDiscount = paymentMethod?.value === 2 ? 50000 : 0;
 
-    return subtotal + shippingFee - couponDiscount - onlinePaymentDiscount;
+    return subtotal + shippingFee - roundedCouponDiscount - onlinePaymentDiscount;
   };
+
 
   const handleCheckCoupon = async () => {
     if (!couponCode) {
@@ -145,14 +148,18 @@ const CreateOrder = () => {
     setPaymentMethod(value);
     updateTotal(subtotal);
   };
+  const roundToNearestThousand = (value) => {
+    return Math.round(value / 1000) * 1000;
+  };
 
   const calculateCouponDiscount = () => {
     if (!appliedCoupon) return 0;
     
     if (appliedCoupon.coupon_type === "percent") {
-      return (subtotal * parseFloat(appliedCoupon.coupon_value)) / 100;
+      const discount = (subtotal * parseFloat(appliedCoupon.coupon_value)) / 100;
+      return roundToNearestThousand(discount);
     }
-    return parseFloat(appliedCoupon.coupon_value);
+    return roundToNearestThousand(parseFloat(appliedCoupon.coupon_value));
   };
 
   useEffect(() => {
@@ -235,7 +242,7 @@ const CreateOrder = () => {
 
         const data = await response.json();
         console.log("Payment URL:", data.url);
-        window.open(data.url, "_blank");
+        window.location.href = data.url;
         return;
       } catch (error) {
         console.error("Lỗi khi gọi API:", error);
