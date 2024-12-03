@@ -30,7 +30,6 @@ import EditProfile from "./components/EditProfile";
 import MinimumStyle from "./components/MinimumStyle";
 import SilverAccessories from "./components/SilverAccessories";
 import ForgotPassword from "./components/ForgotPassword";
-import SizeSaleProductsPage from "./components/SizeSale";
 
 function App() {
   return (
@@ -385,16 +384,7 @@ function App() {
               </>
             }
           />
-          <Route
-            path="/size-sale"
-            element={
-              <>
-                <NavBar />
-                <SizeSaleProductsPage />
-                <SPFooter />
-              </>
-            }
-          />
+
         </Routes>
         <ScrollToTop />
       </BrowserRouter>
