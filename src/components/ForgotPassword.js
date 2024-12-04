@@ -4,10 +4,43 @@ import { Link } from "react-router-dom";
 const ForgotPassword = () => {
     const [email, setEmail] = useState("");
     const [message, setMessage] = useState(null);
+    const [loading, setLoading] = useState(false);
 
-    const handleForgotPassword = (e) => {
+    const isValidEmail = (email) => {
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        return emailRegex.test(email);
+    };
+
+    const handleForgotPassword = async (e) => {
         e.preventDefault();
-        setMessage("Tính năng quên mật khẩu hiện đang được phát triển. Vui lòng thử lại sau.");
+        setMessage(null); // Xóa thông báo cũ
+
+        if (!isValidEmail(email)) {
+            setMessage("Địa chỉ email không hợp lệ.");
+            return;
+        }
+
+        setLoading(true); // Bắt đầu loading
+
+        try {
+            const response = await fetch(`${process.env.REACT_APP_API_ENDPOINT}/forgot-password`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ email }),
+            });
+
+            if (!response.ok) {
+                throw new Error("Không thể gửi yêu cầu đặt lại mật khẩu. Vui lòng thử lại sau.");
+            }
+
+            const data = await response.json();
+            setMessage(data.message); // Hiển thị thông báo từ backend
+        } catch (error) {
+            setMessage("Có lỗi xảy ra. Vui lòng thử lại.");
+            console.error("Error in ForgotPassword:", error.message);
+        } finally {
+            setLoading(false); // Kết thúc loading
+        }
     };
 
     return (
@@ -21,7 +54,16 @@ const ForgotPassword = () => {
                     Nhập email bạn đã dùng để đăng ký tài khoản. Chúng tôi sẽ gửi liên kết đặt lại mật khẩu đến email của bạn.
                 </p>
 
-                {message && <p className="text-green-600 text-center">{message}</p>}
+                {message && (
+                    <p
+                        className={`text-center ${message.toLowerCase().includes("lỗi")
+                            ? "text-red-600"
+                            : "text-green-600"
+                            }`}
+                    >
+                        {message}
+                    </p>
+                )}
 
                 <form className="mt-8 space-y-6" onSubmit={handleForgotPassword}>
                     <div>
@@ -39,9 +81,10 @@ const ForgotPassword = () => {
                     </div>
                     <button
                         type="submit"
-                        className="w-full py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-black hover:bg-gray-800 focus:outline-none"
+                        className={`w-full py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-black hover:bg-gray-800 focus:outline-none ${loading ? "opacity-50 cursor-not-allowed" : ""}`}
+                        disabled={loading}
                     >
-                        Gửi yêu cầu
+                        {loading ? "Đang gửi..." : "Gửi yêu cầu"}
                     </button>
                 </form>
 
