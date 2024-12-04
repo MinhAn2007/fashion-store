@@ -22,9 +22,9 @@ const EditProfile = () => {
   const token = localStorage.getItem("token");
   const { state } = useLocation();
 
-  const { cartItems } = state;
-
-  console.log("cartItems", cartItems);
+  // Sử dụng fallback an toàn cho cartItems
+  const cartItems = state?.cartItems || [];
+  console.log("cartItems:", cartItems);
 
   useEffect(() => {
     const fetchUserProfile = async () => {
@@ -196,7 +196,6 @@ const EditProfile = () => {
     const addressId = userInfo.addresses[index].id;
 
     if (!addressId) {
-      // Xóa địa chỉ chưa được lưu vào cơ sở dữ liệu
       setUserInfo((prevUserInfo) => {
         const newAddresses = [...prevUserInfo.addresses];
         newAddresses.splice(index, 1);
@@ -221,7 +220,6 @@ const EditProfile = () => {
         throw new Error("Xóa địa chỉ không thành công");
       }
 
-      // Cập nhật lại danh sách địa chỉ sau khi xóa thành công
       setUserInfo((prevUserInfo) => {
         const newAddresses = prevUserInfo.addresses.filter(
           (_, i) => i !== index
@@ -269,11 +267,6 @@ const EditProfile = () => {
       }
 
       alert("Cập nhật thông tin thành công!");
-      // const addNewAddress = () => {
-      //   navigate("/edit-profile", { state: { from: "/order",
-      //     cartItems: cartItems,
-      //    } });
-      // };
       navigate(state?.from || "/account", {
         state: {
           cartItems: cartItems,
