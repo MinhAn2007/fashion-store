@@ -18,7 +18,7 @@ const ProductReview = () => {
       rating: 0,
       comment: "",
       images: [],
-      video: null,
+      video: [],
     }))
   );
 
@@ -114,9 +114,9 @@ const ProductReview = () => {
           content: review.comment,
           title: name,
           images: [],
-          video: null,
+          video: [],
         };
-
+        
         if (review.images && review.images.length > 0) {
           const imageUrls = await Promise.all(
             review.images.map((image) => uploadToS3(image, userId, "image"))
@@ -124,13 +124,16 @@ const ProductReview = () => {
           reviewData.images = imageUrls;
         }
 
+        // Initialize reviewData.video as an array
+        reviewData.video = [];
+
         // Tải video lên và thêm vào reviewData
         if (review.video) {
           const videoUrl = await uploadToS3(review.video, userId, "image");
-          reviewData.video = videoUrl;
+          reviewData.video.push(videoUrl);
         }
-        console.log(reviewData);  
-        
+        console.log(reviewData);
+
         // Gửi đánh giá
         const reviewResponse = await fetch(`${API}/api/reviews`, {
           method: "POST",
@@ -144,8 +147,8 @@ const ProductReview = () => {
             content: reviewData.content,
             images: JSON.stringify(reviewData.images),
             video: JSON.stringify(reviewData.video),
-            title: `${name}`, 
-            orderId: cartItems[0].orderId
+            title: `${name}`,
+            orderId: cartItems[0].orderId,
           }),
         });
 
@@ -153,9 +156,10 @@ const ProductReview = () => {
           throw new Error("Failed to submit review");
         }
       }
-      alert("Đánh giả của bạn đã được gửi thành công, bạn có thể xem lại lịch sử mua hàng của mình");
+      alert(
+        "Đánh giả của bạn đã được gửi thành công, bạn có thể xem lại lịch sử mua hàng của mình"
+      );
       navigate("/history");
-
     } catch (error) {
       console.error("Error submitting reviews:", error);
     } finally {

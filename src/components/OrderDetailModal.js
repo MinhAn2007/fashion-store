@@ -146,21 +146,21 @@ const OrderDetailModal = ({ order, onClose }) => {
   // Function to calculate estimated shipping date
   const calculateEstimatedShippingDate = () => {
     if (!order) return null;
-    
+
     // Use either the created_at or returned_at timestamp as the starting point
     const baseTimestamp = order.returned_at || order.created_at;
     const baseDate = new Date(baseTimestamp);
-    
+
     // Add 3-5 days to the base date
     const minEstimatedDate = new Date(baseDate);
     minEstimatedDate.setDate(baseDate.getDate() + 3);
-    
+
     const maxEstimatedDate = new Date(baseDate);
     maxEstimatedDate.setDate(baseDate.getDate() + 5);
-    
+
     return {
       min: minEstimatedDate.toLocaleDateString("vi-VN"),
-      max: maxEstimatedDate.toLocaleDateString("vi-VN")
+      max: maxEstimatedDate.toLocaleDateString("vi-VN"),
     };
   };
 
@@ -201,28 +201,28 @@ const OrderDetailModal = ({ order, onClose }) => {
 
   const downloadPDF = () => {
     const input = document.getElementById("modal");
-  
+
     // Tạo một div với kích thước A4
-    const a4Div = document.createElement('div');
-    a4Div.style.width = '210mm'; // Chiều rộng A4
-    a4Div.style.height = '297mm'; // Chiều cao A4
-    a4Div.style.position = 'absolute';
-    a4Div.style.left = '-9999px'; // Ẩn div ra khỏi màn hình
+    const a4Div = document.createElement("div");
+    a4Div.style.width = "210mm"; // Chiều rộng A4
+    a4Div.style.height = "297mm"; // Chiều cao A4
+    a4Div.style.position = "absolute";
+    a4Div.style.left = "-9999px"; // Ẩn div ra khỏi màn hình
     document.body.appendChild(a4Div);
-    
+
     // Sao chép nội dung từ modal vào div A4
     a4Div.innerHTML = input.innerHTML;
-  
+
     html2canvas(a4Div, { scale: 2 }).then((canvas) => {
       const imgData = canvas.toDataURL("image/png");
-      const pdf = new jsPDF('p', 'mm', 'a4');
+      const pdf = new jsPDF("p", "mm", "a4");
       const imgWidth = 210; // Chiều rộng của ảnh trong mm
       const pageHeight = pdf.internal.pageSize.height; // Chiều cao trang
       const imgHeight = (canvas.height * imgWidth) / canvas.width; // Tính chiều cao của ảnh
       let heightLeft = imgHeight;
-  
+
       let position = 0;
-  
+
       if (heightLeft >= pageHeight) {
         position = 0;
         while (heightLeft >= 0) {
@@ -234,9 +234,9 @@ const OrderDetailModal = ({ order, onClose }) => {
       } else {
         pdf.addImage(imgData, "PNG", 0, 0, imgWidth, imgHeight);
       }
-  
+
       pdf.save("download.pdf");
-      document.body.removeChild(a4Div); 
+      document.body.removeChild(a4Div);
     });
   };
 
@@ -399,6 +399,24 @@ const OrderDetailModal = ({ order, onClose }) => {
                   <p className="text-gray-500">Phí vận chuyển:</p>
                   <p className="text-gray-900 font-medium">
                     {formatPrice(order.shipping_fee)}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-gray-500">Giảm giá:</p>
+                   {order.couponType === "percent" ? (
+                    <p className="text-gray-900 font-medium">
+                      -{order.couponValue}%
+                    </p>
+                  ) : (
+                    <p className="text-gray-900 font-medium">
+                      -{formatPrice(parseInt(order.couponValue || 0 ))}
+                    </p>
+                  )}
+                </div>
+                <div>
+                  <p className="text-gray-500">Giảm giá thanh toán online:</p>
+                  <p className="text-gray-900 font-medium">
+                    {order.payment_id === 2 ? "-50.000 d" : "0 d"}
                   </p>
                 </div>
                 <div>

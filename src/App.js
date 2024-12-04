@@ -110,7 +110,7 @@ function App() {
           />
 
           <Route
-            path="/products"
+            path="/products/:categoryId?"
             element={
               <>
                 <NavBar />
@@ -384,6 +384,7 @@ function App() {
               </>
             }
           />
+
         </Routes>
         <ScrollToTop />
       </BrowserRouter>

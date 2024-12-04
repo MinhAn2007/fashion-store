@@ -106,12 +106,14 @@ const OrderHistory = () => {
       setShowReviewModal(true);
       return;
     }
+    console.log("order", order);
+    
     navigate("/review", {
       state: {
         cartItems: order.items.map((item) => ({
           orderId: order.id,
           id: item.id,
-          productId: item.product_id,
+          productId: item.productId,
           productName: item.product_name,
           productImage: item.image,
           size: item.size,

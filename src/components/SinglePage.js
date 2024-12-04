@@ -438,7 +438,11 @@ const SinglePage = () => {
         {/* Overlay */}
         {isOverlayOpen && (
           <div className="fixed inset-0 bg-black bg-opacity-70 flex justify-center items-center z-[99999]">
-            {selectedMedia.endsWith(".mp4") ? (
+            {selectedMedia.endsWith(".mp4") ||
+            selectedMedia.endsWith(".mov") ||
+            selectedMedia.endsWith(".avi") ||
+            selectedMedia.endsWith(".mkv") ||
+            selectedMedia.endsWith(".webm") ? (
               <video
                 src={selectedMedia}
                 className="max-w-full max-h-full"
