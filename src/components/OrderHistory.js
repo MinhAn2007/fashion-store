@@ -13,7 +13,9 @@ import { formatPrice } from "../utils/utils";
 import { Link } from "react-router-dom";
 import { Loader } from "rizzui";
 import { useAuthWithCheck } from "../hooks/useAuth";
+import { useLocation } from "react-router-dom";
 import { useNavigate } from "react-router-dom";
+import { useToast } from "@chakra-ui/react";
 
 const OrderHistory = () => {
   const [searchTerm, setSearchTerm] = useState("");
@@ -26,7 +28,9 @@ const OrderHistory = () => {
   const ordersPerPage = 3;
   const [statusFilter, setStatusFilter] = useState("all");
   const navigate = useNavigate();
-
+  const toast = useToast();
+  const { isAuthenticated } = useAuthWithCheck();
+  const location = useLocation();
   const API = process.env.REACT_APP_API_ENDPOINT;
   const userId = localStorage.getItem("userId");
   const { checkApiResponse } = useAuthWithCheck();
@@ -107,7 +111,7 @@ const OrderHistory = () => {
       return;
     }
     console.log("order", order);
-    
+
     navigate("/review", {
       state: {
         cartItems: order.items.map((item) => ({
@@ -157,6 +161,81 @@ const OrderHistory = () => {
     return new Date(Math.max(...timestamps.map((date) => new Date(date))));
   };
 
+  const buyBack = async (order) => {
+    const mappedItems = mapOrderItemsForPurchase(order);
+    const { hasOutOfStock } = checkOutOfStockItems(mappedItems);
+
+    if (hasOutOfStock) {
+      alert("Một số sản phẩm đã hết hàng, không thể mua lại");
+      return;
+    }
+
+    const addItemToCartHandler = async (product) => {
+      if (!isAuthenticated) {
+        localStorage.setItem("redirect", location.pathname);
+        navigate("/login", { state: { from: location } });
+        return;
+      }
+
+      try {
+        const userId = localStorage.getItem("userId");
+        const response = await fetch(`${API}/api/cart/add-item`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+          body: JSON.stringify({
+            productId: product.productId,
+            userId: userId,
+            quantity: 1,
+          }),
+        });
+
+        checkApiResponse(response);
+
+        if (!response.ok) {
+          throw new Error("Failed to add item to cart");
+        }
+
+        const data = await response.json();
+
+        localStorage.setItem("cartQuantity", data.totalQuantity);
+        window.dispatchEvent(
+          new CustomEvent("cartQuantityUpdated", {
+            detail: data.totalQuantity,
+          })
+        );
+
+        toast({
+          title: "Thành công",
+          description: "Sản phẩm đã được thêm vào giỏ hàng",
+          status: "success",
+          duration: 1500,
+          isClosable: true,
+        });
+
+        return data;
+      } catch (error) {
+        console.error("Error adding item to cart:", error);
+        toast({
+          title: "Lỗi",
+          description: "Không thể thêm sản phẩm vào giỏ hàng",
+          status: "error",
+          duration: 1500,
+          isClosable: true,
+        });
+        throw error;
+      }
+    };
+
+    try {
+      await Promise.all(mappedItems.map(addItemToCartHandler));
+      navigate("/cart");
+    } catch (error) {
+      console.error("Error buying back order:", error);
+    }
+  };
   if (loading)
     return (
       <div className="flex justify-center mx-auto min-h-[700px]">
@@ -320,31 +399,19 @@ const OrderHistory = () => {
                       <AiOutlineEye className="inline-block mr-2" />
                       Chi tiết
                     </button>
-                    <Link
-                      to="/order"
-                      state={{
-                        cartItems: mappedItems.filter((item) => item.isInStock),
-                        totalPrice: mappedItems
-                          .filter((item) => item.isInStock)
-                          .reduce(
-                            (sum, item) =>
-                              sum + item.cartItemPrice * item.quantity,
-                            0
-                          ),
-                      }}
-                    >
-                      <button
-                        className={`px-4 py-2 text-sm font-medium text-white 
+
+                    <button
+                      className={`px-4 py-2 text-sm font-medium text-white 
                           ${
                             hasOutOfStock
                               ? "bg-gray-400 cursor-not-allowed"
                               : "bg-black hover:bg-gray-200 focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
                           }`}
-                        disabled={hasOutOfStock}
-                      >
-                        Mua lại
-                      </button>
-                    </Link>
+                      disabled={hasOutOfStock}
+                      onClick={() => buyBack(order)}
+                    >
+                      Mua lại
+                    </button>
                     {order.status === "Completed" && (
                       <button
                         className="px-4 py-2 text-sm font-medium text-white bg-black hover:bg-gray-200 focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
