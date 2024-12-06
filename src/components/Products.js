@@ -80,7 +80,7 @@ const Products = () => {
       {products.map((item, index) => (
         <div className="" key={item.id}>
           <OurBestSellers
-            id={item.id}
+            id={item.skus[0].id}
             title={item.name}
             price={formatPrice(item.skus[0].price)} // Format the price using formatPrice
             image={item.skus[0].image} // Randomize the image from cover array
