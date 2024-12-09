@@ -23,7 +23,7 @@ const ForgotPassword = () => {
         setLoading(true); // Bắt đầu loading
 
         try {
-            const response = await fetch(`${process.env.REACT_APP_API_ENDPOINT}/forgot-password`, {
+            const response = await fetch(`${process.env.REACT_APP_API_ENDPOINT}/api/forgot-password`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ email }),
