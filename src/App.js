@@ -30,6 +30,7 @@ import EditProfile from "./components/EditProfile";
 import MinimumStyle from "./components/MinimumStyle";
 import SilverAccessories from "./components/SilverAccessories";
 import ForgotPassword from "./components/ForgotPassword";
+import ResetPassword from "./components/ResetPassword";
 
 function App() {
   return (
@@ -39,7 +40,7 @@ function App() {
           <Route path="/login" element={<Login />} />
           <Route path="/signup" element={<SignUp />} />
           <Route path="/forgot-password" element={<ForgotPassword />} />
-
+          <Route path="/reset-password" element={<ResetPassword />} />
           <Route
             path="/"
             element={
