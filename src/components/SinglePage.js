@@ -14,6 +14,10 @@ const colorMap = {
   Trắng: "#FFFFFF",
   Vàng: "#FFFF00",
   Xám: "#808080",
+  Nâu: "#A52A2A",
+  Hồng: "#FF69B4",
+  Cam: "#FFA500",
+  Tím: "#800080",
 };
 
 const SinglePage = () => {
@@ -192,33 +196,42 @@ const SinglePage = () => {
       </div>
       <div className="relative p-4 gap-6 mx-96 flex">
         <div className="flex flex-col items-start">
-          <div className="flex flex-row mb-4">
-            <div className="flex flex-col">
-              {product.images
-                .split(",")
-                .slice(0, 3)
-                .map((img, index) => (
-                  <img
-                    key={index}
-                    src={img}
-                    alt={`Product Image ${index + 1}`}
-                    className="w-44 h-44 cursor-pointer object-cover rounded-md mb-2"
-                    onMouseEnter={() => setActiveImg(img)}
-                    onMouseLeave={() =>
-                      setActiveImg(product.images.split(",")[0])
-                    }
-                  />
-                ))}
+          {product.images && product.images.split(",").length > 0 ? (
+            <div className="flex flex-row mb-4">
+              <div className="flex flex-col">
+                {product.images
+                  .split(",")
+                  .slice(0, 3)
+                  .map((img, index) => (
+                    <img
+                      key={index}
+                      src={img}
+                      alt={`Product Image ${index + 1}`}
+                      className="w-44 h-44 cursor-pointer object-cover rounded-md mb-2"
+                      onMouseEnter={() => setActiveImg(img)}
+                      onMouseLeave={() =>
+                        setActiveImg(product.images.split(",")[0])
+                      }
+                    />
+                  ))}
+              </div>
+              <figure className="ml-6 mb-4 w-auto">
+                <img
+                  src={activeImg}
+                  alt="Product"
+                  className="rounded-2xl w-96 h-full object-cover"
+                />
+              </figure>
             </div>
-            <figure className="ml-6 mb-4 w-auto">
-              <img
-                src={activeImg}
-                alt="Product"
-                className="rounded-2xl w-96 h-full object-cover"
-              />
-            </figure>
-          </div>
+          ) : (
+            <div className="w-full text-center p-4 bg-gray-100 rounded-md">
+              <p className="text-gray-500">
+                Hiện tại chưa có hình ảnh để hiển thị cho sản phẩm này.
+              </p>
+            </div>
+          )}
         </div>
+
         {/* Right side: product details */}
         <div className="flex flex-col w-full md:w-1/2 ml-8">
           <p className="text-md mb-4">

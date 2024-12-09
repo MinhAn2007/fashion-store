@@ -6,7 +6,7 @@ import { useToast } from "@chakra-ui/react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useAuthWithCheck } from "../hooks/useAuth";
 const OurBestSellers = (props) => {
-  const { title, price, id, image } = props;
+  const { title, price, id, image, productId } = props;
   const toast = useToast();
   const navigate = useNavigate();
   const location = useLocation();
@@ -69,11 +69,11 @@ const OurBestSellers = (props) => {
   return (
     <div>
       <div
-        key={id}
+        key={productId}
         className="mx-auto transform transition-transform duration-300 hover:scale-105 hover:shadow-lg"
       >
         <div className="card w-96 bg-white shadow-xl py-10 ">
-          <Link to={`/${id}`}>
+          <Link to={`/${productId}`}>
             <figure className="pt-6">
               <img
                 src={image}

@@ -81,6 +81,7 @@ const Products = () => {
         <div className="" key={item.id}>
           <OurBestSellers
             id={item.skus[0].id}
+            productId={item.id}
             title={item.name}
             price={formatPrice(item.skus[0].price)} // Format the price using formatPrice
             image={item.skus[0].image} // Randomize the image from cover array
