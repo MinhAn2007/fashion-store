@@ -68,16 +68,18 @@ export default function ShopPage(props) {
         } else {
           response = await fetch(`${API}/api/products`);
         }
-     
+
         const data = await response.json();
         if (data.products && data.products.length > 0) {
-          setNameBreadCrumb(data.products[0].category_name || "Tất cả sản phẩm");
+          setNameBreadCrumb(
+            data.products[0].category_name || "Tất cả sản phẩm"
+          );
         }
         setAllProducts(data.products || []);
         setSortedProducts(data.products || []);
-        if(data.products[0].id === null){
+        if (data.products[0].id === null) {
           console.log("123");
-          
+
           setAllProducts([]);
           setSortedProducts([]);
         }
@@ -261,6 +263,12 @@ export default function ShopPage(props) {
     }
   };
 
+  const areAllSkusOutOfStock = (product) => {
+    console.log("product", product);
+    
+    return product.skus.every((sku) => sku.quantity === 0);
+  };
+
   return (
     <div className="container mx-auto py-8 flex">
       <div className="w-2/12 pr-4">
@@ -317,37 +325,68 @@ export default function ShopPage(props) {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          {currentProducts.map((product) => (
-            <div
-              key={product.id}
-              className="relative border rounded-lg shadow-lg overflow-hidden bg-white transition-transform transform hover:scale-105"
-            >
-              <div className="relative group">
-                <img
-                  src={product.skus[0].image}
-                  alt={product.name}
-                  className="w-96 h-96 object-cover transition-opacity duration-300 group-hover:opacity-50"
-                />
-                <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-black bg-opacity-60">
-                  <button className="bg-transparent w-52 text-white h-10 border border-transparent transition-all duration-400 ease">
-                    <Link to={`/${product.id}`}>Xem chi tiết</Link>
+          {currentProducts.map((product) => {
+            const isOutOfStock = areAllSkusOutOfStock(product);
+            console.log("isOutOfStock", isOutOfStock);
+            return (
+              <div
+                key={product.id}
+                className="relative border rounded-lg shadow-lg overflow-hidden bg-white transition-transform transform hover:scale-105"
+              >
+                <div className="relative group">
+                  <img
+                    src={product.skus[0].image}
+                    alt={product.name}
+                    className={`w-96 h-96 object-cover transition-opacity duration-300 ${
+                      isOutOfStock ? "opacity-50" : "group-hover:opacity-50"
+                    }`}
+                  />
+                  <div
+                    className={`absolute inset-0 flex items-center justify-center ${
+                      isOutOfStock
+                        ? "opacity-100 bg-black bg-opacity-60"
+                        : "opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-black bg-opacity-60"
+                    }`}
+                  >
+                    <button className="bg-transparent w-52 text-white h-10 border border-transparent transition-all duration-400 ease">
+                      {isOutOfStock ? (
+                        <span className=" font-bold">Hết hàng</span>
+                      ) : (
+                        <Link to={`/${product.id}`}>Xem chi tiết</Link>
+                      )}
+                    </button>
+                  </div>
+                </div>
+                <div className="p-4 text-center">
+                  <h2
+                    className={`text-lg font-semibold ${
+                      isOutOfStock ? "text-gray-400" : ""
+                    }`}
+                  >
+                    {product.name}
+                  </h2>
+                  <p
+                    className={`text-gray-600 mt-1 mb-2 ${
+                      isOutOfStock ? "line-through" : ""
+                    }`}
+                  >
+                    {formatPrice(product.skus[0].price)}
+                  </p>
+                  <button
+                    onClick={() => addItemToCartHandler(product)}
+                    disabled={isOutOfStock}
+                    className={`w-52 h-10 border border-transparent transition-all duration-400 ease ${
+                      isOutOfStock
+                        ? "bg-gray-300 text-gray-500 cursor-not-allowed"
+                        : "bg-black text-white hover:bg-white hover:text-black hover:border-black"
+                    }`}
+                  >
+                    Thêm vào giỏ
                   </button>
                 </div>
               </div>
-              <div className="p-4 text-center">
-                <h2 className="text-lg font-semibold">{product.name}</h2>
-                <p className="text-gray-600 mt-1 mb-2">
-                  {formatPrice(product.skus[0].price)}
-                </p>
-                <button
-                  onClick={() => addItemToCartHandler(product)}
-                  className="bg-black w-52 text-white h-10 border border-transparent transition-all duration-400 ease hover:bg-white hover:text-black hover:border-black"
-                >
-                  Thêm vào giỏ
-                </button>
-              </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
 
         <div className="flex justify-center mt-8">
