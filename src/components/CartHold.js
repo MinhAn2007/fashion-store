@@ -72,7 +72,6 @@ const CartHold = () => {
   }, []);
   const updateCartQuantity = (quantity) => {
     localStorage.setItem("cartQuantity", quantity);
-    // Dispatch custom event
     window.dispatchEvent(
       new CustomEvent("cartQuantityUpdated", { detail: quantity })
     );
@@ -121,8 +120,8 @@ const CartHold = () => {
   };
 
   const handleChangeQuantity = (item, increment) => {
+    if (item.isInStock === false && increment === 1) return;
     const newQuantity = item.quantity + increment;
-
     if (newQuantity === 0) {
       setSelectedItem(item);
       setIsOpen(true);
@@ -139,7 +138,6 @@ const CartHold = () => {
         ? { ...cartItem, quantity: newQuantity }
         : cartItem
     );
-    console.log(updatedItems);
 
     updateCartQuantity(
       updatedItems
@@ -160,7 +158,6 @@ const CartHold = () => {
 
     setTimeoutId(id);
   };
-
   const handleToggleSelectItem = (id) => {
     const updatedItems = cartItems.map((item) =>
       item.id === id ? { ...item, checked: !item.checked } : item
@@ -250,12 +247,13 @@ const CartHold = () => {
               {cartItems.map((item) => (
                 <div
                   key={item.id}
-                  className="grid grid-cols-[0.5fr_1fr_2fr_1fr_1fr_1fr] items-center border-b border-gray-300 p-6 mb-4 bg-white" // Adds border bottom
+                  className="grid grid-cols-[0.5fr_1fr_2fr_1fr_1fr_1fr] items-center border-b border-gray-300 p-6 mb-4 bg-white"
                 >
                   <Checkbox
                     isChecked={item.checked}
                     onChange={() => handleToggleSelectItem(item.id)}
                     colorScheme="blackAlpha"
+                    isDisabled={!item.isInStock}
                   />
                   <Link to={`/${item.productId}`} key={item.id}>
                     <img
@@ -271,21 +269,27 @@ const CartHold = () => {
                     </p>
                   </div>
                   <p className="text-lg">{formatPrice(item.skuPrice)}</p>
-                  <div className="flex items-center">
-                    {!item.isInStock ? (
-                      <span className="text-red-500 text-lg">Hết hàng</span>
-                    ) : (
-                      <>
-                        <RiSubtractFill
-                          className="text-3xl text-black cursor-pointer mx-2"
-                          onClick={() => handleChangeQuantity(item, -1)}
-                        />
-                        <span className="text-2xl">{item.quantity}</span>
-                        <MdAdd
-                          className="text-3xl text-black cursor-pointer mx-2"
-                          onClick={() => handleChangeQuantity(item, 1)}
-                        />
-                      </>
+                  <div className="flex flex-col items-center">
+                    <div className="flex items-center mb-2">
+                      <RiSubtractFill
+                        className={`text-3xl cursor-pointer mx-2
+                       
+                           
+                           "text-black
+                        }`}
+                        onClick={() => handleChangeQuantity(item, -1)}
+                      />
+                      <span className="text-2xl">{item.quantity}</span>
+                      <MdAdd
+                        className={`text-3xl mx-2 
+                         ${
+                           item.isInStock ? "cursor-pointer" : "text-gray-300"
+                         }`}
+                        onClick={() => handleChangeQuantity(item, 1)}
+                      />
+                    </div>
+                    {!item.isInStock && (
+                      <span className="text-red-500 text-sm">Hết hàng</span>
                     )}
                   </div>
                   <div className="flex flex-col items-center my-auto">
