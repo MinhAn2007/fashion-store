@@ -57,6 +57,7 @@ const OrderList = () => {
   useEffect(() => {
     // Create socket connection
     const newSocket = io(API, {
+      path: '/api/socket.io',
       reconnection: true,
       reconnectionAttempts: 5,
       reconnectionDelay: 1000,
