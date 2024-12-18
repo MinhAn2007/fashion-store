@@ -538,8 +538,8 @@ const CreateOrder = () => {
         isOpen={isOpen}
         orderDetails={{
           cartItems,
-          selectedAddress: selectedAddress.label,
-          paymentMethod: paymentMethod.label,
+          selectedAddress: selectedAddress,
+          paymentMethod: paymentMethod,
           totalAmount,
           appliedCoupon,
           subtotal: calculateSubtotal(),
