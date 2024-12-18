@@ -65,9 +65,9 @@ const OrderList = () => {
       auth: {
         token: localStorage.getItem("token"),
       },
-      transports: ['websocket']
 
     });
+    setSocket(newSocket);
   
     // Log kết nối
     newSocket.on('connect', () => {
