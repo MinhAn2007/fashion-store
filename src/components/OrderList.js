@@ -67,7 +67,6 @@ const OrderList = () => {
       },
 
     });
-    setSocket(newSocket);
   
     // Log kết nối
     newSocket.on('connect', () => {
