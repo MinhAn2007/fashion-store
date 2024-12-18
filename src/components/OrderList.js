@@ -17,6 +17,7 @@ import { Loader } from "rizzui";
 import { useAuthWithCheck } from "../hooks/useAuth";
 import { useNavigate } from "react-router-dom";
 import CompleteOrderModal from "./CompleteOrderModal";
+import io from "socket.io-client";
 
 const OrderList = () => {
   const [searchTerm, setSearchTerm] = useState("");
@@ -40,6 +41,8 @@ const OrderList = () => {
   const navigate = useNavigate();
   const [showCompleteModal, setShowCompleteModal] = useState(false);
   const [orderToComplete, setOrderToComplete] = useState(null);
+  const [socket, setSocket] = useState(null);
+
 
   const handleReturnOrder = (orderId) => {
     setOrderToReturn(orders.find((order) => order.id === orderId));
@@ -49,6 +52,60 @@ const OrderList = () => {
     setOrderToCancel(orders.find((order) => order.id === orderId));
     setShowCancelModal(true);
   };
+
+
+  useEffect(() => {
+    // Create socket connection
+    const newSocket = io(API, {
+      reconnection: true,
+      reconnectionAttempts: 5,
+      reconnectionDelay: 1000,
+      timeout: 5000,
+      auth: {
+        token: localStorage.getItem("token"),
+      },
+      transports: ['websocket']
+
+    });
+  
+    // Log kết nối
+    newSocket.on('connect', () => {
+      console.log('Socket connected successfully');
+      console.log('Socket ID:', newSocket.id);
+    });
+  
+    // Log lỗi kết nối
+    newSocket.on('connect_error', (error) => {
+      console.error('Socket connection error:', error);
+    });
+  
+    // Log ngắt kết nối
+    newSocket.on('disconnect', (reason) => {
+      console.log('Socket disconnected:', reason);
+    });
+  
+    // Register user
+    const userId = localStorage.getItem('userId');
+    newSocket.emit('register', { userId }, (response) => {
+      console.log('Register response:', response);
+    });
+  
+    // Listen for order updates
+    newSocket.on('orderUpdated', async (updatedOrder) => {
+      console.log('Received order update:', updatedOrder);
+      const response = await fetch(`${API}/api/orders?userId=${userId}`);
+      if (!response.ok) throw new Error("Failed to fetch orders");
+      const data = await response.json();
+      setOrders(data.data.nonComplete);
+    });
+  
+    // Cleanup on component unmount
+    return () => {
+      newSocket.disconnect();
+    };
+  }, []);
+
+
   const fetchOrders = async () => {
     try {
       setLoading(true);
