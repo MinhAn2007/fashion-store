@@ -136,17 +136,6 @@ const OrderHistory = () => {
         order.items.some((item) => item.name.includes(searchTerm)))
   );
 
-  const sortedOrders = filteredOrders.sort((a, b) => {
-    const dateA = new Date(a.created_at);
-    const dateB = new Date(b.created_at);
-    return sortOrder === "desc" ? dateB - dateA : dateA - dateB;
-  });
-
-  const totalPages = Math.ceil(sortedOrders.length / ordersPerPage);
-  const currentOrders = sortedOrders.slice(
-    (currentPage - 1) * ordersPerPage,
-    currentPage * ordersPerPage
-  );
 
   const getLatestTimestamp = (order) => {
     const timestamps = [
@@ -156,10 +145,26 @@ const OrderHistory = () => {
       order.canceled_at,
       order.returned_at,
       order.shipping_at,
+      order.returned_at,
+      order.updated_at,
     ].filter(Boolean);
 
     return new Date(Math.max(...timestamps.map((date) => new Date(date))));
   };
+
+  const sortedOrders = filteredOrders.sort((a, b) => {
+    const dateA = getLatestTimestamp(a);
+    const dateB = getLatestTimestamp(b);
+    return sortOrder === "desc" ? dateB - dateA : dateA - dateB;
+  });
+
+
+  const totalPages = Math.ceil(sortedOrders.length / ordersPerPage);
+  const currentOrders = sortedOrders.slice(
+    (currentPage - 1) * ordersPerPage,
+    currentPage * ordersPerPage
+  );
+
 
   const buyBack = async (order) => {
     const mappedItems = mapOrderItemsForPurchase(order);

@@ -14,6 +14,7 @@ import { useAuthWithCheck } from "../hooks/useAuth";
 import { formatPrice } from "../utils/utils.js"; // Import formatPrice from utils
 import { FaShippingFast, FaLock } from "react-icons/fa";
 import { BsCurrencyDollar } from "react-icons/bs";
+import OrderConfirmationModal from "./OrderConfirmationModal";
 
 const CreateOrder = () => {
   const location = useLocation();
@@ -41,6 +42,7 @@ const CreateOrder = () => {
   const [subtotal, setSubtotal] = useState(0);
   const SHIPPING_FEE = 30000;
   const ONLINE_PAYMENT_DISCOUNT = 50000;
+  const [isOpen, setIsOpen] = useState(false);
 
   const calculateSubtotal = () => {
     return cartItems.reduce(
@@ -56,47 +58,47 @@ const CreateOrder = () => {
     );
     setSubtotal(calculatedSubtotal);
   }, [cartItems]);
-  
-  
 
   const updateTotal = () => {
     let total = subtotal + SHIPPING_FEE;
-  
+
     // Áp dụng mã giảm giá
     if (appliedCoupon) {
       const discount =
-      appliedCoupon.coupon_type === "percent"
-      ? roundToNearestThousand((subtotal * parseFloat(appliedCoupon.coupon_value)) / 100)
-      : roundToNearestThousand(parseFloat(appliedCoupon.coupon_value));
+        appliedCoupon.coupon_type === "percent"
+          ? roundToNearestThousand(
+              (subtotal * parseFloat(appliedCoupon.coupon_value)) / 100
+            )
+          : roundToNearestThousand(parseFloat(appliedCoupon.coupon_value));
       total -= discount;
     }
-  
+
     // Áp dụng giảm giá cho thanh toán online
     if (paymentMethod?.value === 2) {
       total -= ONLINE_PAYMENT_DISCOUNT;
     }
-  
+
     setTotalAmount(total > 0 ? total : 0); // Đảm bảo tổng >= 0
   };
-  
+
   useEffect(() => {
     updateTotal();
   }, [subtotal, appliedCoupon, paymentMethod]);
-  
 
   const calculateTotal = () => {
     const subtotal = calculateSubtotal();
     const shippingFee = 30000;
-    
+
     // Round coupon discount to nearest thousand
     const couponDiscount = calculateCouponDiscount();
     const roundedCouponDiscount = roundToNearestThousand(couponDiscount);
 
     const onlinePaymentDiscount = paymentMethod?.value === 2 ? 50000 : 0;
 
-    return subtotal + shippingFee - roundedCouponDiscount - onlinePaymentDiscount;
+    return (
+      subtotal + shippingFee - roundedCouponDiscount - onlinePaymentDiscount
+    );
   };
-
 
   const handleCheckCoupon = async () => {
     if (!couponCode) {
@@ -124,7 +126,7 @@ const CreateOrder = () => {
       });
 
       const data = await response.json();
-      
+
       if (data.valid) {
         setAppliedCoupon(data.voucher);
         setCouponSuccess("Áp dụng mã giảm giá thành công!");
@@ -154,9 +156,10 @@ const CreateOrder = () => {
 
   const calculateCouponDiscount = () => {
     if (!appliedCoupon) return 0;
-    
+
     if (appliedCoupon.coupon_type === "percent") {
-      const discount = (subtotal * parseFloat(appliedCoupon.coupon_value)) / 100;
+      const discount =
+        (subtotal * parseFloat(appliedCoupon.coupon_value)) / 100;
       return roundToNearestThousand(discount);
     }
     return roundToNearestThousand(parseFloat(appliedCoupon.coupon_value));
@@ -203,13 +206,16 @@ const CreateOrder = () => {
     });
   };
 
-  const handleCreateOrder = async () => {
+  const openModalConfirm = () => {
     if (!selectedAddress || !paymentMethod) {
       alert("Vui lòng chọn địa chỉ và phương thức thanh toán.");
       return;
     }
-    console.log(totalAmount);
-    
+    setIsOpen(true);
+
+  };
+
+  const handleCreateOrder = async () => {
     const orderData = {
       userId: jwtDecode(token).userId,
       cartItems,
@@ -520,7 +526,7 @@ const CreateOrder = () => {
 
               <Button
                 className="mt-6 w-full bg-black text-white hover:bg-opacity-30"
-                onClick={() => handleCreateOrder()}
+                onClick={() => openModalConfirm()}
               >
                 Đặt hàng
               </Button>
@@ -528,6 +534,20 @@ const CreateOrder = () => {
           </div>
         </div>
       </div>
+      <OrderConfirmationModal
+        isOpen={isOpen}
+        orderDetails={{
+          cartItems,
+          selectedAddress: selectedAddress.label,
+          paymentMethod: paymentMethod.label,
+          totalAmount,
+          appliedCoupon,
+          subtotal: calculateSubtotal(),
+          shippingFee: 30000,
+        }}
+        onClose={() => setIsOpen(false)}
+        onConfirm={() => handleCreateOrder()}
+      />
     </div>
   );
 };

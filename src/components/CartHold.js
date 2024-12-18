@@ -16,7 +16,7 @@ import MobileNav from "./MobileNav";
 import BreadCrumb from "./BreadCrumb";
 import { useAuthWithCheck } from "../hooks/useAuth";
 import { Button } from "rizzui";
-import { formatPrice } from "../utils/utils.js"; // Import formatPrice from utils
+import { formatPrice } from "../utils/utils.js";
 import { Link } from "react-router-dom";
 import { Loader } from "rizzui";
 
@@ -70,12 +70,14 @@ const CartHold = () => {
   useEffect(() => {
     fetchCartItems();
   }, []);
+
   const updateCartQuantity = (quantity) => {
     localStorage.setItem("cartQuantity", quantity);
     window.dispatchEvent(
       new CustomEvent("cartQuantityUpdated", { detail: quantity })
     );
   };
+
   const handleQuantityUpdate = async (productId, newQuantity) => {
     try {
       const response = await fetch(`${API}/api/cart/update-quantity`, {
@@ -156,6 +158,7 @@ const CartHold = () => {
 
     setTimeoutId(id);
   };
+
   const handleToggleSelectItem = (id) => {
     const updatedItems = cartItems.map((item) =>
       item.id === id ? { ...item, checked: !item.checked } : item
@@ -214,6 +217,8 @@ const CartHold = () => {
     setSelectedItem(null);
   };
 
+  const checkedItems = cartItems.filter(item => item.checked);
+
   if (loading)
     return (
       <div className="flex justify-center mx-auto min-h-[700px]">
@@ -271,10 +276,7 @@ const CartHold = () => {
                     <div className="flex items-center mb-2">
                       <RiSubtractFill
                         className={`text-3xl cursor-pointer mx-2
-                       
-                           
-                           "text-black
-                        }`}
+                           ${item.quantity > 0 ? "text-black" : "text-gray-300"}`}
                         onClick={() => handleChangeQuantity(item, -1)}
                       />
                       <span className="text-2xl">{item.quantity}</span>
@@ -326,11 +328,18 @@ const CartHold = () => {
                   state: { cartItems, totalPrice },
                 }}
                 state={{
-                  cartItems: cartItems.filter((item) => item.checked),
+                  cartItems: checkedItems,
                   totalPrice,
                 }}
               >
-                <button className="bg-black text-white py-2 px-4 mt-2 w-full rounded">
+                <button 
+                  className={`py-2 px-4 mt-2 w-full rounded ${
+                    checkedItems.length > 0 
+                      ? "bg-black text-white" 
+                      : "bg-gray-300 text-gray-500 cursor-not-allowed"
+                  }`}
+                  disabled={checkedItems.length === 0}
+                >
                   Thanh toán
                 </button>
               </Link>

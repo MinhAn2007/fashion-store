@@ -111,6 +111,7 @@ const OrderList = () => {
     "Pending Confirmation": "Chờ xác nhận",
     "In Transit": "Đang vận chuyển",
     Delivered: "Đã giao hàng",
+    Processing: "Đang xử lý",
   };
 
   const getStatusIcon = (status) => {
@@ -123,6 +124,8 @@ const OrderList = () => {
         return <BsXCircle className="w-5 h-5 text-red-500" />;
       case "Completed":
         return <BsCheckCircle className="w-5 h-5 text-green-500" />;
+      case "Processing":
+        return <BsBoxSeam className="w-5 h-5 text-yellow-500" />;
       default:
         return <BsBoxSeam className="w-5 h-5 text-gray-500" />;
     }
@@ -140,8 +143,31 @@ const OrderList = () => {
         return "bg-red-50 text-red-600 ring-red-500/30";
       case "Completed":
         return "bg-green-50 text-green-600 ring-green-500/30";
+      case "Processing":
+        return "bg-yellow-50 text-yellow-600 ring-yellow-500/30";
       default:
         return "bg-gray-50 text-gray-600 ring-gray-500/30";
+    }
+  };
+
+  const handleGetOrder = async (orderId, isGet) => {
+    try {
+      const response = await fetch(`${API}/api/orders/${orderId}/check`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ isGet: isGet }),
+      });
+      checkApiResponse(response);
+      if (!response.ok) {
+        alert("Đã xảy ra lỗi khi cập nhật trạng thái đơn hàng");
+        return;
+      }
+      alert("Cập nhật trạng thái đơn hàng thành công");
+      fetchOrders();
+    } catch (err) {
+      console.error("Error updating order status:", err);
     }
   };
 
@@ -166,7 +192,6 @@ const OrderList = () => {
 
     return new Date(Math.max(...timestamps.map((date) => new Date(date))));
   };
-
 
   const sortedOrders = filteredOrders.sort((a, b) => {
     const dateA = getLatestTimestamp(a);
@@ -278,12 +303,46 @@ const OrderList = () => {
                     {getLatestTimestamp(order).toLocaleString("vi-VN")}
                   </div>
                 </div>
-
-                {order.status === "Pending Confirmation" && order.return_reason ? (
-                   
-                    <span className="px-3 py-1 inline-flex items-center gap-2 text-sm font-medium rounded-full bg-orange-50 text-orange-600 ring-1 ring-orange-500/30">
-                    <BsClock className="w-5 h-5 text-orange-100-500" /> Đang yêu cầu trả hàng
-                    </span>
+                {order.status === "Pending Confirmation" &&
+                order.return_reason ? (
+                  <span className="px-3 py-1 inline-flex items-center gap-2 text-sm font-medium rounded-full bg-orange-50 text-orange-600 ring-1 ring-orange-500/30">
+                    <BsClock className="w-5 h-5 text-orange-100-500" /> Đang yêu
+                    cầu trả hàng
+                  </span>
+                ) : order.status === "Delivered" ? (
+                  <>
+                    {order.is_get === 0 ? (
+                      <span
+                        className={`px-3 py-1 inline-flex items-center gap-2 text-sm font-medium rounded-full ring-1 ${getStatusColor(
+                          order.status
+                        )}`}
+                      >
+                        {getStatusIcon(order.status)}
+                        Chưa nhận hàng
+                      </span>
+                    ) : order.is_get === 1 ? (
+                      <span
+                        className={`px-3 py-1 inline-flex items-center gap-2 text-sm font-medium rounded-full ring-1 ${getStatusColor(
+                          order.status
+                        )}`}
+                      >
+                        {getStatusIcon(order.status)}
+                        {order.return_reason
+                          ? "Shop đã nhận hàng trả"
+                          : "Đã nhận hàng"}
+                      </span>
+                    ) : (
+                      <span
+                        className={`px-3 py-1 inline-flex items-center gap-2 text-sm font-medium rounded-full ring-1 ${getStatusColor(
+                          order.status
+                        )}`}
+                      >
+                        {" "}
+                        {getStatusIcon(order.status)}
+                        {statusTranslation[order.status] || order.status}
+                      </span>
+                    )}
+                  </>
                 ) : (
                   <span
                     className={`px-3 py-1 inline-flex items-center gap-2 text-sm font-medium rounded-full ring-1 ${getStatusColor(
@@ -351,14 +410,45 @@ const OrderList = () => {
                           Hủy đơn
                         </button>
                       )}
-                    {order.status === "Delivered" && (
+                    {order.status === "Delivered" &&
+                      order.is_get === null &&
+                      !order.return_reason && (
+                        <>
+                          <button
+                            className="px-4 py-2 text-sm font-medium text-white bg-black hover:bg-opacity-30 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
+                            onClick={() => handleGetOrder(order.id, 1)}
+                          >
+                            Đã nhận hàng
+                          </button>
+                          <button
+                            className="px-4 py-2 text-sm font-medium text-white bg-black hover:bg-opacity-30 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
+                            onClick={() => handleGetOrder(order.id)}
+                          >
+                            Chưa nhận hàng
+                          </button>
+                        </>
+                      )}
+
+                    {order.status === "Delivered" &&
+                      order.is_get === 1 &&
+                      !order.return_reason && (
+                        <>
+                          <button
+                            className="px-4 py-2 text-sm font-medium text-black bg-white hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-600"
+                            onClick={() => handleCompleteOrder(order.id)}
+                          >
+                            Hoàn thành đơn hàng
+                          </button>
+                          <button
+                            className="px-4 py-2 text-sm font-medium text-white bg-black hover:bg-opacity-30 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
+                            onClick={() => handleReturnOrder(order.id)}
+                          >
+                            Trả hàng
+                          </button>
+                        </>
+                      )}
+                    {order.status === "Delivered" && order.is_get === 0 && (
                       <>
-                        <button
-                          className="px-4 py-2 text-sm font-medium text-black bg-white hover:bg-gray-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-600"
-                          onClick={() => handleCompleteOrder(order.id)}
-                        >
-                          Hoàn thành đơn hàng
-                        </button>
                         <button
                           className="px-4 py-2 text-sm font-medium text-white bg-black hover:bg-opacity-30 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
                           onClick={() => handleReturnOrder(order.id)}

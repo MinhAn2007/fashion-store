@@ -99,10 +99,10 @@ const ResultVNPAYPage = () => {
         {message && (
           <div className="flex justify-center mt-4">
             <a
-              href="/"
+              href="/order-list"
               className="text-black hover:underline text-lg font-semibold"
             >
-              Quay lại trang chủ
+              Xem đơn hàng của bạn
             </a>
           </div>
         )}
