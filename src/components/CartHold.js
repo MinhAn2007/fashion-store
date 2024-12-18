@@ -92,9 +92,7 @@ const CartHold = () => {
       const data = await response.json();
       const updatedItems = data.cartItems.map((item) => ({
         ...item,
-        checked:
-          cartItems.find((cartItem) => cartItem.id === item.id)?.checked ??
-          true,
+        checked: item.isInStock,
       }));
       setCartItems(updatedItems);
       calculateTotalPrice(updatedItems);

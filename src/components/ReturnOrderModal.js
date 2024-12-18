@@ -61,7 +61,7 @@ const ReturnOrderModal = ({ order, onClose }) => {
   const handleCloseSuccessMessage = () => {
     setShowSuccessMessage(false);
     onClose();
-    navigate("/history");
+    window.location.reload();
   };
 
   return (

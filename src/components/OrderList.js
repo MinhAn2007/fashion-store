@@ -119,8 +119,6 @@ const OrderList = () => {
         return <BsClock className="w-5 h-5 text-yellow-500" />;
       case "In Transit":
         return <BsTruck className="w-5 h-5 text-blue-500" />;
-      case "Returned":
-        return <BsCheckCircle className="w-5 h-5 text-black" />;
       case "Cancelled":
         return <BsXCircle className="w-5 h-5 text-red-500" />;
       case "Completed":
@@ -154,9 +152,25 @@ const OrderList = () => {
         order.items.some((item) => item.name.includes(searchTerm)))
   );
 
+  const getLatestTimestamp = (order) => {
+    const timestamps = [
+      order.created_at,
+      order.delivery_at,
+      order.completed_at,
+      order.canceled_at,
+      order.returned_at,
+      order.shipping_at,
+      order.returned_at,
+      order.updated_at,
+    ].filter(Boolean);
+
+    return new Date(Math.max(...timestamps.map((date) => new Date(date))));
+  };
+
+
   const sortedOrders = filteredOrders.sort((a, b) => {
-    const dateA = new Date(a.created_at);
-    const dateB = new Date(b.created_at);
+    const dateA = getLatestTimestamp(a);
+    const dateB = getLatestTimestamp(b);
     return sortOrder === "desc" ? dateB - dateA : dateA - dateB;
   });
 
@@ -168,19 +182,6 @@ const OrderList = () => {
     (currentPage - 1) * ordersPerPage,
     currentPage * ordersPerPage
   );
-
-  const getLatestTimestamp = (order) => {
-    const timestamps = [
-      order.created_at,
-      order.delivery_at,
-      order.completed_at,
-      order.canceled_at,
-      order.returned_at,
-      order.shipping_at,
-    ].filter(Boolean);
-
-    return new Date(Math.max(...timestamps.map((date) => new Date(date))));
-  };
 
   // Reset currentPage về 1 khi thay đổi bộ lọc hoặc tìm kiếm
   useEffect(() => {
@@ -277,14 +278,22 @@ const OrderList = () => {
                     {getLatestTimestamp(order).toLocaleString("vi-VN")}
                   </div>
                 </div>
-                <span
-                  className={`px-3 py-1 inline-flex items-center gap-2 text-sm font-medium rounded-full ring-1 ${getStatusColor(
-                    order.status
-                  )}`}
-                >
-                  {getStatusIcon(order.status)}
-                  {statusTranslation[order.status]}
-                </span>
+
+                {order.status === "Pending Confirmation" && order.return_reason ? (
+                   
+                    <span className="px-3 py-1 inline-flex items-center gap-2 text-sm font-medium rounded-full bg-orange-50 text-orange-600 ring-1 ring-orange-500/30">
+                    <BsClock className="w-5 h-5 text-orange-100-500" /> Đang yêu cầu trả hàng
+                    </span>
+                ) : (
+                  <span
+                    className={`px-3 py-1 inline-flex items-center gap-2 text-sm font-medium rounded-full ring-1 ${getStatusColor(
+                      order.status
+                    )}`}
+                  >
+                    {getStatusIcon(order.status)}
+                    {statusTranslation[order.status] || order.status}
+                  </span>
+                )}
               </div>
 
               {/* Order Items */}
