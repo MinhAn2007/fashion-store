@@ -18,6 +18,7 @@ import { useAuthWithCheck } from "../hooks/useAuth";
 import { useNavigate } from "react-router-dom";
 import CompleteOrderModal from "./CompleteOrderModal";
 import io from "socket.io-client";
+import Ably from "ably";
 
 const OrderList = () => {
   const [searchTerm, setSearchTerm] = useState("");
@@ -55,56 +56,42 @@ const OrderList = () => {
 
 
   useEffect(() => {
-    // Create socket connection
-    const newSocket = io(API, {
-      path: '/api/socket.io',
-      reconnection: true,
-      reconnectionAttempts: 5,
-      reconnectionDelay: 1000,
-      timeout: 5000,
-      auth: {
-        token: localStorage.getItem("token"),
-      },
-
+    // Kết nối với Ably
+    const ably = new Ably.Realtime('O4RrtQ.Xf-a8Q:0XE5QAwysrz56KobTV-_c0YyQJVSRHid8Z7sWs4b6DU');
+    const channel = ably.channels.get('orders');
+  
+    ably.connection.on('connected', () => {
+      console.log('Kết nối Ably thành công');
     });
   
-    // Log kết nối
-    newSocket.on('connect', () => {
-      console.log('Socket connected successfully');
-      console.log('Socket ID:', newSocket.id);
+    ably.connection.on('disconnected', () => {
+      console.log('Kết nối Ably đã bị ngắt');
     });
   
-    // Log lỗi kết nối
-    newSocket.on('connect_error', (error) => {
-      console.error('Socket connection error:', error);
+    ably.connection.on('failed', (error) => {
+      console.error('Kết nối Ably thất bại:', error);
     });
   
-    // Log ngắt kết nối
-    newSocket.on('disconnect', (reason) => {
-      console.log('Socket disconnected:', reason);
+    channel.subscribe('order-status-updated', async (message) => {
+      console.log('Thông điệp cập nhật trạng thái đơn hàng:', message);
+  
+      try {
+        const response = await fetch(`${API}/api/orders?userId=${userId}`);
+        if (!response.ok) throw new Error("Failed to fetch orders");
+  
+        const data = await response.json();
+        setOrders(data.data.nonComplete);
+      } catch (error) {
+        console.error('Lỗi khi lấy đơn hàng:', error);
+      }
     });
   
-    // Register user
-    const userId = localStorage.getItem('userId');
-    newSocket.emit('register', { userId }, (response) => {
-      console.log('Register response:', response);
-    });
-  
-    // Listen for order updates
-    newSocket.on('orderUpdated', async (updatedOrder) => {
-      console.log('Received order update:', updatedOrder);
-      const response = await fetch(`${API}/api/orders?userId=${userId}`);
-      if (!response.ok) throw new Error("Failed to fetch orders");
-      const data = await response.json();
-      setOrders(data.data.nonComplete);
-    });
-  
-    // Cleanup on component unmount
     return () => {
-      newSocket.disconnect();
+      channel.unsubscribe();
+      ably.close();
     };
-  }, []);
-
+  }, [API, userId]);
+  
 
   const fetchOrders = async () => {
     try {
