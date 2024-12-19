@@ -299,7 +299,7 @@ const CartHold = () => {
                       />
                     </div>
                     {!item.isInStock && (
-                      <span className="text-red-500 text-sm">Hết hàng</span>
+                      <span className="text-red-500 text-sm">Hết hàng ( còn {item.stockQuantity} sản phẩm )</span>
                     )}
                   </div>
                   <div className="flex flex-col items-center my-auto">
