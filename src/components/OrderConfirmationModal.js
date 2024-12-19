@@ -1,30 +1,32 @@
-import React from 'react';
+import React from "react";
 import { Button, Text } from "rizzui";
 import { formatPrice } from "../utils/utils.js";
 
 const OrderConfirmationModal = ({
-  isOpen, 
-  onClose, 
-  onConfirm, 
-  orderDetails
+  isOpen,
+  onClose,
+  onConfirm,
+  orderDetails,
 }) => {
   if (!isOpen) return null;
-
   const {
-    selectedAddress, 
-    paymentMethod, 
-    cartItems, 
-    subtotal, 
-    totalAmount, 
+    selectedAddress,
+    paymentMethod,
+    cartItems,
+    subtotal,
+    totalAmount,
     appliedCoupon,
-    shippingFee
+    shippingFee,
   } = orderDetails;
+  console.log("paymentMethod", paymentMethod);
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center">
       <div className="bg-white rounded-lg p-8 max-w-md w-full max-h-[90vh] overflow-y-auto">
-        <h2 className="text-2xl font-bold mb-6 text-center">Xác nhận đơn hàng</h2>
-        
+        <h2 className="text-2xl font-bold mb-6 text-center">
+          Xác nhận đơn hàng
+        </h2>
+
         {/* Shipping Address */}
         <div className="mb-4 border-b pb-4">
           <h3 className="font-semibold mb-2">Địa chỉ giao hàng</h3>
@@ -73,12 +75,19 @@ const OrderConfirmationModal = ({
                 )
               </Text>
               <Text>
-                -{formatPrice(
+                -
+                {formatPrice(
                   appliedCoupon.coupon_type === "percent"
                     ? (subtotal * parseFloat(appliedCoupon.coupon_value)) / 100
                     : parseFloat(appliedCoupon.coupon_value)
                 )}
               </Text>
+            </div>
+          )}
+          {paymentMethod === 'Thanh toán online ( Chuyển khoản )' && (
+            <div className="flex justify-between mb-2 text-green-600">
+              <Text>Giảm giá thanh toán online</Text>
+              <Text>- 50.000 đ</Text>
             </div>
           )}
           <div className="flex justify-between font-bold mt-4">
@@ -89,14 +98,10 @@ const OrderConfirmationModal = ({
 
         {/* Buttons */}
         <div className="flex justify-between mt-6">
-          <Button 
-            variant="outline" 
-            className="mr-4" 
-            onClick={onClose}
-          >
+          <Button variant="outline" className="mr-4" onClick={onClose}>
             Quay lại
           </Button>
-          <Button 
+          <Button
             className="bg-black text-white hover:bg-opacity-80"
             onClick={onConfirm}
           >

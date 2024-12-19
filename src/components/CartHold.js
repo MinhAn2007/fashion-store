@@ -98,6 +98,14 @@ const CartHold = () => {
       }));
       setCartItems(updatedItems);
       calculateTotalPrice(updatedItems);
+
+      toast({
+        title: "Thành công",
+        description: "Đã cập nhật số lượng sản phẩm.",
+        status: "success",
+        duration: 3000,
+        isClosable: true,
+      });
     } catch (error) {
       console.error("Error updating quantity:", error);
       toast({
@@ -217,7 +225,7 @@ const CartHold = () => {
     setSelectedItem(null);
   };
 
-  const checkedItems = cartItems.filter(item => item.checked);
+  const checkedItems = cartItems.filter((item) => item.checked);
 
   if (loading)
     return (
@@ -276,7 +284,9 @@ const CartHold = () => {
                     <div className="flex items-center mb-2">
                       <RiSubtractFill
                         className={`text-3xl cursor-pointer mx-2
-                           ${item.quantity > 0 ? "text-black" : "text-gray-300"}`}
+                           ${
+                             item.quantity > 0 ? "text-black" : "text-gray-300"
+                           }`}
                         onClick={() => handleChangeQuantity(item, -1)}
                       />
                       <span className="text-2xl">{item.quantity}</span>
@@ -332,10 +342,10 @@ const CartHold = () => {
                   totalPrice,
                 }}
               >
-                <button 
+                <button
                   className={`py-2 px-4 mt-2 w-full rounded ${
-                    checkedItems.length > 0 
-                      ? "bg-black text-white" 
+                    checkedItems.length > 0
+                      ? "bg-black text-white"
                       : "bg-gray-300 text-gray-500 cursor-not-allowed"
                   }`}
                   disabled={checkedItems.length === 0}
