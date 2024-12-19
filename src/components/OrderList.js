@@ -17,6 +17,8 @@ import { Loader } from "rizzui";
 import { useAuthWithCheck } from "../hooks/useAuth";
 import { useNavigate } from "react-router-dom";
 import CompleteOrderModal from "./CompleteOrderModal";
+import io from "socket.io-client";
+import Ably from "ably";
 
 const OrderList = () => {
   const [searchTerm, setSearchTerm] = useState("");
@@ -40,6 +42,8 @@ const OrderList = () => {
   const navigate = useNavigate();
   const [showCompleteModal, setShowCompleteModal] = useState(false);
   const [orderToComplete, setOrderToComplete] = useState(null);
+  const [socket, setSocket] = useState(null);
+
 
   const handleReturnOrder = (orderId) => {
     setOrderToReturn(orders.find((order) => order.id === orderId));
@@ -49,6 +53,46 @@ const OrderList = () => {
     setOrderToCancel(orders.find((order) => order.id === orderId));
     setShowCancelModal(true);
   };
+
+
+  useEffect(() => {
+    // Kết nối với Ably
+    const ably = new Ably.Realtime('O4RrtQ.Xf-a8Q:0XE5QAwysrz56KobTV-_c0YyQJVSRHid8Z7sWs4b6DU');
+    const channel = ably.channels.get('orders');
+  
+    ably.connection.on('connected', () => {
+      console.log('Kết nối Ably thành công');
+    });
+  
+    ably.connection.on('disconnected', () => {
+      console.log('Kết nối Ably đã bị ngắt');
+    });
+  
+    ably.connection.on('failed', (error) => {
+      console.error('Kết nối Ably thất bại:', error);
+    });
+  
+    channel.subscribe('order-status-updated', async (message) => {
+      console.log('Thông điệp cập nhật trạng thái đơn hàng:', message);
+  
+      try {
+        const response = await fetch(`${API}/api/orders?userId=${userId}`);
+        if (!response.ok) throw new Error("Failed to fetch orders");
+  
+        const data = await response.json();
+        setOrders(data.data.nonComplete);
+      } catch (error) {
+        console.error('Lỗi khi lấy đơn hàng:', error);
+      }
+    });
+  
+    return () => {
+      channel.unsubscribe();
+      ably.close();
+    };
+  }, [API, userId]);
+  
+
   const fetchOrders = async () => {
     try {
       setLoading(true);

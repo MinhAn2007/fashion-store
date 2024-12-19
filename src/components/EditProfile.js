@@ -25,7 +25,55 @@ const EditProfile = () => {
   // Sử dụng fallback an toàn cho cartItems
   const cartItems = state?.cartItems || [];
   console.log("cartItems:", cartItems);
+  const [provinces, setProvinces] = useState([]);
+  const [districts, setDistricts] = useState([]);
+  const [wards, setWards] = useState([]);
 
+  useEffect(() => {
+    // Fetch provinces when component mounts
+    const fetchProvinces = async () => {
+      try {
+        const response = await fetch("https://esgoo.net/api-tinhthanh/1/0.htm");
+        const data = await response.json();
+        if (data.error === 0) {
+          setProvinces(data.data);
+        }
+      } catch (error) {
+        console.error("Error fetching provinces:", error);
+      }
+    };
+
+    fetchProvinces();
+  }, []);
+  const fetchDistricts = async (provinceId) => {
+    try {
+      const response = await fetch(
+        `https://esgoo.net/api-tinhthanh/2/${provinceId}.htm`
+      );
+      const data = await response.json();
+      if (data.error === 0) {
+        setDistricts(data.data);
+        setWards([]); // Reset wards when province changes
+      }
+    } catch (error) {
+      console.error("Error fetching districts:", error);
+    }
+  };
+
+  // New method to fetch wards based on selected district
+  const fetchWards = async (districtId) => {
+    try {
+      const response = await fetch(
+        `https://esgoo.net/api-tinhthanh/3/${districtId}.htm`
+      );
+      const data = await response.json();
+      if (data.error === 0) {
+        setWards(data.data);
+      }
+    } catch (error) {
+      console.error("Error fetching wards:", error);
+    }
+  };
   useEffect(() => {
     const fetchUserProfile = async () => {
       if (!token) {
@@ -159,16 +207,54 @@ const EditProfile = () => {
     setUserInfo({ ...userInfo, [name]: value });
   };
 
-  const handleAddressChange = (index, field, value) => {
+  const handleAddressChange = (index, field, value, additionalData = {}) => {
     const newAddresses = [...userInfo.addresses];
     let error = "";
 
+    // Existing validation for other fields
     if (field === "phoneNumber") {
       error = validatePhoneNumber(value);
     } else {
       error = validateField(field, value);
     }
+    if (value === "") {
+      newAddresses[index] = {
+        ...newAddresses[index],
+        [field]: "", // Gán giá trị rỗng thay vì undefined
+      };
+    }
+    // Handle special address-related fields
+    if (field === "province") {
+      fetchDistricts(value);
+      newAddresses[index] = {
+        ...newAddresses[index],
+        provinceId: value,
+        provinceName: additionalData.name,
+        districtId: null,
+        wardId: null,
+      };
+    } else if (field === "district") {
+      fetchWards(value);
+      newAddresses[index] = {
+        ...newAddresses[index],
+        districtId: value,
+        districtName: additionalData.name,
+        wardId: null,
+      };
+    } else if (field === "ward") {
+      newAddresses[index] = {
+        ...newAddresses[index],
+        wardId: value,
+        wardName: additionalData.name,
+      };
+    } else {
+      newAddresses[index] = {
+        ...newAddresses[index],
+        [field]: value,
+      };
+    }
 
+    // Update errors
     const addressErrors = fieldErrors.addresses
       ? [...fieldErrors.addresses]
       : [];
@@ -185,13 +271,9 @@ const EditProfile = () => {
       addresses: addressErrors,
     });
 
-    newAddresses[index] = {
-      ...newAddresses[index],
-      [field]: value,
-    };
+    console.log("newAddresses:", newAddresses);
     setUserInfo({ ...userInfo, addresses: newAddresses });
   };
-
   const handleDeleteAddress = async (index) => {
     const addressId = userInfo.addresses[index].id;
 
@@ -251,6 +333,18 @@ const EditProfile = () => {
       alert("Vui lòng kiểm tra lại các thông tin trước khi lưu.");
       return;
     }
+
+    const newAddressMap =  userInfo.addresses.map((address) => {
+      address.city = address.districtName;
+      address.state = address.provinceName;
+      address.addressLine = `${address.addressLine} ${address.wardName}` || "";
+      return address;
+    });
+
+    setUserInfo((prevUserInfo) => ({
+      ...prevUserInfo,
+      addresses: newAddressMap,
+    }));
 
     try {
       const response = await fetch(`${API}/api/users/me`, {
@@ -386,6 +480,7 @@ const EditProfile = () => {
               className="p-4 mt-4 bg-gray-100 rounded-lg shadow-md border border-gray-200"
             >
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {/* Existing address fields */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700">
                     Địa chỉ chi tiết:
@@ -404,42 +499,92 @@ const EditProfile = () => {
                     </p>
                   )}
                 </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700">
-                    Thành phố:
-                  </label>
-                  <input
-                    type="text"
-                    value={address.city || ""}
-                    onChange={(e) =>
-                      handleAddressChange(index, "city", e.target.value)
-                    }
-                    className="mt-1 block w-full h-10 bg-gray-50 text-gray-900 border border-gray-300 rounded-lg px-4"
-                  />
-                  {fieldErrors.addresses?.[index]?.city && (
-                    <p className="mt-1 text-sm text-red-500">
-                      {fieldErrors.addresses[index].city}
-                    </p>
-                  )}
-                </div>
+
+                {/* Province Dropdown */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700">
                     Tỉnh/Thành phố:
                   </label>
-                  <input
-                    type="text"
-                    value={address.state || ""}
-                    onChange={(e) =>
-                      handleAddressChange(index, "state", e.target.value)
-                    }
+                  <select
+                    value={address.provinceId || "0"}
+                    onChange={(e) => {
+                      const selectedProvince = provinces.find(
+                        (p) => p.id === e.target.value
+                      );
+                      handleAddressChange(index, "province", e.target.value, {
+                        name: selectedProvince
+                          ? selectedProvince.full_name
+                          : "",
+                      });
+                    }}
                     className="mt-1 block w-full h-10 bg-gray-50 text-gray-900 border border-gray-300 rounded-lg px-4"
-                  />
-                  {fieldErrors.addresses?.[index]?.state && (
-                    <p className="mt-1 text-sm text-red-500">
-                      {fieldErrors.addresses[index].state}
-                    </p>
-                  )}
+                  >
+                    <option value="0">Chọn Tỉnh/Thành phố</option>
+                    {provinces.map((province) => (
+                      <option key={province.id} value={province.id}>
+                        {province.full_name}
+                      </option>
+                    ))}
+                  </select>
                 </div>
+
+                {/* District Dropdown */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">
+                    Quận/Huyện:
+                  </label>
+                  <select
+                    value={address.districtId || "0"}
+                    onChange={(e) => {
+                      const selectedDistrict = districts.find(
+                        (d) => d.id === e.target.value
+                      );
+                      handleAddressChange(index, "district", e.target.value, {
+                        name: selectedDistrict
+                          ? selectedDistrict.full_name
+                          : "",
+                      });
+                    }}
+                    disabled={!address.provinceId}
+                    className="mt-1 block w-full h-10 bg-gray-50 text-gray-900 border border-gray-300 rounded-lg px-4"
+                  >
+                    <option value="0">Chọn Quận/Huyện</option>
+                    {districts.map((district) => (
+                      <option key={district.id} value={district.id}>
+                        {district.full_name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                {/* Ward Dropdown */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">
+                    Phường/Xã:
+                  </label>
+                  <select
+                    value={address.wardId || "0"}
+                    onChange={(e) => {
+                      const selectedWard = wards.find(
+                        (w) => w.id === e.target.value
+                      );
+                      handleAddressChange(index, "ward", e.target.value, {
+                        name: selectedWard ? selectedWard.full_name : "",
+                      });
+                    }}
+                    disabled={!address.districtId}
+                    className="mt-1 block w-full h-10 bg-gray-50 text-gray-900 border border-gray-300 rounded-lg px-4"
+                  >
+                    <option value="0">Chọn Phường/Xã</option>
+                    {wards.map((ward) => (
+                      <option key={ward.id} value={ward.id}>
+                        {ward.full_name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                {/* Existing phone number and other fields */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700">
                     Số điện thoại:
@@ -458,23 +603,8 @@ const EditProfile = () => {
                     </p>
                   )}
                 </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700">
-                    Loại địa chỉ:
-                  </label>
-                  <select
-                    value={address.type || "home"}
-                    onChange={(e) =>
-                      handleAddressChange(index, "type", e.target.value)
-                    }
-                    className="mt-1 block w-full h-10 bg-gray-50 text-gray-900 border border-gray-300 rounded-lg px-4"
-                  >
-                    <option value="Nhà riêng">Nhà riêng</option>
-                    <option value="Công ty">Công ty</option>
-                    <option value="Khác">Khác</option>
-                  </select>
-                </div>
               </div>
+              {/* Existing delete button */}
               <button
                 type="button"
                 onClick={() => handleDeleteAddress(index)}
@@ -484,7 +614,6 @@ const EditProfile = () => {
               </button>
             </div>
           ))}
-
           <button
             type="submit"
             className="mt-6 w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-black hover:bg-gray-800"

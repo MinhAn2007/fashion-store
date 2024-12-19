@@ -17,6 +17,7 @@
     "@testing-library/jest-dom": "^5.16.5",
     "@testing-library/react": "^13.4.0",
     "@testing-library/user-event": "^13.5.0",
+    "ably": "^2.6.0",
     "daisyui": "^2.52.0",
     "dotenv": "^16.4.5",
     "framer-motion": "^7.6.6",
@@ -47,6 +48,8 @@
     "react-slick": "^0.29.0",
     "rizzui": "^0.8.7",
     "slick-carousel": "^1.8.1",
+    "socket.io": "^4.8.1",
+    "socket.io-client": "^4.8.1",
     "web-vitals": "^2.1.4",
     "word-wrap": "^1.2.3"
   },
